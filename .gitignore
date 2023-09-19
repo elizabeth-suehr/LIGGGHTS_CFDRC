@@ -1,0 +1,5 @@
+*.script
+in.shear.*
+*.pyc
+core.*
+__pycache__/

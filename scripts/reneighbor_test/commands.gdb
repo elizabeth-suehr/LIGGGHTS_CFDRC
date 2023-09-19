@@ -1,0 +1,1 @@
+run < in.shear.rod2_2_2

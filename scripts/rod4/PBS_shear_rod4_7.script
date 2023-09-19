@@ -1,0 +1,25 @@
+########################################
+##PBS Controls       
+########################################
+#PBS -S /bin/bash
+#PBS -l nodes=1:ppn=18
+#PBS -l walltime=16:00:00
+#PBS -V
+#PBS -W group_list=liz.suehr
+#PBS -N shear_rod4_7
+
+########################################
+#===================================================================#
+# Load modules and move to current directory
+#===================================================================#
+
+module load /home/liz.suehr/modules/openmpi/1.10.7
+module load /home/liz.suehr/modules/vtk/8.2.0
+cd $PBS_O_WORKDIR
+
+#===================================================================#
+# Run simulation
+#===================================================================#
+
+mpiexec -np 18 lmp_auto < in.shear.rod4_7 > stdout_shear_rod4_7 
+
