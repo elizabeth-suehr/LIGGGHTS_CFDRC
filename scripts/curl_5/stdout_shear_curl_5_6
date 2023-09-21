@@ -1,0 +1,1246 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-06-18:40:11 by liz.suehr, git commit 20bafd84e54ba1e14cc5c444673f017ba084bbe9)
+communicate       single vel yes
+units             si
+log               log.shear.curl_5_6.liggghts
+atom_modify       map array
+
+processors        4 4 2
+
+# Set domain
+region            domain block 0.0 7.49051e-03 0.0 7.49051e-03 0.0 3.74525e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00749051 0.00749051 0.00374525)
+  4 by 4 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          2.799e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 5 ntry 10000000 spheres file curl_5.particle scale 1.0 type 1
+Calculating the properties of the given template.
+   Depending on ntry, this may take a while...
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=8.510987e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=8.510987e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 7 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.45
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Thu Sep  7 11:37:31 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.45678 Mbytes
+    Step 
+       0 
+insertion: proc 20 at 0 %
+insertion: proc 20 at 10 %
+insertion: proc 29 at 0 %
+insertion: proc 1 at 0 %
+insertion: proc 1 at 10 %
+insertion: proc 1 at 20 %
+insertion: proc 1 at 30 %
+insertion: proc 1 at 30 %
+insertion: proc 1 at 40 %
+insertion: proc 2 at 0 %
+insertion: proc 2 at 10 %
+insertion: proc 2 at 20 %
+insertion: proc 2 at 30 %
+insertion: proc 2 at 40 %
+insertion: proc 2 at 50 %
+insertion: proc 2 at 60 %
+insertion: proc 4 at 0 %
+insertion: proc 4 at 10 %
+insertion: proc 4 at 20 %
+insertion: proc 5 at 0 %
+insertion: proc 5 at 10 %
+insertion: proc 6 at 0 %
+insertion: proc 6 at 10 %
+insertion: proc 6 at 20 %
+insertion: proc 7 at 0 %
+insertion: proc 7 at 10 %
+insertion: proc 7 at 20 %
+insertion: proc 7 at 30 %
+insertion: proc 7 at 40 %
+insertion: proc 8 at 0 %
+insertion: proc 8 at 10 %
+insertion: proc 9 at 0 %
+insertion: proc 9 at 10 %
+insertion: proc 9 at 20 %
+insertion: proc 9 at 30 %
+insertion: proc 9 at 40 %
+insertion: proc 9 at 50 %
+insertion: proc 9 at 60 %
+insertion: proc 9 at 70 %
+insertion: proc 9 at 80 %
+insertion: proc 9 at 90 %
+insertion: proc 9 at 100 %
+insertion: proc 10 at 0 %
+insertion: proc 10 at 10 %
+insertion: proc 10 at 20 %
+insertion: proc 10 at 30 %
+insertion: proc 10 at 40 %
+insertion: proc 10 at 50 %
+insertion: proc 11 at 0 %
+insertion: proc 11 at 10 %
+insertion: proc 11 at 20 %
+insertion: proc 11 at 30 %
+insertion: proc 11 at 40 %
+insertion: proc 11 at 50 %
+insertion: proc 11 at 60 %
+insertion: proc 11 at 70 %
+insertion: proc 11 at 80 %
+insertion: proc 11 at 90 %
+insertion: proc 11 at 100 %
+insertion: proc 11 at 110 %
+insertion: proc 12 at 0 %
+insertion: proc 12 at 10 %
+insertion: proc 12 at 20 %
+insertion: proc 12 at 30 %
+insertion: proc 12 at 40 %
+insertion: proc 12 at 50 %
+insertion: proc 12 at 60 %
+insertion: proc 12 at 70 %
+insertion: proc 12 at 80 %
+insertion: proc 12 at 90 %
+insertion: proc 12 at 100 %
+insertion: proc 13 at 0 %
+insertion: proc 13 at 10 %
+insertion: proc 13 at 20 %
+insertion: proc 13 at 30 %
+insertion: proc 13 at 40 %
+insertion: proc 13 at 50 %
+insertion: proc 13 at 60 %
+insertion: proc 13 at 70 %
+insertion: proc 13 at 80 %
+insertion: proc 13 at 90 %
+insertion: proc 13 at 100 %
+insertion: proc 13 at 110 %
+insertion: proc 14 at 0 %
+insertion: proc 14 at 10 %
+insertion: proc 14 at 20 %
+insertion: proc 14 at 30 %
+insertion: proc 14 at 40 %
+insertion: proc 14 at 50 %
+insertion: proc 14 at 60 %
+insertion: proc 14 at 70 %
+insertion: proc 14 at 80 %
+insertion: proc 14 at 90 %
+insertion: proc 14 at 100 %
+insertion: proc 15 at 0 %
+insertion: proc 15 at 10 %
+insertion: proc 15 at 20 %
+insertion: proc 15 at 30 %
+insertion: proc 15 at 40 %
+insertion: proc 15 at 50 %
+insertion: proc 15 at 60 %
+insertion: proc 15 at 70 %
+insertion: proc 15 at 80 %
+insertion: proc 15 at 90 %
+insertion: proc 15 at 100 %
+insertion: proc 16 at 0 %
+insertion: proc 16 at 10 %
+insertion: proc 16 at 20 %
+insertion: proc 16 at 30 %
+insertion: proc 16 at 40 %
+insertion: proc 16 at 50 %
+insertion: proc 16 at 60 %
+insertion: proc 16 at 70 %
+insertion: proc 16 at 80 %
+insertion: proc 16 at 90 %
+insertion: proc 16 at 100 %
+insertion: proc 17 at 0 %
+insertion: proc 17 at 10 %
+insertion: proc 17 at 20 %
+insertion: proc 17 at 30 %
+insertion: proc 17 at 40 %
+insertion: proc 17 at 50 %
+insertion: proc 17 at 60 %
+insertion: proc 17 at 70 %
+insertion: proc 17 at 80 %
+insertion: proc 17 at 90 %
+insertion: proc 17 at 100 %
+insertion: proc 18 at 0 %
+insertion: proc 18 at 10 %
+insertion: proc 18 at 20 %
+insertion: proc 18 at 30 %
+insertion: proc 18 at 40 %
+insertion: proc 18 at 50 %
+insertion: proc 18 at 60 %
+insertion: proc 18 at 70 %
+insertion: proc 18 at 80 %
+insertion: proc 18 at 90 %
+insertion: proc 18 at 100 %
+insertion: proc 19 at 0 %
+insertion: proc 19 at 10 %
+insertion: proc 19 at 20 %
+insertion: proc 19 at 30 %
+insertion: proc 19 at 40 %
+insertion: proc 19 at 50 %
+insertion: proc 19 at 60 %
+insertion: proc 19 at 70 %
+insertion: proc 19 at 80 %
+insertion: proc 19 at 90 %
+insertion: proc 19 at 100 %
+insertion: proc 0 at 0 %
+insertion: proc 0 at 10 %
+insertion: proc 0 at 20 %
+insertion: proc 0 at 20 %
+insertion: proc 0 at 30 %
+insertion: proc 0 at 40 %
+insertion: proc 0 at 50 %
+insertion: proc 0 at 60 %
+insertion: proc 0 at 70 %
+insertion: proc 0 at 80 %
+insertion: proc 0 at 90 %
+insertion: proc 21 at 0 %
+insertion: proc 21 at 10 %
+insertion: proc 21 at 20 %
+insertion: proc 21 at 30 %
+insertion: proc 21 at 40 %
+insertion: proc 21 at 50 %
+insertion: proc 21 at 60 %
+insertion: proc 21 at 70 %
+insertion: proc 21 at 80 %
+insertion: proc 21 at 90 %
+insertion: proc 21 at 100 %
+insertion: proc 21 at 110 %
+insertion: proc 22 at 0 %
+insertion: proc 22 at 10 %
+insertion: proc 22 at 20 %
+insertion: proc 22 at 30 %
+insertion: proc 22 at 40 %
+insertion: proc 22 at 50 %
+insertion: proc 22 at 60 %
+insertion: proc 22 at 70 %
+insertion: proc 22 at 80 %
+insertion: proc 22 at 90 %
+insertion: proc 22 at 100 %
+insertion: proc 23 at 0 %
+insertion: proc 23 at 10 %
+insertion: proc 23 at 20 %
+insertion: proc 23 at 30 %
+insertion: proc 23 at 40 %
+insertion: proc 23 at 50 %
+insertion: proc 23 at 60 %
+insertion: proc 23 at 70 %
+insertion: proc 23 at 80 %
+insertion: proc 23 at 90 %
+insertion: proc 23 at 100 %
+insertion: proc 24 at 0 %
+insertion: proc 24 at 10 %
+insertion: proc 24 at 20 %
+insertion: proc 24 at 30 %
+insertion: proc 24 at 40 %
+insertion: proc 24 at 50 %
+insertion: proc 24 at 60 %
+insertion: proc 24 at 70 %
+insertion: proc 24 at 80 %
+insertion: proc 24 at 90 %
+insertion: proc 25 at 0 %
+insertion: proc 25 at 10 %
+insertion: proc 25 at 20 %
+insertion: proc 25 at 30 %
+insertion: proc 25 at 40 %
+insertion: proc 25 at 50 %
+insertion: proc 25 at 60 %
+insertion: proc 25 at 70 %
+insertion: proc 25 at 80 %
+insertion: proc 25 at 90 %
+insertion: proc 25 at 100 %
+insertion: proc 25 at 110 %
+insertion: proc 25 at 120 %
+insertion: proc 26 at 0 %
+insertion: proc 26 at 10 %
+insertion: proc 26 at 20 %
+insertion: proc 26 at 30 %
+insertion: proc 26 at 40 %
+insertion: proc 26 at 50 %
+insertion: proc 26 at 60 %
+insertion: proc 26 at 70 %
+insertion: proc 26 at 80 %
+insertion: proc 26 at 90 %
+insertion: proc 26 at 100 %
+insertion: proc 27 at 0 %
+insertion: proc 27 at 10 %
+insertion: proc 27 at 20 %
+insertion: proc 27 at 30 %
+insertion: proc 27 at 40 %
+insertion: proc 27 at 50 %
+insertion: proc 27 at 60 %
+insertion: proc 27 at 70 %
+insertion: proc 27 at 80 %
+insertion: proc 27 at 90 %
+insertion: proc 27 at 100 %
+insertion: proc 28 at 0 %
+insertion: proc 28 at 10 %
+insertion: proc 28 at 20 %
+insertion: proc 28 at 30 %
+insertion: proc 28 at 40 %
+insertion: proc 28 at 50 %
+insertion: proc 28 at 60 %
+insertion: proc 28 at 70 %
+insertion: proc 28 at 80 %
+insertion: proc 28 at 90 %
+insertion: proc 28 at 100 %
+insertion: proc 20 at 20 %
+insertion: proc 20 at 30 %
+insertion: proc 20 at 40 %
+insertion: proc 20 at 50 %
+insertion: proc 20 at 60 %
+insertion: proc 20 at 70 %
+insertion: proc 20 at 80 %
+insertion: proc 20 at 90 %
+insertion: proc 20 at 100 %
+insertion: proc 30 at 0 %
+insertion: proc 30 at 10 %
+insertion: proc 30 at 20 %
+insertion: proc 30 at 30 %
+insertion: proc 30 at 40 %
+insertion: proc 30 at 50 %
+insertion: proc 30 at 60 %
+insertion: proc 30 at 70 %
+insertion: proc 30 at 80 %
+insertion: proc 30 at 90 %
+insertion: proc 30 at 100 %
+insertion: proc 31 at 0 %
+insertion: proc 31 at 10 %
+insertion: proc 31 at 20 %
+insertion: proc 31 at 30 %
+insertion: proc 31 at 40 %
+insertion: proc 31 at 50 %
+insertion: proc 31 at 60 %
+insertion: proc 31 at 70 %
+insertion: proc 31 at 80 %
+insertion: proc 31 at 90 %
+insertion: proc 31 at 100 %
+insertion: proc 31 at 110 %
+insertion: proc 31 at 120 %
+insertion: proc 29 at 10 %
+insertion: proc 29 at 20 %
+insertion: proc 29 at 30 %
+insertion: proc 29 at 40 %
+insertion: proc 29 at 50 %
+insertion: proc 29 at 60 %
+insertion: proc 29 at 70 %
+insertion: proc 29 at 80 %
+insertion: proc 29 at 90 %
+insertion: proc 29 at 100 %
+insertion: proc 1 at 50 %
+insertion: proc 1 at 60 %
+insertion: proc 1 at 70 %
+insertion: proc 1 at 80 %
+insertion: proc 1 at 90 %
+insertion: proc 1 at 100 %
+insertion: proc 1 at 110 %
+insertion: proc 1 at 120 %
+insertion: proc 3 at 0 %
+insertion: proc 3 at 10 %
+insertion: proc 3 at 20 %
+insertion: proc 3 at 30 %
+insertion: proc 3 at 40 %
+insertion: proc 3 at 50 %
+insertion: proc 3 at 60 %
+insertion: proc 3 at 70 %
+insertion: proc 3 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 3 at 100 %
+insertion: proc 2 at 70 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 2 at 100 %
+insertion: proc 4 at 30 %
+insertion: proc 4 at 40 %
+insertion: proc 4 at 50 %
+insertion: proc 4 at 60 %
+insertion: proc 4 at 70 %
+insertion: proc 4 at 80 %
+insertion: proc 4 at 90 %
+insertion: proc 4 at 100 %
+insertion: proc 5 at 20 %
+insertion: proc 5 at 30 %
+insertion: proc 5 at 40 %
+insertion: proc 5 at 50 %
+insertion: proc 5 at 60 %
+insertion: proc 5 at 70 %
+insertion: proc 5 at 80 %
+insertion: proc 5 at 90 %
+insertion: proc 5 at 100 %
+insertion: proc 6 at 30 %
+insertion: proc 6 at 40 %
+insertion: proc 6 at 50 %
+insertion: proc 6 at 60 %
+insertion: proc 6 at 70 %
+insertion: proc 6 at 80 %
+insertion: proc 6 at 90 %
+insertion: proc 7 at 50 %
+insertion: proc 7 at 60 %
+insertion: proc 7 at 70 %
+insertion: proc 7 at 80 %
+insertion: proc 7 at 90 %
+insertion: proc 8 at 20 %
+insertion: proc 8 at 30 %
+insertion: proc 8 at 40 %
+insertion: proc 8 at 50 %
+insertion: proc 8 at 60 %
+insertion: proc 8 at 70 %
+insertion: proc 8 at 80 %
+insertion: proc 8 at 90 %
+insertion: proc 8 at 100 %
+insertion: proc 10 at 60 %
+insertion: proc 10 at 70 %
+insertion: proc 10 at 80 %
+insertion: proc 10 at 90 %
+insertion: proc 10 at 100 %
+insertion: proc 10 at 110 %
+INFO: Particle insertion ins1: inserted 1673 particle templates (mass 2.364264e-04) at step 1
+ - a total of 1673 particle templates (mass 2.364264e-04) inserted so far.
+       1 
+Loop time of 0.00609008 on 32 procs for 1 steps with 8365 atoms, finish time Thu Sep  7 11:37:36 2023
+
+
+Pair  time (%) = 0.000340837 (5.59659)
+Neigh time (%) = 0.00102045 (16.7559)
+Comm  time (%) = 0.00112896 (18.5376)
+Outpt time (%) = 0.000501065 (8.22757)
+Other time (%) = 0.00309877 (50.8823)
+
+Nlocal:    261.406 ave 346 max 187 min
+Histogram: 7 1 0 5 8 3 0 0 1 7
+Nghost:    1474.06 ave 1967 max 1105 min
+Histogram: 7 1 2 6 4 2 4 1 3 2
+Neighs:    7123.41 ave 11027 max 3894 min
+Histogram: 6 3 1 3 8 2 1 1 5 2
+
+Total # of neighbors = 227949
+Ave neighs/atom = 27.2503
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+8365 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 1.39e-05 reset 1000 threshold 1.00e-06 start_dt 3.268e-08 end_dt 1.634e-07
+run               100000
+Setting up run at Thu Sep  7 11:37:36 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.8049 Mbytes
+    Step 
+       1 
+pre-run, step: 1000, ke/mass=2.849e+01, natoms=8365, overlap=7.029e-01, cor=2.417e-01, dt=4.828e-08 nbody: 1673 
+pre-run, step: 2000, ke/mass=3.701e-01, natoms=8365, overlap=6.957e-01, cor=2.417e-01, dt=7.132e-08 nbody: 1673 
+pre-run, step: 3000, ke/mass=1.314e-04, natoms=8365, overlap=6.936e-01, cor=2.417e-01, dt=1.054e-07 nbody: 1673 
+pre-run, step: 4000, ke/mass=1.708e-06, natoms=8365, overlap=6.925e-01, cor=2.417e-01, dt=1.557e-07 nbody: 1673 
+pre-run, step: 5000, ke/mass=5.543e-06, natoms=8365, overlap=6.947e-01, cor=2.417e-01, dt=2.300e-07 nbody: 1673 
+pre-run, step: 6000, ke/mass=5.735e-03, natoms=8365, overlap=6.641e-01, cor=2.417e-01, dt=3.397e-07 nbody: 1673 
+pre-run, step: 7000, ke/mass=2.805e-05, natoms=8365, overlap=6.856e-01, cor=2.417e-01, dt=3.950e-07 nbody: 1673 
+pre-run, step: 8000, ke/mass=6.304e-10, natoms=8365, overlap=6.855e-01, cor=2.417e-01, dt=3.950e-07 nbody: 1673 
+Loop time of 16.1135 on 32 procs for 100000 steps with 8365 atoms, finish time Thu Sep  7 11:37:52 2023
+
+
+Pair  time (%) = 0.817313 (5.07224)
+Neigh time (%) = 5.70312 (35.3935)
+Comm  time (%) = 2.24781 (13.9499)
+Outpt time (%) = 0 (0)
+Other time (%) = 7.34521 (45.5843)
+
+Nlocal:    261.406 ave 303 max 142 min
+Histogram: 3 0 1 0 2 2 1 2 6 15
+Nghost:    1534.62 ave 1732 max 1168 min
+Histogram: 2 2 0 2 2 4 2 4 9 5
+Neighs:    5405.84 ave 7027 max 1762 min
+Histogram: 4 0 0 2 2 1 2 4 6 11
+
+Total # of neighbors = 172987
+Ave neighs/atom = 20.6799
+Neighbor list builds = 7999
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          1.6341e-07
+
+fix               leboundary all lebc 100.0 true gtemp 1.00e-06
+
+# Run desired simulation
+run               24000000
+Setting up run at Thu Sep  7 11:37:52 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.8434 Mbytes
+    Step 
+    8000 
+10500 2500 body_count: 1673 atom_count: 8365 4.145e+00 3.560e+00 -6.535e-02 1.376e+02 1.306e+02 -3.249e+01
+13000 5000 body_count: 1673 atom_count: 8365 2.936e+00 2.841e+00 -3.157e-01 1.118e+02 1.042e+02 -2.769e+01
+15500 7500 body_count: 1673 atom_count: 8365 2.643e+00 2.723e+00 -5.049e-01 9.604e+01 8.910e+01 -2.481e+01
+18000 10000 body_count: 1673 atom_count: 8365 2.571e+00 2.719e+00 -6.355e-01 8.552e+01 7.912e+01 -2.303e+01
+20500 12500 body_count: 1673 atom_count: 8365 2.595e+00 2.726e+00 -7.193e-01 7.829e+01 7.234e+01 -2.183e+01
+23000 15000 body_count: 1673 atom_count: 8365 2.642e+00 2.736e+00 -7.694e-01 7.327e+01 6.763e+01 -2.106e+01
+25500 17500 body_count: 1673 atom_count: 8365 2.692e+00 2.731e+00 -7.848e-01 6.989e+01 6.440e+01 -2.044e+01
+28000 20000 body_count: 1673 atom_count: 8365 2.728e+00 2.722e+00 -7.676e-01 6.721e+01 6.230e+01 -2.011e+01
+30500 22500 body_count: 1673 atom_count: 8365 2.756e+00 2.708e+00 -7.328e-01 6.533e+01 6.085e+01 -1.981e+01
+33000 25000 body_count: 1673 atom_count: 8365 2.762e+00 2.673e+00 -6.845e-01 6.410e+01 5.998e+01 -1.948e+01
+35500 27500 body_count: 1673 atom_count: 8365 2.754e+00 2.616e+00 -6.349e-01 6.303e+01 5.940e+01 -1.926e+01
+38000 30000 body_count: 1673 atom_count: 8365 2.727e+00 2.566e+00 -5.892e-01 6.229e+01 5.870e+01 -1.928e+01
+40500 32500 body_count: 1673 atom_count: 8365 2.692e+00 2.528e+00 -5.426e-01 6.230e+01 5.866e+01 -1.935e+01
+43000 35000 body_count: 1673 atom_count: 8365 2.662e+00 2.498e+00 -5.007e-01 6.211e+01 5.879e+01 -1.936e+01
+45500 37500 body_count: 1673 atom_count: 8365 2.630e+00 2.471e+00 -4.609e-01 6.218e+01 5.922e+01 -1.953e+01
+48000 40000 body_count: 1673 atom_count: 8365 2.604e+00 2.450e+00 -4.281e-01 6.232e+01 5.948e+01 -1.963e+01
+50500 42500 body_count: 1673 atom_count: 8365 2.581e+00 2.430e+00 -4.094e-01 6.260e+01 5.978e+01 -1.979e+01
+53000 45000 body_count: 1673 atom_count: 8365 2.557e+00 2.413e+00 -3.945e-01 6.286e+01 5.999e+01 -2.006e+01
+55500 47500 body_count: 1673 atom_count: 8365 2.539e+00 2.399e+00 -3.821e-01 6.297e+01 6.019e+01 -2.007e+01
+58000 50000 body_count: 1673 atom_count: 8365 2.523e+00 2.388e+00 -3.718e-01 6.319e+01 6.043e+01 -2.013e+01
+58000 2.523e+00 2.388e+00 -3.718e-01 6.319e+01 6.043e+01 -2.013e+01
+60500 2500 body_count: 1673 atom_count: 8365 2.262e+00 2.181e+00 -1.883e-01 6.785e+01 6.568e+01 -2.213e+01
+63000 5000 body_count: 1673 atom_count: 8365 2.268e+00 2.172e+00 -1.988e-01 6.636e+01 6.574e+01 -2.169e+01
+65500 7500 body_count: 1673 atom_count: 8365 2.239e+00 2.194e+00 -1.972e-01 6.697e+01 6.626e+01 -2.170e+01
+68000 10000 body_count: 1673 atom_count: 8365 2.246e+00 2.191e+00 -1.911e-01 6.609e+01 6.737e+01 -2.164e+01
+70500 12500 body_count: 1673 atom_count: 8365 2.255e+00 2.186e+00 -1.965e-01 6.602e+01 6.756e+01 -2.154e+01
+73000 15000 body_count: 1673 atom_count: 8365 2.263e+00 2.170e+00 -2.010e-01 6.535e+01 6.784e+01 -2.174e+01
+75500 17500 body_count: 1673 atom_count: 8365 2.268e+00 2.150e+00 -1.945e-01 6.545e+01 6.848e+01 -2.202e+01
+78000 20000 body_count: 1673 atom_count: 8365 2.276e+00 2.138e+00 -1.814e-01 6.547e+01 6.860e+01 -2.198e+01
+80500 22500 body_count: 1673 atom_count: 8365 2.283e+00 2.122e+00 -1.695e-01 6.559e+01 6.871e+01 -2.198e+01
+83000 25000 body_count: 1673 atom_count: 8365 2.285e+00 2.114e+00 -1.657e-01 6.533e+01 6.862e+01 -2.212e+01
+85500 27500 body_count: 1673 atom_count: 8365 2.284e+00 2.104e+00 -1.539e-01 6.498e+01 6.854e+01 -2.213e+01
+88000 30000 body_count: 1673 atom_count: 8365 2.286e+00 2.096e+00 -1.405e-01 6.499e+01 6.844e+01 -2.205e+01
+90500 32500 body_count: 1673 atom_count: 8365 2.281e+00 2.093e+00 -1.279e-01 6.486e+01 6.840e+01 -2.192e+01
+93000 35000 body_count: 1673 atom_count: 8365 2.278e+00 2.084e+00 -1.197e-01 6.470e+01 6.865e+01 -2.187e+01
+95500 37500 body_count: 1673 atom_count: 8365 2.280e+00 2.079e+00 -1.133e-01 6.449e+01 6.879e+01 -2.188e+01
+98000 40000 body_count: 1673 atom_count: 8365 2.281e+00 2.072e+00 -1.105e-01 6.415e+01 6.857e+01 -2.181e+01
+100500 42500 body_count: 1673 atom_count: 8365 2.277e+00 2.063e+00 -1.113e-01 6.395e+01 6.852e+01 -2.177e+01
+103000 45000 body_count: 1673 atom_count: 8365 2.273e+00 2.057e+00 -1.125e-01 6.368e+01 6.834e+01 -2.167e+01
+105500 47500 body_count: 1673 atom_count: 8365 2.271e+00 2.054e+00 -1.154e-01 6.341e+01 6.826e+01 -2.154e+01
+108000 50000 body_count: 1673 atom_count: 8365 2.271e+00 2.050e+00 -1.196e-01 6.324e+01 6.815e+01 -2.151e+01
+108000 2.271e+00 2.050e+00 -1.196e-01 6.324e+01 6.815e+01 -2.151e+01
+110500 2500 body_count: 1673 atom_count: 8365 2.250e+00 1.997e+00 -1.489e-01 6.086e+01 6.779e+01 -2.174e+01
+113000 5000 body_count: 1673 atom_count: 8365 2.267e+00 2.036e+00 -1.215e-01 6.170e+01 6.767e+01 -2.188e+01
+115500 7500 body_count: 1673 atom_count: 8365 2.280e+00 2.058e+00 -1.121e-01 6.160e+01 6.740e+01 -2.182e+01
+118000 10000 body_count: 1673 atom_count: 8365 2.267e+00 2.061e+00 -1.110e-01 6.208e+01 6.738e+01 -2.123e+01
+120500 12500 body_count: 1673 atom_count: 8365 2.262e+00 2.056e+00 -1.063e-01 6.206e+01 6.753e+01 -2.135e+01
+123000 15000 body_count: 1673 atom_count: 8365 2.253e+00 2.043e+00 -1.072e-01 6.181e+01 6.765e+01 -2.096e+01
+125500 17500 body_count: 1673 atom_count: 8365 2.256e+00 2.043e+00 -1.018e-01 6.170e+01 6.772e+01 -2.107e+01
+128000 20000 body_count: 1673 atom_count: 8365 2.247e+00 2.041e+00 -9.786e-02 6.136e+01 6.778e+01 -2.118e+01
+130500 22500 body_count: 1673 atom_count: 8365 2.247e+00 2.042e+00 -9.210e-02 6.130e+01 6.797e+01 -2.119e+01
+133000 25000 body_count: 1673 atom_count: 8365 2.244e+00 2.039e+00 -8.916e-02 6.135e+01 6.816e+01 -2.128e+01
+135500 27500 body_count: 1673 atom_count: 8365 2.250e+00 2.026e+00 -8.447e-02 6.149e+01 6.819e+01 -2.123e+01
+138000 30000 body_count: 1673 atom_count: 8365 2.255e+00 2.014e+00 -8.177e-02 6.143e+01 6.814e+01 -2.134e+01
+140500 32500 body_count: 1673 atom_count: 8365 2.255e+00 2.006e+00 -7.822e-02 6.139e+01 6.800e+01 -2.132e+01
+143000 35000 body_count: 1673 atom_count: 8365 2.255e+00 2.001e+00 -7.753e-02 6.134e+01 6.800e+01 -2.132e+01
+145500 37500 body_count: 1673 atom_count: 8365 2.261e+00 1.995e+00 -7.858e-02 6.133e+01 6.797e+01 -2.134e+01
+148000 40000 body_count: 1673 atom_count: 8365 2.259e+00 1.985e+00 -7.847e-02 6.129e+01 6.789e+01 -2.137e+01
+150500 42500 body_count: 1673 atom_count: 8365 2.250e+00 1.978e+00 -7.986e-02 6.124e+01 6.793e+01 -2.138e+01
+153000 45000 body_count: 1673 atom_count: 8365 2.243e+00 1.976e+00 -8.269e-02 6.134e+01 6.813e+01 -2.140e+01
+155500 47500 body_count: 1673 atom_count: 8365 2.238e+00 1.968e+00 -8.201e-02 6.123e+01 6.809e+01 -2.136e+01
+158000 50000 body_count: 1673 atom_count: 8365 2.235e+00 1.966e+00 -8.156e-02 6.117e+01 6.805e+01 -2.136e+01
+158000 2.235e+00 1.966e+00 -8.156e-02 6.117e+01 6.805e+01 -2.136e+01
+160500 2500 body_count: 1673 atom_count: 8365 2.162e+00 1.957e+00 -7.173e-02 6.229e+01 6.868e+01 -2.042e+01
+163000 5000 body_count: 1673 atom_count: 8365 2.155e+00 1.931e+00 -5.359e-02 6.252e+01 6.924e+01 -2.137e+01
+165500 7500 body_count: 1673 atom_count: 8365 2.160e+00 1.924e+00 -5.890e-02 6.122e+01 6.790e+01 -2.050e+01
+168000 10000 body_count: 1673 atom_count: 8365 2.157e+00 1.925e+00 -6.915e-02 6.065e+01 6.742e+01 -1.975e+01
+170500 12500 body_count: 1673 atom_count: 8365 2.175e+00 1.925e+00 -7.696e-02 5.944e+01 6.673e+01 -1.896e+01
+173000 15000 body_count: 1673 atom_count: 8365 2.186e+00 1.909e+00 -8.946e-02 5.880e+01 6.655e+01 -1.872e+01
+175500 17500 body_count: 1673 atom_count: 8365 2.194e+00 1.906e+00 -9.198e-02 5.868e+01 6.601e+01 -1.876e+01
+178000 20000 body_count: 1673 atom_count: 8365 2.199e+00 1.909e+00 -9.551e-02 5.871e+01 6.586e+01 -1.898e+01
+180500 22500 body_count: 1673 atom_count: 8365 2.198e+00 1.909e+00 -9.721e-02 5.870e+01 6.549e+01 -1.888e+01
+183000 25000 body_count: 1673 atom_count: 8365 2.197e+00 1.909e+00 -9.226e-02 5.891e+01 6.505e+01 -1.867e+01
+185500 27500 body_count: 1673 atom_count: 8365 2.194e+00 1.909e+00 -8.957e-02 5.887e+01 6.482e+01 -1.855e+01
+188000 30000 body_count: 1673 atom_count: 8365 2.184e+00 1.911e+00 -9.302e-02 5.874e+01 6.497e+01 -1.871e+01
+190500 32500 body_count: 1673 atom_count: 8365 2.175e+00 1.907e+00 -9.054e-02 5.884e+01 6.502e+01 -1.888e+01
+193000 35000 body_count: 1673 atom_count: 8365 2.171e+00 1.905e+00 -8.971e-02 5.880e+01 6.521e+01 -1.890e+01
+195500 37500 body_count: 1673 atom_count: 8365 2.169e+00 1.903e+00 -9.086e-02 5.872e+01 6.552e+01 -1.898e+01
+198000 40000 body_count: 1673 atom_count: 8365 2.167e+00 1.900e+00 -8.848e-02 5.879e+01 6.581e+01 -1.918e+01
+200500 42500 body_count: 1673 atom_count: 8365 2.165e+00 1.896e+00 -8.582e-02 5.907e+01 6.599e+01 -1.920e+01
+203000 45000 body_count: 1673 atom_count: 8365 2.158e+00 1.891e+00 -8.268e-02 5.903e+01 6.616e+01 -1.927e+01
+205500 47500 body_count: 1673 atom_count: 8365 2.151e+00 1.887e+00 -8.308e-02 5.895e+01 6.628e+01 -1.929e+01
+208000 50000 body_count: 1673 atom_count: 8365 2.145e+00 1.885e+00 -8.221e-02 5.871e+01 6.629e+01 -1.933e+01
+208000 2.145e+00 1.885e+00 -8.221e-02 5.871e+01 6.629e+01 -1.933e+01
+210500 2500 body_count: 1673 atom_count: 8365 2.091e+00 1.861e+00 -8.462e-02 5.739e+01 6.679e+01 -1.969e+01
+213000 5000 body_count: 1673 atom_count: 8365 2.046e+00 1.868e+00 -8.627e-02 5.624e+01 6.567e+01 -1.985e+01
+215500 7500 body_count: 1673 atom_count: 8365 2.023e+00 1.873e+00 -7.632e-02 5.604e+01 6.537e+01 -1.990e+01
+218000 10000 body_count: 1673 atom_count: 8365 2.011e+00 1.868e+00 -7.947e-02 5.545e+01 6.570e+01 -1.970e+01
+220500 12500 body_count: 1673 atom_count: 8365 2.011e+00 1.874e+00 -8.089e-02 5.524e+01 6.644e+01 -1.976e+01
+223000 15000 body_count: 1673 atom_count: 8365 2.010e+00 1.868e+00 -8.706e-02 5.512e+01 6.700e+01 -1.971e+01
+225500 17500 body_count: 1673 atom_count: 8365 2.018e+00 1.853e+00 -8.907e-02 5.503e+01 6.710e+01 -1.949e+01
+228000 20000 body_count: 1673 atom_count: 8365 2.027e+00 1.843e+00 -9.142e-02 5.502e+01 6.734e+01 -1.945e+01
+230500 22500 body_count: 1673 atom_count: 8365 2.029e+00 1.837e+00 -9.323e-02 5.465e+01 6.760e+01 -1.946e+01
+233000 25000 body_count: 1673 atom_count: 8365 2.035e+00 1.831e+00 -9.290e-02 5.471e+01 6.768e+01 -1.940e+01
+235500 27500 body_count: 1673 atom_count: 8365 2.036e+00 1.827e+00 -9.729e-02 5.478e+01 6.763e+01 -1.932e+01
+238000 30000 body_count: 1673 atom_count: 8365 2.049e+00 1.820e+00 -1.088e-01 5.492e+01 6.769e+01 -1.916e+01
+240500 32500 body_count: 1673 atom_count: 8365 2.061e+00 1.821e+00 -1.179e-01 5.494e+01 6.776e+01 -1.906e+01
+243000 35000 body_count: 1673 atom_count: 8365 2.063e+00 1.826e+00 -1.222e-01 5.487e+01 6.766e+01 -1.901e+01
+245500 37500 body_count: 1673 atom_count: 8365 2.063e+00 1.832e+00 -1.253e-01 5.493e+01 6.746e+01 -1.899e+01
+248000 40000 body_count: 1673 atom_count: 8365 2.067e+00 1.832e+00 -1.296e-01 5.492e+01 6.718e+01 -1.902e+01
+250500 42500 body_count: 1673 atom_count: 8365 2.074e+00 1.830e+00 -1.299e-01 5.509e+01 6.704e+01 -1.898e+01
+253000 45000 body_count: 1673 atom_count: 8365 2.079e+00 1.834e+00 -1.314e-01 5.514e+01 6.700e+01 -1.911e+01
+255500 47500 body_count: 1673 atom_count: 8365 2.081e+00 1.834e+00 -1.332e-01 5.507e+01 6.708e+01 -1.912e+01
+258000 50000 body_count: 1673 atom_count: 8365 2.083e+00 1.834e+00 -1.331e-01 5.516e+01 6.716e+01 -1.913e+01
+258000 2.083e+00 1.834e+00 -1.331e-01 5.516e+01 6.716e+01 -1.913e+01
+260500 2500 body_count: 1673 atom_count: 8365 2.092e+00 1.849e+00 -1.287e-01 5.602e+01 6.733e+01 -1.633e+01
+263000 5000 body_count: 1673 atom_count: 8365 2.084e+00 1.851e+00 -9.889e-02 5.578e+01 6.757e+01 -1.709e+01
+265500 7500 body_count: 1673 atom_count: 8365 2.091e+00 1.809e+00 -9.698e-02 5.515e+01 6.678e+01 -1.737e+01
+268000 10000 body_count: 1673 atom_count: 8365 2.098e+00 1.776e+00 -9.370e-02 5.556e+01 6.604e+01 -1.770e+01
+270500 12500 body_count: 1673 atom_count: 8365 2.077e+00 1.761e+00 -9.962e-02 5.504e+01 6.582e+01 -1.748e+01
+273000 15000 body_count: 1673 atom_count: 8365 2.068e+00 1.742e+00 -1.009e-01 5.492e+01 6.561e+01 -1.766e+01
+275500 17500 body_count: 1673 atom_count: 8365 2.065e+00 1.735e+00 -1.018e-01 5.466e+01 6.517e+01 -1.771e+01
+278000 20000 body_count: 1673 atom_count: 8365 2.064e+00 1.733e+00 -9.796e-02 5.478e+01 6.529e+01 -1.776e+01
+280500 22500 body_count: 1673 atom_count: 8365 2.067e+00 1.729e+00 -9.814e-02 5.455e+01 6.487e+01 -1.743e+01
+283000 25000 body_count: 1673 atom_count: 8365 2.063e+00 1.725e+00 -1.001e-01 5.444e+01 6.447e+01 -1.714e+01
+285500 27500 body_count: 1673 atom_count: 8365 2.058e+00 1.724e+00 -1.001e-01 5.439e+01 6.421e+01 -1.726e+01
+288000 30000 body_count: 1673 atom_count: 8365 2.060e+00 1.722e+00 -9.974e-02 5.430e+01 6.423e+01 -1.726e+01
+290500 32500 body_count: 1673 atom_count: 8365 2.063e+00 1.721e+00 -1.019e-01 5.407e+01 6.405e+01 -1.716e+01
+293000 35000 body_count: 1673 atom_count: 8365 2.059e+00 1.716e+00 -1.027e-01 5.407e+01 6.376e+01 -1.693e+01
+295500 37500 body_count: 1673 atom_count: 8365 2.058e+00 1.714e+00 -1.013e-01 5.410e+01 6.343e+01 -1.699e+01
+298000 40000 body_count: 1673 atom_count: 8365 2.058e+00 1.712e+00 -9.887e-02 5.403e+01 6.334e+01 -1.700e+01
+300500 42500 body_count: 1673 atom_count: 8365 2.056e+00 1.709e+00 -1.005e-01 5.401e+01 6.327e+01 -1.722e+01
+303000 45000 body_count: 1673 atom_count: 8365 2.050e+00 1.708e+00 -1.009e-01 5.399e+01 6.308e+01 -1.722e+01
+305500 47500 body_count: 1673 atom_count: 8365 2.043e+00 1.707e+00 -1.010e-01 5.366e+01 6.276e+01 -1.711e+01
+308000 50000 body_count: 1673 atom_count: 8365 2.035e+00 1.707e+00 -1.009e-01 5.350e+01 6.257e+01 -1.701e+01
+308000 2.035e+00 1.707e+00 -1.009e-01 5.350e+01 6.257e+01 -1.701e+01
+310500 2500 body_count: 1673 atom_count: 8365 1.902e+00 1.663e+00 -1.302e-01 5.102e+01 5.705e+01 -1.738e+01
+313000 5000 body_count: 1673 atom_count: 8365 1.904e+00 1.659e+00 -1.427e-01 5.062e+01 5.830e+01 -1.663e+01
+315500 7500 body_count: 1673 atom_count: 8365 1.912e+00 1.658e+00 -1.188e-01 4.993e+01 5.792e+01 -1.699e+01
+318000 10000 body_count: 1673 atom_count: 8365 1.914e+00 1.664e+00 -1.041e-01 4.936e+01 5.814e+01 -1.663e+01
+320500 12500 body_count: 1673 atom_count: 8365 1.925e+00 1.658e+00 -9.579e-02 4.970e+01 5.810e+01 -1.624e+01
+323000 15000 body_count: 1673 atom_count: 8365 1.923e+00 1.654e+00 -8.860e-02 4.960e+01 5.790e+01 -1.622e+01
+325500 17500 body_count: 1673 atom_count: 8365 1.914e+00 1.648e+00 -8.577e-02 4.946e+01 5.809e+01 -1.622e+01
+328000 20000 body_count: 1673 atom_count: 8365 1.914e+00 1.637e+00 -8.764e-02 4.922e+01 5.821e+01 -1.620e+01
+330500 22500 body_count: 1673 atom_count: 8365 1.919e+00 1.633e+00 -9.143e-02 4.921e+01 5.815e+01 -1.607e+01
+333000 25000 body_count: 1673 atom_count: 8365 1.926e+00 1.627e+00 -9.079e-02 4.938e+01 5.825e+01 -1.617e+01
+335500 27500 body_count: 1673 atom_count: 8365 1.928e+00 1.620e+00 -9.179e-02 4.942e+01 5.841e+01 -1.619e+01
+338000 30000 body_count: 1673 atom_count: 8365 1.933e+00 1.616e+00 -9.285e-02 4.940e+01 5.848e+01 -1.617e+01
+340500 32500 body_count: 1673 atom_count: 8365 1.940e+00 1.613e+00 -9.518e-02 4.920e+01 5.850e+01 -1.618e+01
+343000 35000 body_count: 1673 atom_count: 8365 1.949e+00 1.610e+00 -9.562e-02 4.901e+01 5.854e+01 -1.613e+01
+345500 37500 body_count: 1673 atom_count: 8365 1.957e+00 1.608e+00 -9.671e-02 4.893e+01 5.850e+01 -1.614e+01
+348000 40000 body_count: 1673 atom_count: 8365 1.962e+00 1.607e+00 -9.819e-02 4.897e+01 5.856e+01 -1.611e+01
+350500 42500 body_count: 1673 atom_count: 8365 1.970e+00 1.609e+00 -1.005e-01 4.919e+01 5.867e+01 -1.630e+01
+353000 45000 body_count: 1673 atom_count: 8365 1.982e+00 1.609e+00 -1.025e-01 4.948e+01 5.880e+01 -1.649e+01
+355500 47500 body_count: 1673 atom_count: 8365 1.989e+00 1.611e+00 -1.030e-01 4.966e+01 5.903e+01 -1.662e+01
+358000 50000 body_count: 1673 atom_count: 8365 1.996e+00 1.615e+00 -1.030e-01 4.973e+01 5.899e+01 -1.661e+01
+358000 1.996e+00 1.615e+00 -1.030e-01 4.973e+01 5.899e+01 -1.661e+01
+360500 2500 body_count: 1673 atom_count: 8365 2.067e+00 1.753e+00 -7.516e-02 5.072e+01 6.115e+01 -1.632e+01
+363000 5000 body_count: 1673 atom_count: 8365 2.067e+00 1.718e+00 -7.814e-02 4.965e+01 5.999e+01 -1.649e+01
+365500 7500 body_count: 1673 atom_count: 8365 2.049e+00 1.726e+00 -8.908e-02 4.956e+01 6.051e+01 -1.641e+01
+368000 10000 body_count: 1673 atom_count: 8365 2.039e+00 1.738e+00 -8.579e-02 4.991e+01 6.137e+01 -1.689e+01
+370500 12500 body_count: 1673 atom_count: 8365 2.032e+00 1.752e+00 -8.337e-02 5.016e+01 6.155e+01 -1.698e+01
+373000 15000 body_count: 1673 atom_count: 8365 2.034e+00 1.749e+00 -8.766e-02 4.998e+01 6.194e+01 -1.701e+01
+375500 17500 body_count: 1673 atom_count: 8365 2.034e+00 1.750e+00 -9.364e-02 5.008e+01 6.170e+01 -1.689e+01
+378000 20000 body_count: 1673 atom_count: 8365 2.034e+00 1.744e+00 -9.909e-02 5.067e+01 6.185e+01 -1.683e+01
+380500 22500 body_count: 1673 atom_count: 8365 2.040e+00 1.741e+00 -1.012e-01 5.132e+01 6.198e+01 -1.713e+01
+383000 25000 body_count: 1673 atom_count: 8365 2.041e+00 1.746e+00 -1.044e-01 5.159e+01 6.190e+01 -1.703e+01
+385500 27500 body_count: 1673 atom_count: 8365 2.035e+00 1.749e+00 -1.068e-01 5.149e+01 6.182e+01 -1.721e+01
+388000 30000 body_count: 1673 atom_count: 8365 2.035e+00 1.747e+00 -1.059e-01 5.156e+01 6.170e+01 -1.727e+01
+390500 32500 body_count: 1673 atom_count: 8365 2.032e+00 1.747e+00 -1.062e-01 5.169e+01 6.148e+01 -1.731e+01
+393000 35000 body_count: 1673 atom_count: 8365 2.031e+00 1.747e+00 -1.059e-01 5.187e+01 6.147e+01 -1.734e+01
+395500 37500 body_count: 1673 atom_count: 8365 2.025e+00 1.742e+00 -1.051e-01 5.195e+01 6.130e+01 -1.724e+01
+398000 40000 body_count: 1673 atom_count: 8365 2.019e+00 1.737e+00 -1.038e-01 5.173e+01 6.118e+01 -1.706e+01
+400500 42500 body_count: 1673 atom_count: 8365 2.015e+00 1.729e+00 -9.994e-02 5.163e+01 6.118e+01 -1.705e+01
+403000 45000 body_count: 1673 atom_count: 8365 2.010e+00 1.725e+00 -9.806e-02 5.159e+01 6.118e+01 -1.699e+01
+405500 47500 body_count: 1673 atom_count: 8365 2.005e+00 1.725e+00 -9.369e-02 5.151e+01 6.109e+01 -1.686e+01
+408000 50000 body_count: 1673 atom_count: 8365 2.001e+00 1.722e+00 -9.252e-02 5.140e+01 6.104e+01 -1.684e+01
+408000 2.001e+00 1.722e+00 -9.252e-02 5.140e+01 6.104e+01 -1.684e+01
+410500 2500 body_count: 1673 atom_count: 8365 1.915e+00 1.671e+00 -1.277e-01 5.280e+01 6.313e+01 -1.766e+01
+413000 5000 body_count: 1673 atom_count: 8365 1.904e+00 1.652e+00 -1.279e-01 5.280e+01 6.216e+01 -1.715e+01
+415500 7500 body_count: 1673 atom_count: 8365 1.909e+00 1.655e+00 -1.273e-01 5.344e+01 6.198e+01 -1.764e+01
+418000 10000 body_count: 1673 atom_count: 8365 1.923e+00 1.678e+00 -1.153e-01 5.255e+01 6.120e+01 -1.753e+01
+420500 12500 body_count: 1673 atom_count: 8365 1.943e+00 1.697e+00 -1.059e-01 5.175e+01 6.131e+01 -1.737e+01
+423000 15000 body_count: 1673 atom_count: 8365 1.956e+00 1.697e+00 -1.057e-01 5.205e+01 6.138e+01 -1.717e+01
+425500 17500 body_count: 1673 atom_count: 8365 1.948e+00 1.691e+00 -9.856e-02 5.178e+01 6.170e+01 -1.686e+01
+428000 20000 body_count: 1673 atom_count: 8365 1.957e+00 1.688e+00 -9.579e-02 5.143e+01 6.180e+01 -1.675e+01
+430500 22500 body_count: 1673 atom_count: 8365 1.963e+00 1.684e+00 -9.512e-02 5.173e+01 6.174e+01 -1.688e+01
+433000 25000 body_count: 1673 atom_count: 8365 1.963e+00 1.689e+00 -1.005e-01 5.174e+01 6.152e+01 -1.702e+01
+435500 27500 body_count: 1673 atom_count: 8365 1.959e+00 1.690e+00 -1.023e-01 5.169e+01 6.138e+01 -1.681e+01
+438000 30000 body_count: 1673 atom_count: 8365 1.962e+00 1.693e+00 -1.019e-01 5.184e+01 6.140e+01 -1.684e+01
+440500 32500 body_count: 1673 atom_count: 8365 1.966e+00 1.691e+00 -9.850e-02 5.182e+01 6.133e+01 -1.665e+01
+443000 35000 body_count: 1673 atom_count: 8365 1.963e+00 1.689e+00 -9.686e-02 5.174e+01 6.106e+01 -1.657e+01
+445500 37500 body_count: 1673 atom_count: 8365 1.962e+00 1.685e+00 -9.749e-02 5.166e+01 6.082e+01 -1.635e+01
+448000 40000 body_count: 1673 atom_count: 8365 1.963e+00 1.676e+00 -9.887e-02 5.162e+01 6.065e+01 -1.635e+01
+450500 42500 body_count: 1673 atom_count: 8365 1.962e+00 1.670e+00 -9.737e-02 5.155e+01 6.063e+01 -1.644e+01
+453000 45000 body_count: 1673 atom_count: 8365 1.959e+00 1.666e+00 -9.764e-02 5.149e+01 6.060e+01 -1.647e+01
+455500 47500 body_count: 1673 atom_count: 8365 1.958e+00 1.665e+00 -9.808e-02 5.154e+01 6.076e+01 -1.654e+01
+458000 50000 body_count: 1673 atom_count: 8365 1.960e+00 1.662e+00 -9.658e-02 5.146e+01 6.072e+01 -1.654e+01
+458000 1.960e+00 1.662e+00 -9.658e-02 5.146e+01 6.072e+01 -1.654e+01
+460500 2500 body_count: 1673 atom_count: 8365 2.054e+00 1.636e+00 -1.163e-01 5.336e+01 5.961e+01 -1.654e+01
+463000 5000 body_count: 1673 atom_count: 8365 2.003e+00 1.645e+00 -1.094e-01 5.162e+01 5.989e+01 -1.687e+01
+465500 7500 body_count: 1673 atom_count: 8365 1.988e+00 1.671e+00 -1.252e-01 5.092e+01 5.908e+01 -1.728e+01
+468000 10000 body_count: 1673 atom_count: 8365 1.992e+00 1.684e+00 -1.271e-01 5.091e+01 5.949e+01 -1.755e+01
+470500 12500 body_count: 1673 atom_count: 8365 2.009e+00 1.684e+00 -1.306e-01 5.142e+01 5.999e+01 -1.758e+01
+473000 15000 body_count: 1673 atom_count: 8365 2.016e+00 1.694e+00 -1.421e-01 5.223e+01 6.037e+01 -1.773e+01
+475500 17500 body_count: 1673 atom_count: 8365 2.008e+00 1.701e+00 -1.331e-01 5.236e+01 6.047e+01 -1.766e+01
+478000 20000 body_count: 1673 atom_count: 8365 2.005e+00 1.707e+00 -1.280e-01 5.227e+01 6.067e+01 -1.749e+01
+480500 22500 body_count: 1673 atom_count: 8365 2.002e+00 1.722e+00 -1.266e-01 5.246e+01 6.074e+01 -1.754e+01
+483000 25000 body_count: 1673 atom_count: 8365 2.001e+00 1.736e+00 -1.216e-01 5.224e+01 6.066e+01 -1.726e+01
+485500 27500 body_count: 1673 atom_count: 8365 1.996e+00 1.741e+00 -1.222e-01 5.242e+01 6.064e+01 -1.740e+01
+488000 30000 body_count: 1673 atom_count: 8365 1.990e+00 1.747e+00 -1.190e-01 5.253e+01 6.060e+01 -1.738e+01
+490500 32500 body_count: 1673 atom_count: 8365 1.989e+00 1.754e+00 -1.160e-01 5.262e+01 6.056e+01 -1.733e+01
+493000 35000 body_count: 1673 atom_count: 8365 1.989e+00 1.756e+00 -1.124e-01 5.268e+01 6.054e+01 -1.733e+01
+495500 37500 body_count: 1673 atom_count: 8365 1.992e+00 1.756e+00 -1.111e-01 5.265e+01 6.053e+01 -1.724e+01
+498000 40000 body_count: 1673 atom_count: 8365 1.995e+00 1.760e+00 -1.100e-01 5.264e+01 6.051e+01 -1.712e+01
+500500 42500 body_count: 1673 atom_count: 8365 1.998e+00 1.764e+00 -1.103e-01 5.266e+01 6.068e+01 -1.718e+01
+503000 45000 body_count: 1673 atom_count: 8365 2.001e+00 1.761e+00 -1.063e-01 5.291e+01 6.074e+01 -1.719e+01
+505500 47500 body_count: 1673 atom_count: 8365 2.001e+00 1.756e+00 -1.058e-01 5.286e+01 6.062e+01 -1.704e+01
+508000 50000 body_count: 1673 atom_count: 8365 1.999e+00 1.751e+00 -1.040e-01 5.272e+01 6.046e+01 -1.682e+01
+508000 1.999e+00 1.751e+00 -1.040e-01 5.272e+01 6.046e+01 -1.682e+01
+510500 2500 body_count: 1673 atom_count: 8365 1.934e+00 1.690e+00 -8.314e-02 4.971e+01 5.742e+01 -1.718e+01
+513000 5000 body_count: 1673 atom_count: 8365 1.908e+00 1.696e+00 -8.525e-02 5.107e+01 5.875e+01 -1.622e+01
+515500 7500 body_count: 1673 atom_count: 8365 1.929e+00 1.686e+00 -9.895e-02 5.215e+01 5.919e+01 -1.628e+01
+518000 10000 body_count: 1673 atom_count: 8365 1.937e+00 1.670e+00 -1.061e-01 5.235e+01 5.973e+01 -1.667e+01
+520500 12500 body_count: 1673 atom_count: 8365 1.945e+00 1.672e+00 -1.084e-01 5.274e+01 6.011e+01 -1.682e+01
+523000 15000 body_count: 1673 atom_count: 8365 1.947e+00 1.683e+00 -1.044e-01 5.306e+01 6.029e+01 -1.690e+01
+525500 17500 body_count: 1673 atom_count: 8365 1.947e+00 1.687e+00 -1.062e-01 5.297e+01 6.050e+01 -1.715e+01
+528000 20000 body_count: 1673 atom_count: 8365 1.950e+00 1.688e+00 -1.085e-01 5.345e+01 6.085e+01 -1.725e+01
+530500 22500 body_count: 1673 atom_count: 8365 1.954e+00 1.689e+00 -1.094e-01 5.369e+01 6.120e+01 -1.735e+01
+533000 25000 body_count: 1673 atom_count: 8365 1.953e+00 1.685e+00 -1.078e-01 5.364e+01 6.116e+01 -1.740e+01
+535500 27500 body_count: 1673 atom_count: 8365 1.962e+00 1.682e+00 -1.079e-01 5.356e+01 6.120e+01 -1.725e+01
+538000 30000 body_count: 1673 atom_count: 8365 1.967e+00 1.680e+00 -1.099e-01 5.340e+01 6.116e+01 -1.714e+01
+540500 32500 body_count: 1673 atom_count: 8365 1.972e+00 1.679e+00 -1.116e-01 5.322e+01 6.106e+01 -1.725e+01
+543000 35000 body_count: 1673 atom_count: 8365 1.974e+00 1.679e+00 -1.128e-01 5.323e+01 6.116e+01 -1.725e+01
+545500 37500 body_count: 1673 atom_count: 8365 1.979e+00 1.680e+00 -1.149e-01 5.327e+01 6.124e+01 -1.732e+01
+548000 40000 body_count: 1673 atom_count: 8365 1.982e+00 1.681e+00 -1.139e-01 5.327e+01 6.140e+01 -1.735e+01
+550500 42500 body_count: 1673 atom_count: 8365 1.982e+00 1.685e+00 -1.132e-01 5.317e+01 6.146e+01 -1.736e+01
+553000 45000 body_count: 1673 atom_count: 8365 1.981e+00 1.686e+00 -1.090e-01 5.332e+01 6.157e+01 -1.733e+01
+555500 47500 body_count: 1673 atom_count: 8365 1.978e+00 1.686e+00 -1.065e-01 5.342e+01 6.155e+01 -1.730e+01
+558000 50000 body_count: 1673 atom_count: 8365 1.976e+00 1.691e+00 -1.058e-01 5.330e+01 6.155e+01 -1.722e+01
+558000 1.976e+00 1.691e+00 -1.058e-01 5.330e+01 6.155e+01 -1.722e+01
+560500 2500 body_count: 1673 atom_count: 8365 1.883e+00 1.808e+00 -6.322e-02 5.178e+01 6.532e+01 -1.713e+01
+563000 5000 body_count: 1673 atom_count: 8365 1.856e+00 1.782e+00 -5.568e-02 5.318e+01 6.574e+01 -1.797e+01
+565500 7500 body_count: 1673 atom_count: 8365 1.861e+00 1.767e+00 -4.956e-02 5.362e+01 6.535e+01 -1.835e+01
+568000 10000 body_count: 1673 atom_count: 8365 1.879e+00 1.751e+00 -5.085e-02 5.312e+01 6.486e+01 -1.789e+01
+570500 12500 body_count: 1673 atom_count: 8365 1.883e+00 1.747e+00 -5.943e-02 5.353e+01 6.375e+01 -1.784e+01
+573000 15000 body_count: 1673 atom_count: 8365 1.878e+00 1.729e+00 -6.380e-02 5.367e+01 6.331e+01 -1.753e+01
+575500 17500 body_count: 1673 atom_count: 8365 1.874e+00 1.723e+00 -6.426e-02 5.348e+01 6.298e+01 -1.735e+01
+578000 20000 body_count: 1673 atom_count: 8365 1.870e+00 1.709e+00 -6.895e-02 5.331e+01 6.247e+01 -1.708e+01
+580500 22500 body_count: 1673 atom_count: 8365 1.866e+00 1.705e+00 -7.401e-02 5.321e+01 6.237e+01 -1.713e+01
+583000 25000 body_count: 1673 atom_count: 8365 1.866e+00 1.707e+00 -7.586e-02 5.302e+01 6.215e+01 -1.707e+01
+585500 27500 body_count: 1673 atom_count: 8365 1.867e+00 1.709e+00 -8.134e-02 5.308e+01 6.212e+01 -1.700e+01
+588000 30000 body_count: 1673 atom_count: 8365 1.871e+00 1.705e+00 -8.443e-02 5.304e+01 6.162e+01 -1.702e+01
+590500 32500 body_count: 1673 atom_count: 8365 1.871e+00 1.704e+00 -8.777e-02 5.314e+01 6.139e+01 -1.699e+01
+593000 35000 body_count: 1673 atom_count: 8365 1.873e+00 1.704e+00 -9.239e-02 5.305e+01 6.133e+01 -1.701e+01
+595500 37500 body_count: 1673 atom_count: 8365 1.878e+00 1.709e+00 -9.674e-02 5.317e+01 6.145e+01 -1.704e+01
+598000 40000 body_count: 1673 atom_count: 8365 1.881e+00 1.710e+00 -1.017e-01 5.325e+01 6.154e+01 -1.711e+01
+600500 42500 body_count: 1673 atom_count: 8365 1.888e+00 1.712e+00 -1.022e-01 5.325e+01 6.155e+01 -1.693e+01
+603000 45000 body_count: 1673 atom_count: 8365 1.894e+00 1.717e+00 -1.062e-01 5.326e+01 6.139e+01 -1.692e+01
+605500 47500 body_count: 1673 atom_count: 8365 1.896e+00 1.723e+00 -1.096e-01 5.326e+01 6.139e+01 -1.697e+01
+608000 50000 body_count: 1673 atom_count: 8365 1.900e+00 1.729e+00 -1.126e-01 5.328e+01 6.128e+01 -1.694e+01
+608000 1.900e+00 1.729e+00 -1.126e-01 5.328e+01 6.128e+01 -1.694e+01
+610500 2500 body_count: 1673 atom_count: 8365 1.961e+00 1.833e+00 -1.443e-01 5.245e+01 6.409e+01 -1.576e+01
+613000 5000 body_count: 1673 atom_count: 8365 1.952e+00 1.824e+00 -1.138e-01 5.188e+01 6.276e+01 -1.614e+01
+615500 7500 body_count: 1673 atom_count: 8365 1.927e+00 1.805e+00 -1.178e-01 5.167e+01 6.153e+01 -1.582e+01
+618000 10000 body_count: 1673 atom_count: 8365 1.920e+00 1.797e+00 -1.104e-01 5.162e+01 6.163e+01 -1.570e+01
+620500 12500 body_count: 1673 atom_count: 8365 1.906e+00 1.797e+00 -1.152e-01 5.171e+01 6.108e+01 -1.571e+01
+623000 15000 body_count: 1673 atom_count: 8365 1.897e+00 1.799e+00 -1.176e-01 5.194e+01 6.123e+01 -1.583e+01
+625500 17500 body_count: 1673 atom_count: 8365 1.897e+00 1.796e+00 -1.164e-01 5.211e+01 6.165e+01 -1.587e+01
+628000 20000 body_count: 1673 atom_count: 8365 1.903e+00 1.792e+00 -1.094e-01 5.175e+01 6.145e+01 -1.589e+01
+630500 22500 body_count: 1673 atom_count: 8365 1.907e+00 1.785e+00 -1.050e-01 5.144e+01 6.147e+01 -1.613e+01
+633000 25000 body_count: 1673 atom_count: 8365 1.903e+00 1.773e+00 -1.019e-01 5.178e+01 6.159e+01 -1.656e+01
+635500 27500 body_count: 1673 atom_count: 8365 1.900e+00 1.764e+00 -9.933e-02 5.179e+01 6.126e+01 -1.658e+01
+638000 30000 body_count: 1673 atom_count: 8365 1.901e+00 1.758e+00 -9.294e-02 5.194e+01 6.121e+01 -1.663e+01
+640500 32500 body_count: 1673 atom_count: 8365 1.900e+00 1.752e+00 -8.763e-02 5.191e+01 6.113e+01 -1.672e+01
+643000 35000 body_count: 1673 atom_count: 8365 1.902e+00 1.748e+00 -8.642e-02 5.223e+01 6.126e+01 -1.682e+01
+645500 37500 body_count: 1673 atom_count: 8365 1.901e+00 1.742e+00 -8.704e-02 5.222e+01 6.126e+01 -1.677e+01
+648000 40000 body_count: 1673 atom_count: 8365 1.900e+00 1.737e+00 -8.585e-02 5.224e+01 6.123e+01 -1.679e+01
+650500 42500 body_count: 1673 atom_count: 8365 1.900e+00 1.735e+00 -8.727e-02 5.219e+01 6.106e+01 -1.677e+01
+653000 45000 body_count: 1673 atom_count: 8365 1.901e+00 1.731e+00 -8.908e-02 5.231e+01 6.109e+01 -1.678e+01
+655500 47500 body_count: 1673 atom_count: 8365 1.900e+00 1.725e+00 -8.932e-02 5.225e+01 6.124e+01 -1.684e+01
+658000 50000 body_count: 1673 atom_count: 8365 1.901e+00 1.720e+00 -8.956e-02 5.212e+01 6.131e+01 -1.665e+01
+658000 1.901e+00 1.720e+00 -8.956e-02 5.212e+01 6.131e+01 -1.665e+01
+660500 2500 body_count: 1673 atom_count: 8365 1.813e+00 1.637e+00 -7.117e-02 5.328e+01 6.117e+01 -1.524e+01
+663000 5000 body_count: 1673 atom_count: 8365 1.853e+00 1.679e+00 -8.374e-02 5.470e+01 6.133e+01 -1.554e+01
+665500 7500 body_count: 1673 atom_count: 8365 1.861e+00 1.685e+00 -8.654e-02 5.488e+01 6.130e+01 -1.666e+01
+668000 10000 body_count: 1673 atom_count: 8365 1.865e+00 1.681e+00 -9.309e-02 5.425e+01 6.154e+01 -1.652e+01
+670500 12500 body_count: 1673 atom_count: 8365 1.870e+00 1.686e+00 -9.543e-02 5.420e+01 6.189e+01 -1.720e+01
+673000 15000 body_count: 1673 atom_count: 8365 1.870e+00 1.695e+00 -9.673e-02 5.486e+01 6.231e+01 -1.763e+01
+675500 17500 body_count: 1673 atom_count: 8365 1.868e+00 1.702e+00 -9.425e-02 5.499e+01 6.219e+01 -1.773e+01
+678000 20000 body_count: 1673 atom_count: 8365 1.873e+00 1.708e+00 -8.976e-02 5.491e+01 6.229e+01 -1.782e+01
+680500 22500 body_count: 1673 atom_count: 8365 1.880e+00 1.705e+00 -9.112e-02 5.500e+01 6.239e+01 -1.784e+01
+683000 25000 body_count: 1673 atom_count: 8365 1.877e+00 1.711e+00 -9.471e-02 5.512e+01 6.288e+01 -1.793e+01
+685500 27500 body_count: 1673 atom_count: 8365 1.876e+00 1.721e+00 -9.797e-02 5.529e+01 6.302e+01 -1.802e+01
+688000 30000 body_count: 1673 atom_count: 8365 1.869e+00 1.726e+00 -9.413e-02 5.534e+01 6.336e+01 -1.806e+01
+690500 32500 body_count: 1673 atom_count: 8365 1.866e+00 1.727e+00 -9.164e-02 5.533e+01 6.345e+01 -1.826e+01
+693000 35000 body_count: 1673 atom_count: 8365 1.873e+00 1.725e+00 -8.762e-02 5.520e+01 6.347e+01 -1.831e+01
+695500 37500 body_count: 1673 atom_count: 8365 1.876e+00 1.720e+00 -8.701e-02 5.509e+01 6.364e+01 -1.831e+01
+698000 40000 body_count: 1673 atom_count: 8365 1.879e+00 1.715e+00 -8.825e-02 5.485e+01 6.357e+01 -1.824e+01
+700500 42500 body_count: 1673 atom_count: 8365 1.884e+00 1.712e+00 -8.819e-02 5.473e+01 6.347e+01 -1.819e+01
+703000 45000 body_count: 1673 atom_count: 8365 1.880e+00 1.708e+00 -8.589e-02 5.444e+01 6.326e+01 -1.789e+01
+705500 47500 body_count: 1673 atom_count: 8365 1.879e+00 1.704e+00 -8.626e-02 5.413e+01 6.302e+01 -1.768e+01
+708000 50000 body_count: 1673 atom_count: 8365 1.878e+00 1.702e+00 -8.824e-02 5.379e+01 6.279e+01 -1.746e+01
+708000 1.878e+00 1.702e+00 -8.824e-02 5.379e+01 6.279e+01 -1.746e+01
+710500 2500 body_count: 1673 atom_count: 8365 1.864e+00 1.598e+00 -8.376e-02 4.932e+01 6.036e+01 -1.771e+01
+713000 5000 body_count: 1673 atom_count: 8365 1.853e+00 1.623e+00 -1.203e-01 4.855e+01 6.125e+01 -1.676e+01
+715500 7500 body_count: 1673 atom_count: 8365 1.845e+00 1.637e+00 -1.416e-01 4.950e+01 6.028e+01 -1.665e+01
+718000 10000 body_count: 1673 atom_count: 8365 1.857e+00 1.636e+00 -1.430e-01 5.015e+01 6.053e+01 -1.684e+01
+720500 12500 body_count: 1673 atom_count: 8365 1.874e+00 1.639e+00 -1.422e-01 5.062e+01 6.059e+01 -1.653e+01
+723000 15000 body_count: 1673 atom_count: 8365 1.894e+00 1.651e+00 -1.464e-01 5.123e+01 6.047e+01 -1.717e+01
+725500 17500 body_count: 1673 atom_count: 8365 1.908e+00 1.671e+00 -1.462e-01 5.146e+01 6.085e+01 -1.746e+01
+728000 20000 body_count: 1673 atom_count: 8365 1.910e+00 1.676e+00 -1.432e-01 5.135e+01 6.084e+01 -1.751e+01
+730500 22500 body_count: 1673 atom_count: 8365 1.912e+00 1.680e+00 -1.424e-01 5.125e+01 6.104e+01 -1.765e+01
+733000 25000 body_count: 1673 atom_count: 8365 1.916e+00 1.683e+00 -1.394e-01 5.122e+01 6.117e+01 -1.778e+01
+735500 27500 body_count: 1673 atom_count: 8365 1.919e+00 1.688e+00 -1.344e-01 5.114e+01 6.121e+01 -1.777e+01
+738000 30000 body_count: 1673 atom_count: 8365 1.923e+00 1.698e+00 -1.362e-01 5.127e+01 6.145e+01 -1.778e+01
+740500 32500 body_count: 1673 atom_count: 8365 1.928e+00 1.703e+00 -1.373e-01 5.131e+01 6.134e+01 -1.783e+01
+743000 35000 body_count: 1673 atom_count: 8365 9.272e+00 9.716e+00 -5.611e-01 1.829e+02 2.016e+02 -3.865e+01
+745500 37500 body_count: 1673 atom_count: 8365 2.007e+01 2.041e+01 -1.530e+00 4.528e+02 5.043e+02 -6.909e+01
+748000 40000 body_count: 1673 atom_count: 8365 2.275e+01 2.316e+01 -1.411e+00 5.200e+02 5.777e+02 -7.424e+01
+750500 42500 body_count: 1673 atom_count: 8365 2.371e+01 2.395e+01 -1.290e+00 5.413e+02 6.003e+02 -7.616e+01
+753000 45000 body_count: 1673 atom_count: 8365 2.381e+01 2.401e+01 -1.251e+00 5.452e+02 6.038e+02 -7.573e+01
+755500 47500 body_count: 1673 atom_count: 8365 2.349e+01 2.368e+01 -1.228e+00 5.411e+02 5.990e+02 -7.546e+01
+758000 50000 body_count: 1673 atom_count: 8365 2.299e+01 2.314e+01 -1.174e+00 5.327e+02 5.895e+02 -7.458e+01
+758000 2.299e+01 2.314e+01 -1.174e+00 5.327e+02 5.895e+02 -7.458e+01
+760500 2500 body_count: 1673 atom_count: 8365 1.032e+01 1.056e+01 -3.670e-01 2.931e+02 3.212e+02 -4.870e+01
+763000 5000 body_count: 1673 atom_count: 8365 9.475e+00 9.626e+00 -2.094e-01 2.661e+02 2.878e+02 -4.264e+01
+765500 7500 body_count: 1673 atom_count: 8365 8.742e+00 8.912e+00 -2.307e-01 2.405e+02 2.600e+02 -4.075e+01
+768000 10000 body_count: 1673 atom_count: 8365 8.221e+00 8.302e+00 -2.591e-01 2.218e+02 2.394e+02 -3.821e+01
+770500 12500 body_count: 1673 atom_count: 8365 7.708e+00 7.766e+00 -2.662e-01 2.063e+02 2.237e+02 -3.687e+01
+773000 15000 body_count: 1673 atom_count: 8365 7.266e+00 7.319e+00 -2.607e-01 1.949e+02 2.109e+02 -3.599e+01
+775500 17500 body_count: 1673 atom_count: 8365 6.872e+00 6.935e+00 -2.720e-01 1.847e+02 1.992e+02 -3.537e+01
+778000 20000 body_count: 1673 atom_count: 8365 6.547e+00 6.583e+00 -2.588e-01 1.755e+02 1.897e+02 -3.460e+01
+780500 22500 body_count: 1673 atom_count: 8365 6.245e+00 6.293e+00 -2.449e-01 1.676e+02 1.818e+02 -3.339e+01
+783000 25000 body_count: 1673 atom_count: 8365 5.970e+00 6.032e+00 -2.347e-01 1.613e+02 1.748e+02 -3.294e+01
+785500 27500 body_count: 1673 atom_count: 8365 5.728e+00 5.803e+00 -2.250e-01 1.552e+02 1.689e+02 -3.229e+01
+788000 30000 body_count: 1673 atom_count: 8365 5.516e+00 5.604e+00 -2.269e-01 1.499e+02 1.634e+02 -3.177e+01
+790500 32500 body_count: 1673 atom_count: 8365 5.329e+00 5.422e+00 -2.215e-01 1.451e+02 1.580e+02 -3.120e+01
+793000 35000 body_count: 1673 atom_count: 8365 5.166e+00 5.247e+00 -2.173e-01 1.405e+02 1.529e+02 -3.080e+01
+795500 37500 body_count: 1673 atom_count: 8365 5.014e+00 5.087e+00 -2.083e-01 1.362e+02 1.485e+02 -3.027e+01
+798000 40000 body_count: 1673 atom_count: 8365 4.875e+00 4.936e+00 -2.002e-01 1.324e+02 1.448e+02 -2.983e+01
+800500 42500 body_count: 1673 atom_count: 8365 4.754e+00 4.799e+00 -1.933e-01 1.291e+02 1.414e+02 -2.944e+01
+803000 45000 body_count: 1673 atom_count: 8365 4.636e+00 4.679e+00 -1.874e-01 1.259e+02 1.381e+02 -2.903e+01
+805500 47500 body_count: 1673 atom_count: 8365 4.532e+00 4.563e+00 -1.812e-01 1.230e+02 1.349e+02 -2.859e+01
+808000 50000 body_count: 1673 atom_count: 8365 4.439e+00 4.452e+00 -1.749e-01 1.204e+02 1.319e+02 -2.829e+01
+808000 4.439e+00 4.452e+00 -1.749e-01 1.204e+02 1.319e+02 -2.829e+01
+810500 2500 body_count: 1673 atom_count: 8365 2.582e+00 2.209e+00 -7.195e-02 6.689e+01 7.672e+01 -2.269e+01
+813000 5000 body_count: 1673 atom_count: 8365 2.547e+00 2.173e+00 -7.289e-02 6.601e+01 7.764e+01 -2.206e+01
+815500 7500 body_count: 1673 atom_count: 8365 2.530e+00 2.132e+00 -7.935e-02 6.548e+01 7.703e+01 -2.155e+01
+818000 10000 body_count: 1673 atom_count: 8365 2.489e+00 2.110e+00 -9.708e-02 6.538e+01 7.567e+01 -2.132e+01
+820500 12500 body_count: 1673 atom_count: 8365 2.462e+00 2.095e+00 -1.071e-01 6.469e+01 7.507e+01 -2.097e+01
+823000 15000 body_count: 1673 atom_count: 8365 2.458e+00 2.078e+00 -1.126e-01 6.385e+01 7.444e+01 -2.068e+01
+825500 17500 body_count: 1673 atom_count: 8365 2.438e+00 2.061e+00 -1.190e-01 6.365e+01 7.392e+01 -2.038e+01
+828000 20000 body_count: 1673 atom_count: 8365 2.410e+00 2.042e+00 -1.221e-01 6.331e+01 7.303e+01 -2.015e+01
+830500 22500 body_count: 1673 atom_count: 8365 2.390e+00 2.027e+00 -1.146e-01 6.286e+01 7.252e+01 -2.006e+01
+833000 25000 body_count: 1673 atom_count: 8365 2.371e+00 2.025e+00 -1.102e-01 6.248e+01 7.233e+01 -1.994e+01
+835500 27500 body_count: 1673 atom_count: 8365 2.353e+00 2.009e+00 -1.061e-01 6.221e+01 7.200e+01 -1.992e+01
+838000 30000 body_count: 1673 atom_count: 8365 2.334e+00 1.999e+00 -1.056e-01 6.177e+01 7.140e+01 -1.974e+01
+840500 32500 body_count: 1673 atom_count: 8365 2.312e+00 1.990e+00 -1.062e-01 6.133e+01 7.087e+01 -1.974e+01
+843000 35000 body_count: 1673 atom_count: 8365 2.294e+00 1.986e+00 -1.070e-01 6.105e+01 7.064e+01 -1.979e+01
+845500 37500 body_count: 1673 atom_count: 8365 2.281e+00 1.982e+00 -1.085e-01 6.086e+01 7.042e+01 -1.992e+01
+848000 40000 body_count: 1673 atom_count: 8365 2.271e+00 1.974e+00 -1.075e-01 6.041e+01 7.019e+01 -1.972e+01
+850500 42500 body_count: 1673 atom_count: 8365 2.262e+00 1.965e+00 -1.112e-01 6.002e+01 7.004e+01 -1.973e+01
+853000 45000 body_count: 1673 atom_count: 8365 2.259e+00 1.958e+00 -1.140e-01 5.978e+01 6.971e+01 -1.957e+01
+855500 47500 body_count: 1673 atom_count: 8365 2.257e+00 1.953e+00 -1.179e-01 5.955e+01 6.945e+01 -1.959e+01
+858000 50000 body_count: 1673 atom_count: 8365 2.259e+00 1.948e+00 -1.192e-01 5.926e+01 6.927e+01 -1.948e+01
+858000 2.259e+00 1.948e+00 -1.192e-01 5.926e+01 6.927e+01 -1.948e+01
+860500 2500 body_count: 1673 atom_count: 8365 2.253e+00 1.772e+00 -2.014e-01 5.246e+01 6.357e+01 -1.799e+01
+863000 5000 body_count: 1673 atom_count: 8365 2.258e+00 1.775e+00 -1.939e-01 5.382e+01 6.371e+01 -1.803e+01
+865500 7500 body_count: 1673 atom_count: 8365 2.223e+00 1.788e+00 -1.746e-01 5.426e+01 6.489e+01 -1.817e+01
+868000 10000 body_count: 1673 atom_count: 8365 2.211e+00 1.789e+00 -1.580e-01 5.381e+01 6.540e+01 -1.824e+01
+870500 12500 body_count: 1673 atom_count: 8365 2.193e+00 1.778e+00 -1.423e-01 5.449e+01 6.505e+01 -1.820e+01
+873000 15000 body_count: 1673 atom_count: 8365 2.186e+00 1.770e+00 -1.359e-01 5.473e+01 6.498e+01 -1.828e+01
+875500 17500 body_count: 1673 atom_count: 8365 2.184e+00 1.765e+00 -1.346e-01 5.494e+01 6.485e+01 -1.824e+01
+878000 20000 body_count: 1673 atom_count: 8365 2.170e+00 1.754e+00 -1.284e-01 5.470e+01 6.466e+01 -1.810e+01
+880500 22500 body_count: 1673 atom_count: 8365 2.154e+00 1.744e+00 -1.286e-01 5.438e+01 6.442e+01 -1.772e+01
+883000 25000 body_count: 1673 atom_count: 8365 2.139e+00 1.737e+00 -1.241e-01 5.428e+01 6.421e+01 -1.781e+01
+885500 27500 body_count: 1673 atom_count: 8365 2.124e+00 1.732e+00 -1.161e-01 5.423e+01 6.407e+01 -1.777e+01
+888000 30000 body_count: 1673 atom_count: 8365 2.110e+00 1.727e+00 -1.134e-01 5.434e+01 6.407e+01 -1.786e+01
+890500 32500 body_count: 1673 atom_count: 8365 2.101e+00 1.723e+00 -1.137e-01 5.433e+01 6.406e+01 -1.803e+01
+893000 35000 body_count: 1673 atom_count: 8365 2.094e+00 1.721e+00 -1.111e-01 5.443e+01 6.408e+01 -1.798e+01
+895500 37500 body_count: 1673 atom_count: 8365 2.091e+00 1.724e+00 -1.118e-01 5.441e+01 6.397e+01 -1.796e+01
+898000 40000 body_count: 1673 atom_count: 8365 2.086e+00 1.729e+00 -1.097e-01 5.438e+01 6.390e+01 -1.789e+01
+900500 42500 body_count: 1673 atom_count: 8365 2.079e+00 1.728e+00 -1.096e-01 5.439e+01 6.364e+01 -1.780e+01
+903000 45000 body_count: 1673 atom_count: 8365 2.071e+00 1.726e+00 -1.098e-01 5.430e+01 6.347e+01 -1.759e+01
+905500 47500 body_count: 1673 atom_count: 8365 2.067e+00 1.727e+00 -1.081e-01 5.430e+01 6.339e+01 -1.756e+01
+908000 50000 body_count: 1673 atom_count: 8365 2.063e+00 1.729e+00 -1.099e-01 5.402e+01 6.317e+01 -1.744e+01
+908000 2.063e+00 1.729e+00 -1.099e-01 5.402e+01 6.317e+01 -1.744e+01
+910500 2500 body_count: 1673 atom_count: 8365 1.950e+00 1.737e+00 -1.847e-01 5.040e+01 6.287e+01 -1.909e+01
+913000 5000 body_count: 1673 atom_count: 8365 1.970e+00 1.730e+00 -1.570e-01 4.965e+01 6.286e+01 -1.850e+01
+915500 7500 body_count: 1673 atom_count: 8365 1.972e+00 1.737e+00 -1.361e-01 5.058e+01 6.252e+01 -1.855e+01
+918000 10000 body_count: 1673 atom_count: 8365 1.983e+00 1.737e+00 -1.268e-01 5.142e+01 6.222e+01 -1.826e+01
+920500 12500 body_count: 1673 atom_count: 8365 1.980e+00 1.741e+00 -1.137e-01 5.203e+01 6.226e+01 -1.833e+01
+923000 15000 body_count: 1673 atom_count: 8365 1.973e+00 1.752e+00 -1.069e-01 5.201e+01 6.255e+01 -1.849e+01
+925500 17500 body_count: 1673 atom_count: 8365 1.973e+00 1.761e+00 -1.079e-01 5.242e+01 6.284e+01 -1.867e+01
+928000 20000 body_count: 1673 atom_count: 8365 1.975e+00 1.769e+00 -1.060e-01 5.256e+01 6.312e+01 -1.851e+01
+930500 22500 body_count: 1673 atom_count: 8365 1.972e+00 1.779e+00 -9.384e-02 5.264e+01 6.366e+01 -1.851e+01
+933000 25000 body_count: 1673 atom_count: 8365 1.969e+00 1.779e+00 -8.774e-02 5.253e+01 6.372e+01 -1.831e+01
+935500 27500 body_count: 1673 atom_count: 8365 1.975e+00 1.774e+00 -8.335e-02 5.263e+01 6.356e+01 -1.830e+01
+938000 30000 body_count: 1673 atom_count: 8365 1.978e+00 1.765e+00 -8.148e-02 5.243e+01 6.368e+01 -1.818e+01
+940500 32500 body_count: 1673 atom_count: 8365 1.975e+00 1.758e+00 -8.298e-02 5.251e+01 6.362e+01 -1.793e+01
+943000 35000 body_count: 1673 atom_count: 8365 1.969e+00 1.750e+00 -8.467e-02 5.254e+01 6.330e+01 -1.779e+01
+945500 37500 body_count: 1673 atom_count: 8365 1.964e+00 1.742e+00 -8.479e-02 5.251e+01 6.317e+01 -1.781e+01
+948000 40000 body_count: 1673 atom_count: 8365 1.962e+00 1.736e+00 -8.509e-02 5.253e+01 6.285e+01 -1.781e+01
+950500 42500 body_count: 1673 atom_count: 8365 1.962e+00 1.732e+00 -8.528e-02 5.243e+01 6.258e+01 -1.772e+01
+953000 45000 body_count: 1673 atom_count: 8365 1.961e+00 1.724e+00 -8.545e-02 5.247e+01 6.246e+01 -1.767e+01
+955500 47500 body_count: 1673 atom_count: 8365 1.954e+00 1.721e+00 -8.674e-02 5.231e+01 6.227e+01 -1.743e+01
+958000 50000 body_count: 1673 atom_count: 8365 1.947e+00 1.717e+00 -9.000e-02 5.223e+01 6.220e+01 -1.739e+01
+958000 1.947e+00 1.717e+00 -9.000e-02 5.223e+01 6.220e+01 -1.739e+01
+960500 2500 body_count: 1673 atom_count: 8365 1.947e+00 1.687e+00 -1.396e-01 5.563e+01 6.300e+01 -1.883e+01
+963000 5000 body_count: 1673 atom_count: 8365 1.940e+00 1.680e+00 -1.344e-01 5.391e+01 6.148e+01 -1.819e+01
+965500 7500 body_count: 1673 atom_count: 8365 1.929e+00 1.696e+00 -1.266e-01 5.367e+01 6.137e+01 -1.799e+01
+968000 10000 body_count: 1673 atom_count: 8365 1.935e+00 1.690e+00 -1.327e-01 5.366e+01 6.194e+01 -1.816e+01
+970500 12500 body_count: 1673 atom_count: 8365 1.935e+00 1.690e+00 -1.302e-01 5.335e+01 6.289e+01 -1.814e+01
+973000 15000 body_count: 1673 atom_count: 8365 1.935e+00 1.682e+00 -1.275e-01 5.316e+01 6.347e+01 -1.816e+01
+975500 17500 body_count: 1673 atom_count: 8365 1.931e+00 1.689e+00 -1.308e-01 5.273e+01 6.345e+01 -1.816e+01
+978000 20000 body_count: 1673 atom_count: 8365 1.932e+00 1.688e+00 -1.273e-01 5.273e+01 6.332e+01 -1.790e+01
+980500 22500 body_count: 1673 atom_count: 8365 1.933e+00 1.698e+00 -1.268e-01 5.231e+01 6.330e+01 -1.767e+01
+983000 25000 body_count: 1673 atom_count: 8365 1.937e+00 1.699e+00 -1.289e-01 5.218e+01 6.341e+01 -1.753e+01
+985500 27500 body_count: 1673 atom_count: 8365 1.934e+00 1.701e+00 -1.262e-01 5.211e+01 6.354e+01 -1.757e+01
+988000 30000 body_count: 1673 atom_count: 8365 1.931e+00 1.698e+00 -1.292e-01 5.207e+01 6.348e+01 -1.753e+01
+990500 32500 body_count: 1673 atom_count: 8365 1.927e+00 1.696e+00 -1.309e-01 5.197e+01 6.333e+01 -1.738e+01
+993000 35000 body_count: 1673 atom_count: 8365 1.923e+00 1.696e+00 -1.305e-01 5.195e+01 6.324e+01 -1.718e+01
+995500 37500 body_count: 1673 atom_count: 8365 1.923e+00 1.693e+00 -1.293e-01 5.206e+01 6.295e+01 -1.716e+01
+998000 40000 body_count: 1673 atom_count: 8365 1.920e+00 1.694e+00 -1.274e-01 5.221e+01 6.297e+01 -1.716e+01
+1000500 42500 body_count: 1673 atom_count: 8365 1.916e+00 1.691e+00 -1.225e-01 5.230e+01 6.297e+01 -1.724e+01
+1003000 45000 body_count: 1673 atom_count: 8365 1.910e+00 1.692e+00 -1.183e-01 5.236e+01 6.293e+01 -1.723e+01
+1005500 47500 body_count: 1673 atom_count: 8365 1.905e+00 1.691e+00 -1.152e-01 5.240e+01 6.286e+01 -1.717e+01
+1008000 50000 body_count: 1673 atom_count: 8365 1.900e+00 1.693e+00 -1.136e-01 5.226e+01 6.279e+01 -1.706e+01
+1008000 1.900e+00 1.693e+00 -1.136e-01 5.226e+01 6.279e+01 -1.706e+01
+1010500 2500 body_count: 1673 atom_count: 8365 1.849e+00 1.661e+00 -1.177e-01 5.218e+01 6.035e+01 -1.709e+01
+1013000 5000 body_count: 1673 atom_count: 8365 1.874e+00 1.686e+00 -1.203e-01 5.101e+01 6.012e+01 -1.672e+01
+1015500 7500 body_count: 1673 atom_count: 8365 1.879e+00 1.715e+00 -1.255e-01 5.141e+01 6.102e+01 -1.678e+01
+1018000 10000 body_count: 1673 atom_count: 8365 1.874e+00 1.719e+00 -1.269e-01 5.095e+01 6.085e+01 -1.634e+01
+1020500 12500 body_count: 1673 atom_count: 8365 1.883e+00 1.702e+00 -1.167e-01 5.104e+01 6.037e+01 -1.663e+01
+1023000 15000 body_count: 1673 atom_count: 8365 1.885e+00 1.688e+00 -1.069e-01 5.159e+01 6.067e+01 -1.676e+01
+1025500 17500 body_count: 1673 atom_count: 8365 1.889e+00 1.678e+00 -9.889e-02 5.180e+01 6.088e+01 -1.672e+01
+1028000 20000 body_count: 1673 atom_count: 8365 1.890e+00 1.683e+00 -9.609e-02 5.221e+01 6.123e+01 -1.719e+01
+1030500 22500 body_count: 1673 atom_count: 8365 1.895e+00 1.685e+00 -8.924e-02 5.247e+01 6.156e+01 -1.748e+01
+1033000 25000 body_count: 1673 atom_count: 8365 1.899e+00 1.685e+00 -9.047e-02 5.238e+01 6.175e+01 -1.762e+01
+1035500 27500 body_count: 1673 atom_count: 8365 1.902e+00 1.688e+00 -9.097e-02 5.254e+01 6.176e+01 -1.774e+01
+1038000 30000 body_count: 1673 atom_count: 8365 1.904e+00 1.690e+00 -9.302e-02 5.263e+01 6.181e+01 -1.796e+01
+1040500 32500 body_count: 1673 atom_count: 8365 1.912e+00 1.690e+00 -9.791e-02 5.294e+01 6.197e+01 -1.793e+01
+1043000 35000 body_count: 1673 atom_count: 8365 1.920e+00 1.686e+00 -1.011e-01 5.310e+01 6.222e+01 -1.804e+01
+1045500 37500 body_count: 1673 atom_count: 8365 1.928e+00 1.689e+00 -1.016e-01 5.301e+01 6.242e+01 -1.797e+01
+1048000 40000 body_count: 1673 atom_count: 8365 1.935e+00 1.693e+00 -1.017e-01 5.293e+01 6.265e+01 -1.793e+01
+1050500 42500 body_count: 1673 atom_count: 8365 1.943e+00 1.698e+00 -1.015e-01 5.294e+01 6.286e+01 -1.783e+01
+1053000 45000 body_count: 1673 atom_count: 8365 1.947e+00 1.698e+00 -1.005e-01 5.308e+01 6.289e+01 -1.785e+01
+1055500 47500 body_count: 1673 atom_count: 8365 1.949e+00 1.698e+00 -1.010e-01 5.323e+01 6.280e+01 -1.785e+01
+1058000 50000 body_count: 1673 atom_count: 8365 1.951e+00 1.699e+00 -1.023e-01 5.329e+01 6.294e+01 -1.784e+01
+1058000 1.951e+00 1.699e+00 -1.023e-01 5.329e+01 6.294e+01 -1.784e+01
+1060500 2500 body_count: 1673 atom_count: 8365 1.914e+00 1.716e+00 -1.586e-01 5.462e+01 6.565e+01 -1.947e+01
+1063000 5000 body_count: 1673 atom_count: 8365 1.943e+00 1.721e+00 -1.547e-01 5.487e+01 6.517e+01 -1.908e+01
+1065500 7500 body_count: 1673 atom_count: 8365 1.966e+00 1.724e+00 -1.493e-01 5.547e+01 6.545e+01 -1.847e+01
+1068000 10000 body_count: 1673 atom_count: 8365 1.959e+00 1.730e+00 -1.264e-01 5.557e+01 6.515e+01 -1.871e+01
+1070500 12500 body_count: 1673 atom_count: 8365 1.959e+00 1.737e+00 -1.286e-01 5.537e+01 6.541e+01 -1.872e+01
+1073000 15000 body_count: 1673 atom_count: 8365 1.959e+00 1.732e+00 -1.156e-01 5.539e+01 6.565e+01 -1.876e+01
+1075500 17500 body_count: 1673 atom_count: 8365 1.956e+00 1.720e+00 -1.051e-01 5.534e+01 6.527e+01 -1.858e+01
+1078000 20000 body_count: 1673 atom_count: 8365 1.953e+00 1.724e+00 -1.032e-01 5.519e+01 6.469e+01 -1.857e+01
+1080500 22500 body_count: 1673 atom_count: 8365 1.942e+00 1.727e+00 -9.852e-02 5.509e+01 6.471e+01 -1.875e+01
+1083000 25000 body_count: 1673 atom_count: 8365 1.933e+00 1.733e+00 -9.449e-02 5.489e+01 6.434e+01 -1.850e+01
+1085500 27500 body_count: 1673 atom_count: 8365 1.924e+00 1.733e+00 -9.652e-02 5.461e+01 6.403e+01 -1.835e+01
+1088000 30000 body_count: 1673 atom_count: 8365 1.922e+00 1.735e+00 -9.777e-02 5.441e+01 6.385e+01 -1.828e+01
+1090500 32500 body_count: 1673 atom_count: 8365 1.925e+00 1.739e+00 -1.025e-01 5.400e+01 6.360e+01 -1.810e+01
+1093000 35000 body_count: 1673 atom_count: 8365 1.919e+00 1.737e+00 -1.078e-01 5.375e+01 6.355e+01 -1.811e+01
+1095500 37500 body_count: 1673 atom_count: 8365 1.915e+00 1.737e+00 -1.116e-01 5.351e+01 6.372e+01 -1.796e+01
+1098000 40000 body_count: 1673 atom_count: 8365 1.910e+00 1.740e+00 -1.110e-01 5.323e+01 6.375e+01 -1.792e+01
+1100500 42500 body_count: 1673 atom_count: 8365 1.905e+00 1.741e+00 -1.090e-01 5.307e+01 6.369e+01 -1.787e+01
+1103000 45000 body_count: 1673 atom_count: 8365 1.903e+00 1.742e+00 -1.074e-01 5.305e+01 6.367e+01 -1.796e+01
+1105500 47500 body_count: 1673 atom_count: 8365 1.903e+00 1.745e+00 -1.064e-01 5.303e+01 6.371e+01 -1.794e+01
+1108000 50000 body_count: 1673 atom_count: 8365 1.901e+00 1.748e+00 -1.031e-01 5.298e+01 6.362e+01 -1.782e+01
+1108000 1.901e+00 1.748e+00 -1.031e-01 5.298e+01 6.362e+01 -1.782e+01
+1110500 2500 body_count: 1673 atom_count: 8365 1.831e+00 1.730e+00 -5.952e-02 5.329e+01 5.948e+01 -1.592e+01
+1113000 5000 body_count: 1673 atom_count: 8365 1.845e+00 1.736e+00 -7.887e-02 5.236e+01 5.865e+01 -1.525e+01
+1115500 7500 body_count: 1673 atom_count: 8365 1.826e+00 1.730e+00 -6.009e-02 5.229e+01 5.930e+01 -1.546e+01
+1118000 10000 body_count: 1673 atom_count: 8365 1.827e+00 1.718e+00 -6.175e-02 5.220e+01 5.938e+01 -1.602e+01
+1120500 12500 body_count: 1673 atom_count: 8365 1.840e+00 1.713e+00 -5.786e-02 5.233e+01 5.967e+01 -1.598e+01
+1123000 15000 body_count: 1673 atom_count: 8365 1.844e+00 1.716e+00 -5.783e-02 5.244e+01 5.997e+01 -1.614e+01
+1125500 17500 body_count: 1673 atom_count: 8365 1.841e+00 1.710e+00 -6.067e-02 5.205e+01 6.018e+01 -1.629e+01
+1128000 20000 body_count: 1673 atom_count: 8365 1.846e+00 1.703e+00 -6.561e-02 5.213e+01 6.048e+01 -1.629e+01
+1130500 22500 body_count: 1673 atom_count: 8365 1.845e+00 1.699e+00 -6.737e-02 5.219e+01 6.072e+01 -1.655e+01
+1133000 25000 body_count: 1673 atom_count: 8365 1.844e+00 1.688e+00 -7.429e-02 5.208e+01 6.109e+01 -1.652e+01
+1135500 27500 body_count: 1673 atom_count: 8365 1.846e+00 1.682e+00 -7.933e-02 5.194e+01 6.100e+01 -1.639e+01
+1138000 30000 body_count: 1673 atom_count: 8365 1.850e+00 1.680e+00 -8.512e-02 5.179e+01 6.090e+01 -1.637e+01
+1140500 32500 body_count: 1673 atom_count: 8365 1.855e+00 1.681e+00 -8.555e-02 5.167e+01 6.061e+01 -1.634e+01
+1143000 35000 body_count: 1673 atom_count: 8365 1.858e+00 1.680e+00 -8.408e-02 5.152e+01 6.038e+01 -1.622e+01
+1145500 37500 body_count: 1673 atom_count: 8365 1.857e+00 1.679e+00 -8.479e-02 5.173e+01 6.031e+01 -1.632e+01
+1148000 40000 body_count: 1673 atom_count: 8365 1.858e+00 1.679e+00 -8.800e-02 5.187e+01 6.034e+01 -1.620e+01
+1150500 42500 body_count: 1673 atom_count: 8365 1.855e+00 1.681e+00 -8.989e-02 5.202e+01 6.026e+01 -1.622e+01
+1153000 45000 body_count: 1673 atom_count: 8365 1.852e+00 1.687e+00 -9.242e-02 5.209e+01 6.027e+01 -1.637e+01
+1155500 47500 body_count: 1673 atom_count: 8365 1.853e+00 1.687e+00 -9.280e-02 5.212e+01 6.022e+01 -1.633e+01
+1158000 50000 body_count: 1673 atom_count: 8365 1.851e+00 1.686e+00 -8.935e-02 5.223e+01 6.032e+01 -1.636e+01
+1158000 1.851e+00 1.686e+00 -8.935e-02 5.223e+01 6.032e+01 -1.636e+01
+1160500 2500 body_count: 1673 atom_count: 8365 1.869e+00 1.710e+00 -8.328e-02 5.033e+01 6.251e+01 -1.673e+01
+1163000 5000 body_count: 1673 atom_count: 8365 1.907e+00 1.691e+00 -7.649e-02 5.142e+01 6.306e+01 -1.766e+01
+1165500 7500 body_count: 1673 atom_count: 8365 1.901e+00 1.681e+00 -7.921e-02 5.170e+01 6.271e+01 -1.847e+01
+1168000 10000 body_count: 1673 atom_count: 8365 1.910e+00 1.701e+00 -8.065e-02 5.219e+01 6.272e+01 -1.842e+01
+1170500 12500 body_count: 1673 atom_count: 8365 1.913e+00 1.715e+00 -7.850e-02 5.237e+01 6.257e+01 -1.810e+01
+1173000 15000 body_count: 1673 atom_count: 8365 1.917e+00 1.717e+00 -8.230e-02 5.271e+01 6.244e+01 -1.791e+01
+1175500 17500 body_count: 1673 atom_count: 8365 1.902e+00 1.708e+00 -7.945e-02 5.267e+01 6.223e+01 -1.771e+01
+1178000 20000 body_count: 1673 atom_count: 8365 1.895e+00 1.709e+00 -8.413e-02 5.278e+01 6.216e+01 -1.730e+01
+1180500 22500 body_count: 1673 atom_count: 8365 1.888e+00 1.702e+00 -8.077e-02 5.282e+01 6.206e+01 -1.724e+01
+1183000 25000 body_count: 1673 atom_count: 8365 1.878e+00 1.698e+00 -7.691e-02 5.271e+01 6.188e+01 -1.702e+01
+1185500 27500 body_count: 1673 atom_count: 8365 1.864e+00 1.683e+00 -7.482e-02 5.222e+01 6.173e+01 -1.686e+01
+1188000 30000 body_count: 1673 atom_count: 8365 1.862e+00 1.670e+00 -7.337e-02 5.224e+01 6.146e+01 -1.681e+01
+1190500 32500 body_count: 1673 atom_count: 8365 1.857e+00 1.662e+00 -7.391e-02 5.212e+01 6.110e+01 -1.671e+01
+1193000 35000 body_count: 1673 atom_count: 8365 1.857e+00 1.657e+00 -7.432e-02 5.221e+01 6.090e+01 -1.669e+01
+1195500 37500 body_count: 1673 atom_count: 8365 1.853e+00 1.656e+00 -7.634e-02 5.198e+01 6.086e+01 -1.664e+01
+1198000 40000 body_count: 1673 atom_count: 8365 1.854e+00 1.655e+00 -8.057e-02 5.217e+01 6.095e+01 -1.677e+01
+1200500 42500 body_count: 1673 atom_count: 8365 1.850e+00 1.657e+00 -8.188e-02 5.227e+01 6.109e+01 -1.686e+01
+1203000 45000 body_count: 1673 atom_count: 8365 1.847e+00 1.657e+00 -8.406e-02 5.232e+01 6.114e+01 -1.696e+01
+1205500 47500 body_count: 1673 atom_count: 8365 1.846e+00 1.657e+00 -8.594e-02 5.232e+01 6.106e+01 -1.687e+01
+1208000 50000 body_count: 1673 atom_count: 8365 1.845e+00 1.659e+00 -8.974e-02 5.243e+01 6.105e+01 -1.691e+01
+1208000 1.845e+00 1.659e+00 -8.974e-02 5.243e+01 6.105e+01 -1.691e+01
+1210500 2500 body_count: 1673 atom_count: 8365 1.902e+00 1.673e+00 -1.541e-01 4.947e+01 5.901e+01 -1.730e+01
+1213000 5000 body_count: 1673 atom_count: 8365 1.892e+00 1.718e+00 -1.602e-01 4.921e+01 5.982e+01 -1.738e+01
+1215500 7500 body_count: 1673 atom_count: 8365 1.877e+00 1.746e+00 -1.556e-01 4.950e+01 5.994e+01 -1.779e+01
+1218000 10000 body_count: 1673 atom_count: 8365 1.874e+00 1.754e+00 -1.568e-01 4.897e+01 6.012e+01 -1.783e+01
+1220500 12500 body_count: 1673 atom_count: 8365 1.881e+00 1.751e+00 -1.524e-01 4.920e+01 5.957e+01 -1.751e+01
+1223000 15000 body_count: 1673 atom_count: 8365 1.881e+00 1.738e+00 -1.477e-01 4.867e+01 5.928e+01 -1.738e+01
+1225500 17500 body_count: 1673 atom_count: 8365 1.883e+00 1.735e+00 -1.511e-01 4.867e+01 5.904e+01 -1.718e+01
+1228000 20000 body_count: 1673 atom_count: 8365 1.881e+00 1.737e+00 -1.482e-01 4.846e+01 5.872e+01 -1.733e+01
+1230500 22500 body_count: 1673 atom_count: 8365 1.884e+00 1.734e+00 -1.451e-01 4.827e+01 5.877e+01 -1.732e+01
+1233000 25000 body_count: 1673 atom_count: 8365 1.889e+00 1.736e+00 -1.382e-01 4.843e+01 5.906e+01 -1.727e+01
+1235500 27500 body_count: 1673 atom_count: 8365 1.892e+00 1.734e+00 -1.324e-01 4.901e+01 5.906e+01 -1.719e+01
+1238000 30000 body_count: 1673 atom_count: 8365 1.896e+00 1.733e+00 -1.263e-01 4.922e+01 5.900e+01 -1.712e+01
+1240500 32500 body_count: 1673 atom_count: 8365 1.900e+00 1.729e+00 -1.235e-01 4.935e+01 5.910e+01 -1.703e+01
+1243000 35000 body_count: 1673 atom_count: 8365 1.898e+00 1.728e+00 -1.179e-01 4.947e+01 5.933e+01 -1.696e+01
+1245500 37500 body_count: 1673 atom_count: 8365 1.893e+00 1.727e+00 -1.136e-01 4.968e+01 5.947e+01 -1.696e+01
+1248000 40000 body_count: 1673 atom_count: 8365 1.889e+00 1.726e+00 -1.082e-01 4.979e+01 5.972e+01 -1.698e+01
+1250500 42500 body_count: 1673 atom_count: 8365 1.883e+00 1.723e+00 -1.061e-01 4.988e+01 6.004e+01 -1.699e+01
+1253000 45000 body_count: 1673 atom_count: 8365 1.879e+00 1.718e+00 -1.035e-01 4.998e+01 6.017e+01 -1.692e+01
+1255500 47500 body_count: 1673 atom_count: 8365 1.876e+00 1.718e+00 -1.034e-01 5.010e+01 6.032e+01 -1.700e+01
+1258000 50000 body_count: 1673 atom_count: 8365 1.872e+00 1.717e+00 -1.013e-01 5.029e+01 6.049e+01 -1.699e+01
+1258000 1.872e+00 1.717e+00 -1.013e-01 5.029e+01 6.049e+01 -1.699e+01
+1260500 2500 body_count: 1673 atom_count: 8365 1.817e+00 1.685e+00 -8.711e-02 5.285e+01 6.320e+01 -1.569e+01
+1263000 5000 body_count: 1673 atom_count: 8365 1.846e+00 1.691e+00 -6.664e-02 5.233e+01 6.451e+01 -1.678e+01
+1265500 7500 body_count: 1673 atom_count: 8365 1.853e+00 1.690e+00 -5.866e-02 5.302e+01 6.427e+01 -1.718e+01
+1268000 10000 body_count: 1673 atom_count: 8365 1.847e+00 1.698e+00 -6.966e-02 5.313e+01 6.364e+01 -1.699e+01
+1270500 12500 body_count: 1673 atom_count: 8365 1.846e+00 1.711e+00 -8.094e-02 5.328e+01 6.374e+01 -1.741e+01
+1273000 15000 body_count: 1673 atom_count: 8365 1.835e+00 1.723e+00 -8.690e-02 5.295e+01 6.361e+01 -1.731e+01
+1275500 17500 body_count: 1673 atom_count: 8365 1.832e+00 1.731e+00 -8.431e-02 5.308e+01 6.342e+01 -1.748e+01
+1278000 20000 body_count: 1673 atom_count: 8365 1.835e+00 1.739e+00 -9.086e-02 5.299e+01 6.273e+01 -1.746e+01
+1280500 22500 body_count: 1673 atom_count: 8365 1.838e+00 1.742e+00 -9.320e-02 5.301e+01 6.265e+01 -1.715e+01
+1283000 25000 body_count: 1673 atom_count: 8365 1.846e+00 1.733e+00 -9.492e-02 5.314e+01 6.254e+01 -1.715e+01
+1285500 27500 body_count: 1673 atom_count: 8365 1.842e+00 1.731e+00 -9.369e-02 5.345e+01 6.240e+01 -1.725e+01
+1288000 30000 body_count: 1673 atom_count: 8365 1.832e+00 1.734e+00 -9.605e-02 5.355e+01 6.247e+01 -1.735e+01
+1290500 32500 body_count: 1673 atom_count: 8365 1.829e+00 1.738e+00 -9.566e-02 5.364e+01 6.225e+01 -1.741e+01
+1293000 35000 body_count: 1673 atom_count: 8365 1.826e+00 1.742e+00 -9.372e-02 5.374e+01 6.225e+01 -1.753e+01
+1295500 37500 body_count: 1673 atom_count: 8365 1.818e+00 1.746e+00 -8.723e-02 5.390e+01 6.219e+01 -1.749e+01
+1298000 40000 body_count: 1673 atom_count: 8365 1.817e+00 1.747e+00 -8.526e-02 5.395e+01 6.207e+01 -1.752e+01
+1300500 42500 body_count: 1673 atom_count: 8365 1.818e+00 1.745e+00 -8.588e-02 5.387e+01 6.192e+01 -1.738e+01
+1303000 45000 body_count: 1673 atom_count: 8365 1.821e+00 1.742e+00 -8.685e-02 5.370e+01 6.179e+01 -1.740e+01
+1305500 47500 body_count: 1673 atom_count: 8365 1.821e+00 1.738e+00 -8.817e-02 5.365e+01 6.175e+01 -1.730e+01
+1308000 50000 body_count: 1673 atom_count: 8365 1.823e+00 1.734e+00 -8.863e-02 5.378e+01 6.170e+01 -1.729e+01
+1308000 1.823e+00 1.734e+00 -8.863e-02 5.378e+01 6.170e+01 -1.729e+01
+1310500 2500 body_count: 1673 atom_count: 8365 1.915e+00 1.599e+00 -3.805e-02 5.457e+01 6.262e+01 -1.762e+01
+1313000 5000 body_count: 1673 atom_count: 8365 1.928e+00 1.635e+00 -3.867e-02 5.374e+01 6.285e+01 -1.747e+01
+1315500 7500 body_count: 1673 atom_count: 8365 1.931e+00 1.652e+00 -6.652e-02 5.405e+01 6.289e+01 -1.701e+01
+1318000 10000 body_count: 1673 atom_count: 8365 1.929e+00 1.661e+00 -6.765e-02 5.390e+01 6.305e+01 -1.714e+01
+1320500 12500 body_count: 1673 atom_count: 8365 1.930e+00 1.669e+00 -7.592e-02 5.388e+01 6.322e+01 -1.723e+01
+1323000 15000 body_count: 1673 atom_count: 8365 1.939e+00 1.678e+00 -8.638e-02 5.386e+01 6.256e+01 -1.698e+01
+1325500 17500 body_count: 1673 atom_count: 8365 1.939e+00 1.688e+00 -9.336e-02 5.362e+01 6.253e+01 -1.677e+01
+1328000 20000 body_count: 1673 atom_count: 8365 1.937e+00 1.692e+00 -9.356e-02 5.312e+01 6.203e+01 -1.660e+01
+1330500 22500 body_count: 1673 atom_count: 8365 1.930e+00 1.694e+00 -9.970e-02 5.300e+01 6.196e+01 -1.648e+01
+1333000 25000 body_count: 1673 atom_count: 8365 1.927e+00 1.691e+00 -1.034e-01 5.275e+01 6.167e+01 -1.642e+01
+1335500 27500 body_count: 1673 atom_count: 8365 1.922e+00 1.693e+00 -1.110e-01 5.261e+01 6.146e+01 -1.635e+01
+1338000 30000 body_count: 1673 atom_count: 8365 1.923e+00 1.699e+00 -1.178e-01 5.240e+01 6.135e+01 -1.647e+01
+1340500 32500 body_count: 1673 atom_count: 8365 1.917e+00 1.701e+00 -1.219e-01 5.231e+01 6.126e+01 -1.642e+01
+1343000 35000 body_count: 1673 atom_count: 8365 1.913e+00 1.702e+00 -1.182e-01 5.217e+01 6.103e+01 -1.641e+01
+1345500 37500 body_count: 1673 atom_count: 8365 1.910e+00 1.706e+00 -1.193e-01 5.205e+01 6.103e+01 -1.640e+01
+1348000 40000 body_count: 1673 atom_count: 8365 1.908e+00 1.707e+00 -1.163e-01 5.174e+01 6.105e+01 -1.645e+01
+1350500 42500 body_count: 1673 atom_count: 8365 1.907e+00 1.710e+00 -1.162e-01 5.156e+01 6.102e+01 -1.641e+01
+1353000 45000 body_count: 1673 atom_count: 8365 1.907e+00 1.717e+00 -1.175e-01 5.167e+01 6.111e+01 -1.647e+01
+1355500 47500 body_count: 1673 atom_count: 8365 1.906e+00 1.723e+00 -1.175e-01 5.165e+01 6.107e+01 -1.654e+01
+1358000 50000 body_count: 1673 atom_count: 8365 1.909e+00 1.725e+00 -1.153e-01 5.174e+01 6.110e+01 -1.665e+01
+1358000 1.909e+00 1.725e+00 -1.153e-01 5.174e+01 6.110e+01 -1.665e+01
+1360500 2500 body_count: 1673 atom_count: 8365 1.941e+00 1.815e+00 -1.354e-02 5.157e+01 6.260e+01 -1.568e+01
+1363000 5000 body_count: 1673 atom_count: 8365 1.973e+00 1.764e+00 -4.293e-02 5.248e+01 6.264e+01 -1.630e+01
+1365500 7500 body_count: 1673 atom_count: 8365 1.991e+00 1.735e+00 -5.437e-02 5.358e+01 6.304e+01 -1.642e+01
+1368000 10000 body_count: 1673 atom_count: 8365 1.991e+00 1.723e+00 -5.418e-02 5.311e+01 6.275e+01 -1.708e+01
+1370500 12500 body_count: 1673 atom_count: 8365 1.988e+00 1.719e+00 -6.052e-02 5.337e+01 6.264e+01 -1.697e+01
+1373000 15000 body_count: 1673 atom_count: 8365 1.974e+00 1.713e+00 -7.489e-02 5.330e+01 6.273e+01 -1.710e+01
+1375500 17500 body_count: 1673 atom_count: 8365 1.964e+00 1.708e+00 -7.994e-02 5.352e+01 6.278e+01 -1.730e+01
+1378000 20000 body_count: 1673 atom_count: 8365 1.952e+00 1.710e+00 -8.138e-02 5.362e+01 6.280e+01 -1.755e+01
+1380500 22500 body_count: 1673 atom_count: 8365 1.944e+00 1.718e+00 -7.647e-02 5.364e+01 6.284e+01 -1.752e+01
+1383000 25000 body_count: 1673 atom_count: 8365 1.948e+00 1.719e+00 -7.503e-02 5.371e+01 6.294e+01 -1.764e+01
+1385500 27500 body_count: 1673 atom_count: 8365 1.950e+00 1.718e+00 -7.593e-02 5.374e+01 6.306e+01 -1.739e+01
+1388000 30000 body_count: 1673 atom_count: 8365 1.948e+00 1.717e+00 -7.671e-02 5.378e+01 6.289e+01 -1.735e+01
+1390500 32500 body_count: 1673 atom_count: 8365 1.945e+00 1.716e+00 -7.881e-02 5.359e+01 6.260e+01 -1.726e+01
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=363 atom_map=986, x/L=0.298596, y/L=1.96151, z/L=1.0032, bt=73, me=15
+8365 total atoms
+WARNING: Internal error in multisphere method less atoms then body needs (../multisphere.cpp:837)
+73 missing atoms real: 2 ghost: 2 not_first: 2
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): r atom_tag=362 atom_map=19, x/L=0.692928, y/L=0.984935, z/L=0.965611, bt=73, me=23
+1392677 FixMultisphere::pre_neighbor(): r atom_tag=364 atom_map=24, x/L=0.655909, y/L=0.98677, z/L=0.959799, bt=73, me=23
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=361 atom_map=211, x/L=0.696214, y/L=1.01341, z/L=0.918252, bt=73, me=23
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=365 atom_map=214, x/L=0.659195, y/L=1.01524, z/L=0.912439, bt=73, me=23
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=361 atom_map=211, x/L=0.696214, y/L=1.01341, z/L=0.918252, bt=73, me=23
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=365 atom_map=214, x/L=0.659195, y/L=1.01524, z/L=0.912439, bt=73, me=23
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=363 atom_map=384, x/L=0.671589, y/L=0.961507, z/L=0.0031973, bt=73, me=24
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=363 atom_map=384, x/L=0.671589, y/L=0.961507, z/L=0.0031973, bt=73, me=24
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=362 atom_map=1476, x/L=0.0659207, y/L=-0.0150645, z/L=-0.0343888, bt=73, me=24
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=364 atom_map=1478, x/L=0.0289017, y/L=-0.01323, z/L=-0.0402013, bt=73, me=24
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=361 atom_map=1519, x/L=1.06921, y/L=0.0134099, z/L=-0.0817482, bt=73, me=24
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=365 atom_map=1521, x/L=1.03219, y/L=0.0152445, z/L=-0.0875607, bt=73, me=24
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=362 atom_map=1476, x/L=1.06592, y/L=-0.0150645, z/L=-0.0343888, bt=73, me=24
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=364 atom_map=1478, x/L=1.0289, y/L=-0.01323, z/L=-0.0402013, bt=73, me=24
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=362 atom_map=441, x/L=0.0659207, y/L=-0.0150645, z/L=0.965611, bt=73, me=25
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=364 atom_map=445, x/L=0.0289017, y/L=-0.01323, z/L=0.959799, bt=73, me=25
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=361 atom_map=539, x/L=1.06921, y/L=0.0134099, z/L=0.918252, bt=73, me=25
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=365 atom_map=544, x/L=1.03219, y/L=0.0152445, z/L=0.912439, bt=73, me=25
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=362 atom_map=441, x/L=1.06592, y/L=-0.0150645, z/L=0.965611, bt=73, me=25
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=364 atom_map=445, x/L=1.0289, y/L=-0.01323, z/L=0.959799, bt=73, me=25
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=363 atom_map=1100, x/L=0.671589, y/L=0.961507, z/L=1.0032, bt=73, me=25
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=363 atom_map=1100, x/L=0.671589, y/L=0.961507, z/L=1.0032, bt=73, me=25
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=361 atom_map=1550, x/L=0.696214, y/L=1.01341, z/L=-0.0817482, bt=73, me=30
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=365 atom_map=1552, x/L=0.659195, y/L=1.01524, z/L=-0.0875607, bt=73, me=30
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=362 atom_map=1745, x/L=0.692928, y/L=0.984935, z/L=-0.0343888, bt=73, me=30
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=364 atom_map=1748, x/L=0.655909, y/L=0.98677, z/L=-0.0402013, bt=73, me=30
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=361 atom_map=1550, x/L=0.696214, y/L=1.01341, z/L=-0.0817482, bt=73, me=30
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=365 atom_map=1552, x/L=0.659195, y/L=1.01524, z/L=-0.0875607, bt=73, me=30
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=361 atom_map=1412, x/L=6.921e-02, y/L=1.341e-02, z/L=-8.175e-02, bt=73, me=0
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=365 atom_map=1415, x/L=3.219e-02, y/L=1.524e-02, z/L=-8.756e-02, bt=73, me=0
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=362 atom_map=1533, x/L=6.592e-02, y/L=-1.506e-02, z/L=-3.439e-02, bt=73, me=0
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=364 atom_map=1535, x/L=2.890e-02, y/L=-1.323e-02, z/L=-4.020e-02, bt=73, me=0
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=361 atom_map=311, x/L=0.696214, y/L=1.01341, z/L=0.918252, bt=73, me=31
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=365 atom_map=314, x/L=0.659195, y/L=1.01524, z/L=0.912439, bt=73, me=31
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=362 atom_map=748, x/L=0.692928, y/L=0.984935, z/L=0.965611, bt=73, me=31
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=364 atom_map=752, x/L=0.655909, y/L=0.98677, z/L=0.959799, bt=73, me=31
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=361 atom_map=311, x/L=0.696214, y/L=1.01341, z/L=0.918252, bt=73, me=31
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=365 atom_map=314, x/L=0.659195, y/L=1.01524, z/L=0.912439, bt=73, me=31
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): r atom_tag=361 atom_map=49, x/L=0.0692072, y/L=0.0134099, z/L=0.918252, bt=73, me=1
+1392677 FixMultisphere::pre_neighbor(): r atom_tag=365 atom_map=57, x/L=0.0321882, y/L=0.0152445, z/L=0.912439, bt=73, me=1
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=362 atom_map=320, x/L=0.0659207, y/L=-0.0150645, z/L=0.965611, bt=73, me=1
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=364 atom_map=324, x/L=0.0289017, y/L=-0.01323, z/L=0.959799, bt=73, me=1
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=363 atom_map=569, x/L=0.298596, y/L=1.96151, z/L=0.0031973, bt=73, me=6
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=363 atom_map=1209, x/L=0.298596, y/L=1.96151, z/L=1.0032, bt=73, me=7
+8365 total atoms
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): r atom_tag=363 atom_map=156, x/L=0.298596, y/L=1.96151, z/L=0.0031973, bt=73, me=14
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=363 atom_map=414, x/L=0.671589, y/L=0.961507, z/L=0.0031973, bt=73, me=16
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=363 atom_map=414, x/L=0.671589, y/L=0.961507, z/L=0.0031973, bt=73, me=16
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=362 atom_map=1615, x/L=0.0659207, y/L=-0.0150645, z/L=-0.0343888, bt=73, me=16
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=364 atom_map=1617, x/L=0.0289017, y/L=-0.01323, z/L=-0.0402013, bt=73, me=16
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=362 atom_map=693, x/L=0.0659207, y/L=-0.0150645, z/L=0.965611, bt=73, me=17
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=364 atom_map=696, x/L=0.0289017, y/L=-0.01323, z/L=0.959799, bt=73, me=17
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=363 atom_map=1158, x/L=0.671589, y/L=0.961507, z/L=1.0032, bt=73, me=17
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=363 atom_map=1158, x/L=0.671589, y/L=0.961507, z/L=1.0032, bt=73, me=17
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+1392677 FixMultisphere::pre_neighbor(), lost_body_tag=73
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=362 atom_map=1314, x/L=0.692928, y/L=0.984935, z/L=-0.0343888, bt=73, me=22
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=364 atom_map=1317, x/L=0.655909, y/L=0.98677, z/L=-0.0402013, bt=73, me=22
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=361 atom_map=1404, x/L=0.696214, y/L=1.01341, z/L=-0.0817482, bt=73, me=22
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=365 atom_map=1406, x/L=0.659195, y/L=1.01524, z/L=-0.0875607, bt=73, me=22
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=361 atom_map=1404, x/L=0.696214, y/L=1.01341, z/L=-0.0817482, bt=73, me=22
+1392677 FixMultisphere::pre_neighbor(): g atom_tag=365 atom_map=1406, x/L=0.659195, y/L=1.01524, z/L=-0.0875607, bt=73, me=22
+8365 total atoms
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+at end bodies changed from: 1673 to: 1672
+--------------------------------------------------------------------------
+mpiexec noticed that process rank 3 with PID 235612 on node node-26 exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------

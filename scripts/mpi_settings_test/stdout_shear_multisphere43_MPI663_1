@@ -1,0 +1,1687 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-06-18:40:11 by liz.suehr, git commit 20bafd84e54ba1e14cc5c444673f017ba084bbe9)
+communicate       single vel yes
+units             si
+log               log.shear.multisphere43_MPI663_1.liggghts
+atom_modify       map array
+
+processors        6 6 3
+
+# Set domain
+region            domain block 0.0 5.04000e-03 0.0 5.04000e-03 0.0 2.52000e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00504 0.00504 0.00252)
+  6 by 6 by 3 MPI processor grid
+
+# Set neighbor and list options
+neighbor          1.721e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 43 ntry 10000000 spheres file multisphere43.txt scale 1.0 type 1
+Calculating the properties of the given template.
+   Depending on ntry, this may take a while...
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=2.782000e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=2.782000e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 10000 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 10000 volumefraction_region 0.5
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Mon Sep 11 09:05:53 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.44603 Mbytes
+    Step 
+       0 
+insertion: proc 0 at 0 %
+insertion: proc 0 at 10 %
+insertion: proc 0 at 20 %
+insertion: proc 0 at 30 %
+insertion: proc 6 at 0 %
+insertion: proc 6 at 10 %
+insertion: proc 6 at 20 %
+insertion: proc 6 at 30 %
+insertion: proc 7 at 0 %
+insertion: proc 7 at 10 %
+insertion: proc 7 at 20 %
+insertion: proc 7 at 30 %
+insertion: proc 8 at 0 %
+insertion: proc 8 at 10 %
+insertion: proc 8 at 20 %
+insertion: proc 8 at 30 %
+insertion: proc 9 at 0 %
+insertion: proc 9 at 10 %
+insertion: proc 9 at 20 %
+insertion: proc 9 at 30 %
+insertion: proc 10 at 0 %
+insertion: proc 10 at 10 %
+insertion: proc 10 at 20 %
+insertion: proc 11 at 0 %
+insertion: proc 11 at 10 %
+insertion: proc 11 at 20 %
+insertion: proc 11 at 30 %
+insertion: proc 12 at 0 %
+insertion: proc 12 at 10 %
+insertion: proc 12 at 20 %
+insertion: proc 12 at 30 %
+insertion: proc 13 at 0 %
+insertion: proc 13 at 10 %
+insertion: proc 14 at 0 %
+insertion: proc 14 at 10 %
+insertion: proc 14 at 20 %
+insertion: proc 15 at 0 %
+insertion: proc 15 at 10 %
+insertion: proc 15 at 20 %
+insertion: proc 15 at 30 %
+insertion: proc 16 at 0 %
+insertion: proc 16 at 10 %
+insertion: proc 16 at 20 %
+insertion: proc 16 at 30 %
+insertion: proc 17 at 0 %
+insertion: proc 17 at 10 %
+insertion: proc 17 at 20 %
+insertion: proc 17 at 30 %
+insertion: proc 17 at 40 %
+insertion: proc 18 at 0 %
+insertion: proc 18 at 10 %
+insertion: proc 18 at 20 %
+insertion: proc 18 at 30 %
+insertion: proc 19 at 0 %
+insertion: proc 19 at 10 %
+insertion: proc 19 at 20 %
+insertion: proc 20 at 0 %
+insertion: proc 20 at 10 %
+insertion: proc 20 at 20 %
+insertion: proc 20 at 30 %
+insertion: proc 21 at 0 %
+insertion: proc 21 at 10 %
+insertion: proc 21 at 20 %
+insertion: proc 22 at 0 %
+insertion: proc 22 at 10 %
+insertion: proc 22 at 20 %
+insertion: proc 22 at 30 %
+insertion: proc 23 at 0 %
+insertion: proc 23 at 10 %
+insertion: proc 23 at 20 %
+insertion: proc 23 at 30 %
+insertion: proc 23 at 40 %
+insertion: proc 24 at 0 %
+insertion: proc 24 at 10 %
+insertion: proc 24 at 20 %
+insertion: proc 24 at 30 %
+insertion: proc 25 at 0 %
+insertion: proc 25 at 10 %
+insertion: proc 25 at 20 %
+insertion: proc 25 at 30 %
+insertion: proc 26 at 0 %
+insertion: proc 26 at 10 %
+insertion: proc 26 at 20 %
+insertion: proc 26 at 30 %
+insertion: proc 26 at 40 %
+insertion: proc 27 at 0 %
+insertion: proc 27 at 10 %
+insertion: proc 27 at 20 %
+insertion: proc 27 at 30 %
+insertion: proc 27 at 40 %
+insertion: proc 18 at 40 %
+insertion: proc 18 at 50 %
+insertion: proc 19 at 30 %
+insertion: proc 20 at 40 %
+insertion: proc 21 at 30 %
+insertion: proc 24 at 40 %
+insertion: proc 1 at 0 %
+insertion: proc 1 at 10 %
+insertion: proc 1 at 20 %
+insertion: proc 1 at 30 %
+insertion: proc 1 at 40 %
+insertion: proc 2 at 0 %
+insertion: proc 2 at 10 %
+insertion: proc 2 at 20 %
+insertion: proc 2 at 30 %
+insertion: proc 2 at 40 %
+insertion: proc 3 at 0 %
+insertion: proc 3 at 10 %
+insertion: proc 3 at 20 %
+insertion: proc 3 at 30 %
+insertion: proc 3 at 40 %
+insertion: proc 4 at 0 %
+insertion: proc 4 at 10 %
+insertion: proc 4 at 20 %
+insertion: proc 4 at 30 %
+insertion: proc 4 at 40 %
+insertion: proc 4 at 50 %
+insertion: proc 5 at 0 %
+insertion: proc 5 at 10 %
+insertion: proc 5 at 20 %
+insertion: proc 5 at 30 %
+insertion: proc 5 at 40 %
+insertion: proc 0 at 40 %
+insertion: proc 0 at 50 %
+insertion: proc 6 at 40 %
+insertion: proc 6 at 50 %
+insertion: proc 7 at 40 %
+insertion: proc 7 at 50 %
+insertion: proc 8 at 40 %
+insertion: proc 8 at 50 %
+insertion: proc 10 at 30 %
+insertion: proc 10 at 40 %
+insertion: proc 11 at 40 %
+insertion: proc 12 at 40 %
+insertion: proc 13 at 20 %
+insertion: proc 14 at 30 %
+insertion: proc 14 at 40 %
+insertion: proc 14 at 50 %
+insertion: proc 15 at 40 %
+insertion: proc 16 at 40 %
+insertion: proc 16 at 50 %
+insertion: proc 22 at 40 %
+insertion: proc 23 at 50 %
+insertion: proc 24 at 50 %
+insertion: proc 3 at 50 %
+insertion: proc 9 at 40 %
+insertion: proc 9 at 50 %
+insertion: proc 10 at 50 %
+insertion: proc 17 at 50 %
+insertion: proc 1 at 50 %
+insertion: proc 6 at 60 %
+insertion: proc 13 at 30 %
+insertion: proc 14 at 60 %
+insertion: proc 15 at 50 %
+insertion: proc 4 at 60 %
+insertion: proc 5 at 50 %
+insertion: proc 9 at 60 %
+insertion: proc 11 at 50 %
+insertion: proc 2 at 50 %
+insertion: proc 3 at 60 %
+insertion: proc 12 at 50 %
+insertion: proc 20 at 50 %
+insertion: proc 66 at 0 %
+insertion: proc 66 at 10 %
+insertion: proc 66 at 20 %
+insertion: proc 33 at 0 %
+insertion: proc 33 at 10 %
+insertion: proc 33 at 20 %
+insertion: proc 33 at 30 %
+insertion: proc 26 at 50 %
+insertion: proc 12 at 60 %
+insertion: proc 21 at 40 %
+insertion: proc 67 at 0 %
+insertion: proc 67 at 10 %
+insertion: proc 67 at 20 %
+insertion: proc 34 at 0 %
+insertion: proc 34 at 10 %
+insertion: proc 34 at 20 %
+insertion: proc 34 at 30 %
+insertion: proc 68 at 0 %
+insertion: proc 68 at 10 %
+insertion: proc 68 at 20 %
+insertion: proc 68 at 30 %
+insertion: proc 97 at 0 %
+insertion: proc 97 at 10 %
+insertion: proc 97 at 20 %
+insertion: proc 23 at 60 %
+insertion: proc 69 at 0 %
+insertion: proc 69 at 10 %
+insertion: proc 69 at 20 %
+insertion: proc 69 at 30 %
+insertion: proc 69 at 40 %
+insertion: proc 35 at 0 %
+insertion: proc 35 at 10 %
+insertion: proc 35 at 20 %
+insertion: proc 35 at 30 %
+insertion: proc 16 at 60 %
+insertion: proc 70 at 0 %
+insertion: proc 70 at 10 %
+insertion: proc 70 at 20 %
+insertion: proc 36 at 0 %
+insertion: proc 36 at 10 %
+insertion: proc 36 at 20 %
+insertion: proc 36 at 30 %
+insertion: proc 36 at 40 %
+insertion: proc 71 at 0 %
+insertion: proc 71 at 10 %
+insertion: proc 71 at 20 %
+insertion: proc 71 at 30 %
+insertion: proc 71 at 40 %
+insertion: proc 37 at 0 %
+insertion: proc 37 at 10 %
+insertion: proc 37 at 20 %
+insertion: proc 27 at 50 %
+insertion: proc 72 at 0 %
+insertion: proc 72 at 10 %
+insertion: proc 72 at 20 %
+insertion: proc 38 at 0 %
+insertion: proc 38 at 10 %
+insertion: proc 38 at 20 %
+insertion: proc 38 at 30 %
+insertion: proc 0 at 60 %
+insertion: proc 20 at 60 %
+insertion: proc 73 at 0 %
+insertion: proc 73 at 10 %
+insertion: proc 73 at 20 %
+insertion: proc 73 at 30 %
+insertion: proc 39 at 0 %
+insertion: proc 39 at 10 %
+insertion: proc 39 at 20 %
+insertion: proc 39 at 30 %
+insertion: proc 74 at 0 %
+insertion: proc 74 at 10 %
+insertion: proc 74 at 20 %
+insertion: proc 74 at 30 %
+insertion: proc 74 at 40 %
+insertion: proc 40 at 0 %
+insertion: proc 40 at 10 %
+insertion: proc 40 at 20 %
+insertion: proc 75 at 0 %
+insertion: proc 75 at 10 %
+insertion: proc 75 at 20 %
+insertion: proc 75 at 30 %
+insertion: proc 41 at 0 %
+insertion: proc 41 at 10 %
+insertion: proc 41 at 20 %
+insertion: proc 41 at 30 %
+insertion: proc 41 at 40 %
+insertion: proc 76 at 0 %
+insertion: proc 76 at 10 %
+insertion: proc 76 at 20 %
+insertion: proc 76 at 30 %
+insertion: proc 77 at 0 %
+insertion: proc 77 at 10 %
+insertion: proc 77 at 20 %
+insertion: proc 77 at 30 %
+insertion: proc 42 at 0 %
+insertion: proc 42 at 10 %
+insertion: proc 42 at 20 %
+insertion: proc 42 at 30 %
+insertion: proc 6 at 70 %
+insertion: proc 7 at 60 %
+insertion: proc 78 at 0 %
+insertion: proc 78 at 10 %
+insertion: proc 78 at 20 %
+insertion: proc 78 at 30 %
+insertion: proc 43 at 0 %
+insertion: proc 43 at 10 %
+insertion: proc 43 at 20 %
+insertion: proc 79 at 0 %
+insertion: proc 79 at 10 %
+insertion: proc 79 at 20 %
+insertion: proc 44 at 0 %
+insertion: proc 44 at 10 %
+insertion: proc 44 at 20 %
+insertion: proc 44 at 30 %
+insertion: proc 80 at 0 %
+insertion: proc 80 at 10 %
+insertion: proc 80 at 20 %
+insertion: proc 45 at 0 %
+insertion: proc 45 at 10 %
+insertion: proc 45 at 20 %
+insertion: proc 45 at 30 %
+insertion: proc 81 at 0 %
+insertion: proc 81 at 10 %
+insertion: proc 81 at 20 %
+insertion: proc 81 at 30 %
+insertion: proc 81 at 40 %
+insertion: proc 46 at 0 %
+insertion: proc 46 at 10 %
+insertion: proc 46 at 20 %
+insertion: proc 82 at 0 %
+insertion: proc 82 at 10 %
+insertion: proc 82 at 20 %
+insertion: proc 47 at 0 %
+insertion: proc 47 at 10 %
+insertion: proc 47 at 20 %
+insertion: proc 47 at 30 %
+insertion: proc 10 at 60 %
+insertion: proc 19 at 40 %
+insertion: proc 83 at 0 %
+insertion: proc 83 at 10 %
+insertion: proc 83 at 20 %
+insertion: proc 83 at 30 %
+insertion: proc 83 at 40 %
+insertion: proc 48 at 0 %
+insertion: proc 48 at 10 %
+insertion: proc 48 at 20 %
+insertion: proc 48 at 30 %
+insertion: proc 48 at 40 %
+insertion: proc 98 at 0 %
+insertion: proc 98 at 10 %
+insertion: proc 98 at 20 %
+insertion: proc 98 at 30 %
+insertion: proc 56 at 0 %
+insertion: proc 56 at 10 %
+insertion: proc 56 at 20 %
+insertion: proc 56 at 30 %
+insertion: proc 49 at 0 %
+insertion: proc 49 at 10 %
+insertion: proc 49 at 20 %
+insertion: proc 49 at 30 %
+insertion: proc 57 at 0 %
+insertion: proc 57 at 10 %
+insertion: proc 57 at 20 %
+insertion: proc 57 at 30 %
+insertion: proc 57 at 40 %
+insertion: proc 50 at 0 %
+insertion: proc 50 at 10 %
+insertion: proc 50 at 20 %
+insertion: proc 50 at 30 %
+insertion: proc 25 at 40 %
+insertion: proc 58 at 0 %
+insertion: proc 58 at 10 %
+insertion: proc 58 at 20 %
+insertion: proc 51 at 0 %
+insertion: proc 51 at 10 %
+insertion: proc 51 at 20 %
+insertion: proc 51 at 30 %
+insertion: proc 59 at 0 %
+insertion: proc 59 at 10 %
+insertion: proc 59 at 20 %
+insertion: proc 59 at 30 %
+insertion: proc 59 at 40 %
+insertion: proc 52 at 0 %
+insertion: proc 52 at 10 %
+insertion: proc 52 at 20 %
+insertion: proc 52 at 30 %
+insertion: proc 52 at 40 %
+insertion: proc 99 at 0 %
+insertion: proc 99 at 10 %
+insertion: proc 99 at 20 %
+insertion: proc 99 at 30 %
+insertion: proc 99 at 40 %
+insertion: proc 60 at 0 %
+insertion: proc 60 at 10 %
+insertion: proc 60 at 20 %
+insertion: proc 60 at 30 %
+insertion: proc 60 at 40 %
+insertion: proc 53 at 0 %
+insertion: proc 53 at 10 %
+insertion: proc 53 at 20 %
+insertion: proc 53 at 30 %
+insertion: proc 53 at 40 %
+insertion: proc 100 at 0 %
+insertion: proc 100 at 10 %
+insertion: proc 100 at 20 %
+insertion: proc 100 at 30 %
+insertion: proc 61 at 0 %
+insertion: proc 61 at 10 %
+insertion: proc 61 at 20 %
+insertion: proc 54 at 0 %
+insertion: proc 54 at 10 %
+insertion: proc 54 at 20 %
+insertion: proc 54 at 30 %
+insertion: proc 101 at 0 %
+insertion: proc 101 at 10 %
+insertion: proc 101 at 20 %
+insertion: proc 101 at 30 %
+insertion: proc 62 at 0 %
+insertion: proc 62 at 10 %
+insertion: proc 62 at 20 %
+insertion: proc 62 at 30 %
+insertion: proc 55 at 0 %
+insertion: proc 55 at 10 %
+insertion: proc 55 at 20 %
+insertion: proc 15 at 60 %
+insertion: proc 63 at 0 %
+insertion: proc 63 at 10 %
+insertion: proc 63 at 20 %
+insertion: proc 63 at 30 %
+insertion: proc 63 at 40 %
+insertion: proc 29 at 0 %
+insertion: proc 29 at 10 %
+insertion: proc 29 at 20 %
+insertion: proc 29 at 30 %
+insertion: proc 29 at 40 %
+insertion: proc 102 at 0 %
+insertion: proc 102 at 10 %
+insertion: proc 102 at 20 %
+insertion: proc 102 at 30 %
+insertion: proc 64 at 0 %
+insertion: proc 64 at 10 %
+insertion: proc 64 at 20 %
+insertion: proc 30 at 0 %
+insertion: proc 30 at 10 %
+insertion: proc 30 at 20 %
+insertion: proc 65 at 0 %
+insertion: proc 65 at 10 %
+insertion: proc 65 at 20 %
+insertion: proc 65 at 30 %
+insertion: proc 65 at 40 %
+insertion: proc 31 at 0 %
+insertion: proc 31 at 10 %
+insertion: proc 31 at 20 %
+insertion: proc 31 at 30 %
+insertion: proc 80 at 30 %
+insertion: proc 32 at 0 %
+insertion: proc 32 at 10 %
+insertion: proc 32 at 20 %
+insertion: proc 32 at 30 %
+insertion: proc 32 at 40 %
+insertion: proc 103 at 0 %
+insertion: proc 103 at 10 %
+insertion: proc 103 at 20 %
+insertion: proc 103 at 30 %
+insertion: proc 81 at 50 %
+insertion: proc 40 at 30 %
+insertion: proc 104 at 0 %
+insertion: proc 104 at 10 %
+insertion: proc 104 at 20 %
+insertion: proc 104 at 30 %
+insertion: proc 82 at 30 %
+insertion: proc 41 at 50 %
+insertion: proc 105 at 0 %
+insertion: proc 105 at 10 %
+insertion: proc 105 at 20 %
+insertion: proc 105 at 30 %
+insertion: proc 27 at 60 %
+insertion: proc 65 at 50 %
+insertion: proc 42 at 40 %
+insertion: proc 42 at 50 %
+insertion: proc 24 at 60 %
+insertion: proc 83 at 50 %
+insertion: proc 43 at 30 %
+insertion: proc 106 at 0 %
+insertion: proc 106 at 10 %
+insertion: proc 106 at 20 %
+insertion: proc 106 at 30 %
+insertion: proc 56 at 40 %
+insertion: proc 44 at 40 %
+insertion: proc 107 at 0 %
+insertion: proc 107 at 10 %
+insertion: proc 107 at 20 %
+insertion: proc 107 at 30 %
+insertion: proc 57 at 50 %
+insertion: proc 45 at 40 %
+insertion: proc 85 at 0 %
+insertion: proc 85 at 10 %
+insertion: proc 85 at 20 %
+insertion: proc 22 at 50 %
+insertion: proc 58 at 30 %
+insertion: proc 46 at 30 %
+insertion: proc 86 at 0 %
+insertion: proc 86 at 10 %
+insertion: proc 86 at 20 %
+insertion: proc 86 at 30 %
+insertion: proc 59 at 50 %
+insertion: proc 47 at 40 %
+insertion: proc 88 at 0 %
+insertion: proc 88 at 10 %
+insertion: proc 88 at 20 %
+insertion: proc 88 at 30 %
+insertion: proc 10 at 70 %
+insertion: proc 60 at 50 %
+insertion: proc 48 at 50 %
+insertion: proc 89 at 0 %
+insertion: proc 89 at 10 %
+insertion: proc 89 at 20 %
+insertion: proc 89 at 30 %
+insertion: proc 61 at 30 %
+insertion: proc 49 at 40 %
+insertion: proc 90 at 0 %
+insertion: proc 90 at 10 %
+insertion: proc 90 at 20 %
+insertion: proc 90 at 30 %
+insertion: proc 90 at 40 %
+insertion: proc 63 at 50 %
+insertion: proc 50 at 40 %
+insertion: proc 50 at 50 %
+insertion: proc 91 at 0 %
+insertion: proc 91 at 10 %
+insertion: proc 91 at 20 %
+insertion: proc 91 at 30 %
+insertion: proc 64 at 30 %
+insertion: proc 51 at 40 %
+insertion: proc 51 at 50 %
+insertion: proc 18 at 60 %
+insertion: proc 66 at 30 %
+insertion: proc 52 at 50 %
+insertion: proc 92 at 0 %
+insertion: proc 92 at 10 %
+insertion: proc 92 at 20 %
+insertion: proc 92 at 30 %
+insertion: proc 92 at 40 %
+insertion: proc 67 at 30 %
+insertion: proc 53 at 50 %
+insertion: proc 53 at 60 %
+insertion: proc 93 at 0 %
+insertion: proc 93 at 10 %
+insertion: proc 93 at 20 %
+insertion: proc 93 at 30 %
+insertion: proc 68 at 40 %
+insertion: proc 68 at 50 %
+insertion: proc 54 at 40 %
+insertion: proc 54 at 50 %
+insertion: proc 94 at 0 %
+insertion: proc 94 at 10 %
+insertion: proc 94 at 20 %
+insertion: proc 69 at 50 %
+insertion: proc 69 at 60 %
+insertion: proc 32 at 50 %
+insertion: proc 95 at 0 %
+insertion: proc 95 at 10 %
+insertion: proc 95 at 20 %
+insertion: proc 95 at 30 %
+insertion: proc 95 at 40 %
+insertion: proc 95 at 50 %
+insertion: proc 70 at 30 %
+insertion: proc 28 at 0 %
+insertion: proc 28 at 10 %
+insertion: proc 28 at 20 %
+insertion: proc 28 at 30 %
+insertion: proc 28 at 40 %
+insertion: proc 96 at 0 %
+insertion: proc 96 at 10 %
+insertion: proc 96 at 20 %
+insertion: proc 96 at 30 %
+insertion: proc 71 at 50 %
+insertion: proc 55 at 30 %
+insertion: proc 96 at 40 %
+insertion: proc 96 at 50 %
+insertion: proc 72 at 30 %
+insertion: proc 72 at 40 %
+insertion: proc 84 at 0 %
+insertion: proc 84 at 10 %
+insertion: proc 84 at 20 %
+insertion: proc 84 at 30 %
+insertion: proc 84 at 40 %
+insertion: proc 73 at 40 %
+insertion: proc 73 at 50 %
+insertion: proc 107 at 40 %
+insertion: proc 107 at 50 %
+insertion: proc 74 at 50 %
+insertion: proc 29 at 50 %
+insertion: proc 75 at 40 %
+insertion: proc 75 at 50 %
+insertion: proc 30 at 30 %
+insertion: proc 85 at 30 %
+insertion: proc 85 at 40 %
+insertion: proc 77 at 40 %
+insertion: proc 31 at 40 %
+insertion: proc 87 at 0 %
+insertion: proc 87 at 10 %
+insertion: proc 87 at 20 %
+insertion: proc 87 at 30 %
+insertion: proc 87 at 40 %
+insertion: proc 87 at 50 %
+insertion: proc 78 at 40 %
+insertion: proc 78 at 50 %
+insertion: proc 33 at 40 %
+insertion: proc 33 at 50 %
+insertion: proc 86 at 40 %
+insertion: proc 86 at 50 %
+insertion: proc 79 at 30 %
+insertion: proc 34 at 40 %
+insertion: proc 34 at 50 %
+insertion: proc 88 at 40 %
+insertion: proc 88 at 50 %
+insertion: proc 63 at 60 %
+insertion: proc 35 at 40 %
+insertion: proc 35 at 50 %
+insertion: proc 11 at 60 %
+insertion: proc 68 at 60 %
+insertion: proc 36 at 50 %
+insertion: proc 89 at 40 %
+insertion: proc 89 at 50 %
+insertion: proc 74 at 60 %
+insertion: proc 37 at 30 %
+insertion: proc 90 at 50 %
+insertion: proc 90 at 60 %
+insertion: proc 75 at 60 %
+insertion: proc 38 at 40 %
+insertion: proc 38 at 50 %
+insertion: proc 91 at 40 %
+insertion: proc 91 at 50 %
+insertion: proc 14 at 70 %
+insertion: proc 79 at 40 %
+insertion: proc 39 at 40 %
+insertion: proc 39 at 50 %
+insertion: proc 93 at 40 %
+insertion: proc 72 at 50 %
+insertion: proc 37 at 40 %
+insertion: proc 94 at 30 %
+insertion: proc 71 at 60 %
+insertion: proc 54 at 60 %
+insertion: proc 95 at 60 %
+insertion: proc 44 at 50 %
+insertion: proc 97 at 30 %
+insertion: proc 97 at 40 %
+insertion: proc 97 at 50 %
+insertion: proc 97 at 60 %
+insertion: proc 58 at 40 %
+insertion: proc 9 at 70 %
+insertion: proc 67 at 40 %
+insertion: proc 47 at 50 %
+insertion: proc 76 at 40 %
+insertion: proc 50 at 60 %
+insertion: proc 98 at 40 %
+insertion: proc 98 at 50 %
+insertion: proc 64 at 40 %
+insertion: proc 51 at 60 %
+insertion: proc 80 at 40 %
+insertion: proc 52 at 60 %
+insertion: proc 99 at 50 %
+insertion: proc 99 at 60 %
+insertion: proc 82 at 40 %
+insertion: proc 55 at 40 %
+insertion: proc 100 at 40 %
+insertion: proc 100 at 50 %
+insertion: proc 77 at 50 %
+insertion: proc 29 at 60 %
+insertion: proc 66 at 40 %
+insertion: proc 40 at 40 %
+insertion: proc 101 at 40 %
+insertion: proc 101 at 50 %
+insertion: proc 81 at 60 %
+insertion: proc 41 at 60 %
+insertion: proc 102 at 40 %
+insertion: proc 102 at 50 %
+insertion: proc 59 at 60 %
+insertion: proc 48 at 60 %
+insertion: proc 103 at 40 %
+insertion: proc 103 at 50 %
+insertion: proc 70 at 40 %
+insertion: proc 39 at 60 %
+insertion: proc 104 at 40 %
+insertion: proc 104 at 50 %
+insertion: proc 77 at 60 %
+insertion: proc 45 at 50 %
+insertion: proc 105 at 40 %
+insertion: proc 69 at 70 %
+insertion: proc 36 at 60 %
+insertion: proc 106 at 40 %
+insertion: proc 106 at 50 %
+insertion: proc 106 at 60 %
+insertion: proc 77 at 70 %
+insertion: proc 38 at 60 %
+insertion: proc 98 at 60 %
+insertion: proc 8 at 60 %
+insertion: proc 56 at 50 %
+insertion: proc 35 at 60 %
+insertion: proc 107 at 60 %
+insertion: proc 65 at 60 %
+insertion: proc 47 at 60 %
+insertion: proc 86 at 60 %
+insertion: proc 60 at 60 %
+insertion: proc 46 at 40 %
+insertion: proc 57 at 60 %
+insertion: proc 42 at 60 %
+insertion: proc 88 at 60 %
+insertion: proc 75 at 70 %
+insertion: proc 30 at 40 %
+insertion: proc 90 at 70 %
+insertion: proc 32 at 60 %
+insertion: proc 106 at 70 %
+insertion: proc 54 at 70 %
+insertion: proc 93 at 50 %
+insertion: proc 36 at 70 %
+insertion: proc 13 at 40 %
+insertion: proc 26 at 60 %
+insertion: proc 43 at 40 %
+insertion: proc 101 at 60 %
+insertion: proc 44 at 60 %
+insertion: proc 105 at 50 %
+insertion: proc 4 at 70 %
+insertion: proc 98 at 70 %
+insertion: proc 84 at 50 %
+insertion: proc 5 at 60 %
+insertion: proc 96 at 60 %
+insertion: proc 94 at 40 %
+insertion: proc 47 at 70 %
+insertion: proc 35 at 70 %
+insertion: proc 3 at 70 %
+insertion: proc 45 at 60 %
+insertion: proc 99 at 70 %
+insertion: proc 48 at 70 %
+insertion: proc 2 at 60 %
+insertion: proc 58 at 50 %
+insertion: proc 102 at 60 %
+insertion: proc 72 at 60 %
+insertion: proc 89 at 60 %
+insertion: proc 92 at 50 %
+insertion: proc 34 at 60 %
+insertion: proc 64 at 50 %
+insertion: proc 68 at 70 %
+insertion: proc 7 at 70 %
+insertion: proc 93 at 60 %
+insertion: proc 28 at 50 %
+insertion: proc 88 at 70 %
+insertion: proc 38 at 70 %
+insertion: proc 91 at 60 %
+insertion: proc 33 at 60 %
+insertion: proc 51 at 70 %
+insertion: proc 78 at 60 %
+insertion: proc 62 at 40 %
+insertion: proc 42 at 70 %
+insertion: proc 39 at 70 %
+insertion: proc 101 at 70 %
+insertion: proc 61 at 40 %
+insertion: proc 82 at 50 %
+insertion: proc 86 at 70 %
+insertion: proc 85 at 50 %
+insertion: proc 80 at 50 %
+insertion: proc 73 at 60 %
+insertion: proc 104 at 60 %
+insertion: proc 72 at 70 %
+insertion: proc 84 at 60 %
+insertion: proc 103 at 60 %
+insertion: proc 17 at 60 %
+insertion: proc 71 at 70 %
+insertion: proc 65 at 70 %
+insertion: proc 95 at 70 %
+insertion: proc 87 at 60 %
+insertion: proc 49 at 50 %
+insertion: proc 45 at 70 %
+insertion: proc 45 at 80 %
+insertion: proc 45 at 90 %
+insertion: proc 45 at 100 %
+insertion: proc 45 at 110 %
+insertion: proc 45 at 120 %
+insertion: proc 45 at 130 %
+insertion: proc 73 at 60 %
+insertion: proc 73 at 70 %
+insertion: proc 73 at 80 %
+insertion: proc 73 at 90 %
+insertion: proc 73 at 100 %
+insertion: proc 73 at 110 %
+insertion: proc 73 at 120 %
+insertion: proc 73 at 130 %
+insertion: proc 73 at 140 %
+insertion: proc 2 at 70 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 29 at 70 %
+insertion: proc 29 at 80 %
+insertion: proc 29 at 90 %
+insertion: proc 29 at 100 %
+insertion: proc 29 at 110 %
+insertion: proc 29 at 120 %
+insertion: proc 29 at 130 %
+insertion: proc 27 at 60 %
+insertion: proc 27 at 70 %
+insertion: proc 27 at 80 %
+insertion: proc 27 at 90 %
+insertion: proc 27 at 100 %
+insertion: proc 27 at 110 %
+insertion: proc 27 at 120 %
+insertion: proc 27 at 130 %
+insertion: proc 59 at 60 %
+insertion: proc 59 at 70 %
+insertion: proc 59 at 80 %
+insertion: proc 59 at 90 %
+insertion: proc 59 at 100 %
+insertion: proc 59 at 110 %
+insertion: proc 59 at 120 %
+insertion: proc 59 at 130 %
+insertion: proc 59 at 140 %
+insertion: proc 75 at 70 %
+insertion: proc 75 at 80 %
+insertion: proc 75 at 90 %
+insertion: proc 75 at 100 %
+insertion: proc 75 at 110 %
+insertion: proc 75 at 120 %
+insertion: proc 75 at 130 %
+insertion: proc 5 at 70 %
+insertion: proc 5 at 80 %
+insertion: proc 5 at 90 %
+insertion: proc 5 at 100 %
+insertion: proc 5 at 110 %
+insertion: proc 75 at 140 %
+insertion: proc 8 at 70 %
+insertion: proc 8 at 80 %
+insertion: proc 8 at 90 %
+insertion: proc 8 at 100 %
+insertion: proc 8 at 110 %
+insertion: proc 50 at 70 %
+insertion: proc 50 at 80 %
+insertion: proc 50 at 90 %
+insertion: proc 50 at 100 %
+insertion: proc 50 at 110 %
+insertion: proc 50 at 120 %
+insertion: proc 50 at 130 %
+insertion: proc 50 at 140 %
+insertion: proc 17 at 60 %
+insertion: proc 17 at 70 %
+insertion: proc 17 at 80 %
+insertion: proc 17 at 90 %
+insertion: proc 26 at 70 %
+insertion: proc 26 at 80 %
+insertion: proc 26 at 90 %
+insertion: proc 26 at 100 %
+insertion: proc 26 at 110 %
+insertion: proc 26 at 120 %
+insertion: proc 26 at 130 %
+insertion: proc 63 at 70 %
+insertion: proc 63 at 80 %
+insertion: proc 63 at 90 %
+insertion: proc 63 at 100 %
+insertion: proc 63 at 110 %
+insertion: proc 63 at 120 %
+insertion: proc 63 at 130 %
+insertion: proc 63 at 140 %
+insertion: proc 32 at 70 %
+insertion: proc 32 at 80 %
+insertion: proc 32 at 90 %
+insertion: proc 32 at 100 %
+insertion: proc 32 at 110 %
+insertion: proc 32 at 120 %
+insertion: proc 32 at 130 %
+insertion: proc 54 at 70 %
+insertion: proc 54 at 80 %
+insertion: proc 54 at 90 %
+insertion: proc 54 at 100 %
+insertion: proc 54 at 110 %
+insertion: proc 52 at 70 %
+insertion: proc 52 at 80 %
+insertion: proc 52 at 90 %
+insertion: proc 52 at 100 %
+insertion: proc 52 at 110 %
+insertion: proc 52 at 120 %
+insertion: proc 52 at 130 %
+insertion: proc 33 at 60 %
+insertion: proc 33 at 70 %
+insertion: proc 33 at 80 %
+insertion: proc 33 at 90 %
+insertion: proc 33 at 100 %
+insertion: proc 33 at 110 %
+insertion: proc 43 at 50 %
+insertion: proc 43 at 60 %
+insertion: proc 43 at 70 %
+insertion: proc 43 at 80 %
+insertion: proc 43 at 90 %
+insertion: proc 43 at 100 %
+insertion: proc 43 at 110 %
+insertion: proc 23 at 60 %
+insertion: proc 23 at 70 %
+insertion: proc 23 at 80 %
+insertion: proc 23 at 90 %
+insertion: proc 23 at 100 %
+insertion: proc 25 at 50 %
+insertion: proc 25 at 60 %
+insertion: proc 25 at 70 %
+insertion: proc 23 at 110 %
+insertion: proc 23 at 120 %
+insertion: proc 23 at 130 %
+insertion: proc 25 at 80 %
+insertion: proc 25 at 90 %
+insertion: proc 25 at 100 %
+insertion: proc 25 at 110 %
+insertion: proc 78 at 60 %
+insertion: proc 78 at 70 %
+insertion: proc 78 at 80 %
+insertion: proc 78 at 90 %
+insertion: proc 78 at 100 %
+insertion: proc 78 at 110 %
+insertion: proc 78 at 120 %
+insertion: proc 78 at 130 %
+insertion: proc 78 at 140 %
+insertion: proc 0 at 70 %
+insertion: proc 0 at 80 %
+insertion: proc 0 at 90 %
+insertion: proc 1 at 60 %
+insertion: proc 1 at 70 %
+insertion: proc 1 at 80 %
+insertion: proc 1 at 90 %
+insertion: proc 1 at 100 %
+insertion: proc 1 at 110 %
+insertion: proc 24 at 70 %
+insertion: proc 24 at 80 %
+insertion: proc 24 at 90 %
+insertion: proc 24 at 100 %
+insertion: proc 24 at 110 %
+insertion: proc 24 at 120 %
+insertion: proc 24 at 130 %
+insertion: proc 38 at 70 %
+insertion: proc 38 at 80 %
+insertion: proc 38 at 90 %
+insertion: proc 38 at 100 %
+insertion: proc 38 at 110 %
+insertion: proc 79 at 50 %
+insertion: proc 79 at 60 %
+insertion: proc 79 at 70 %
+insertion: proc 79 at 80 %
+insertion: proc 79 at 90 %
+insertion: proc 42 at 70 %
+insertion: proc 42 at 80 %
+insertion: proc 42 at 90 %
+insertion: proc 42 at 100 %
+insertion: proc 42 at 110 %
+insertion: proc 42 at 120 %
+insertion: proc 79 at 100 %
+insertion: proc 79 at 110 %
+insertion: proc 47 at 70 %
+insertion: proc 47 at 80 %
+insertion: proc 47 at 90 %
+insertion: proc 47 at 100 %
+insertion: proc 47 at 110 %
+insertion: proc 47 at 120 %
+insertion: proc 47 at 130 %
+insertion: proc 47 at 140 %
+insertion: proc 51 at 70 %
+insertion: proc 51 at 80 %
+insertion: proc 51 at 90 %
+insertion: proc 51 at 100 %
+insertion: proc 51 at 110 %
+insertion: proc 42 at 130 %
+insertion: proc 42 at 140 %
+insertion: proc 100 at 60 %
+insertion: proc 83 at 60 %
+insertion: proc 83 at 70 %
+insertion: proc 83 at 80 %
+insertion: proc 83 at 90 %
+insertion: proc 83 at 100 %
+insertion: proc 83 at 110 %
+insertion: proc 83 at 120 %
+insertion: proc 83 at 130 %
+insertion: proc 83 at 140 %
+insertion: proc 61 at 50 %
+insertion: proc 61 at 60 %
+insertion: proc 61 at 70 %
+insertion: proc 61 at 80 %
+insertion: proc 61 at 90 %
+insertion: proc 61 at 100 %
+insertion: proc 61 at 110 %
+insertion: proc 49 at 60 %
+insertion: proc 49 at 70 %
+insertion: proc 49 at 80 %
+insertion: proc 49 at 90 %
+insertion: proc 49 at 100 %
+insertion: proc 49 at 110 %
+insertion: proc 21 at 50 %
+insertion: proc 21 at 60 %
+insertion: proc 21 at 70 %
+insertion: proc 21 at 80 %
+insertion: proc 21 at 90 %
+insertion: proc 30 at 40 %
+insertion: proc 30 at 50 %
+insertion: proc 30 at 60 %
+insertion: proc 30 at 70 %
+insertion: proc 30 at 80 %
+insertion: proc 30 at 90 %
+insertion: proc 9 at 70 %
+insertion: proc 9 at 80 %
+insertion: proc 9 at 90 %
+insertion: proc 9 at 100 %
+insertion: proc 9 at 110 %
+insertion: proc 97 at 70 %
+insertion: proc 11 at 60 %
+insertion: proc 11 at 70 %
+insertion: proc 11 at 80 %
+insertion: proc 11 at 90 %
+insertion: proc 11 at 100 %
+insertion: proc 11 at 110 %
+insertion: proc 48 at 70 %
+insertion: proc 48 at 80 %
+insertion: proc 48 at 90 %
+insertion: proc 48 at 100 %
+insertion: proc 48 at 110 %
+insertion: proc 48 at 120 %
+insertion: proc 48 at 130 %
+insertion: proc 48 at 140 %
+insertion: proc 40 at 50 %
+insertion: proc 40 at 60 %
+insertion: proc 40 at 70 %
+insertion: proc 40 at 80 %
+insertion: proc 40 at 90 %
+insertion: proc 40 at 100 %
+insertion: proc 40 at 110 %
+insertion: proc 56 at 60 %
+insertion: proc 56 at 70 %
+insertion: proc 56 at 80 %
+insertion: proc 56 at 90 %
+insertion: proc 56 at 100 %
+insertion: proc 56 at 110 %
+insertion: proc 31 at 50 %
+insertion: proc 31 at 60 %
+insertion: proc 31 at 70 %
+insertion: proc 31 at 80 %
+insertion: proc 31 at 90 %
+insertion: proc 31 at 100 %
+insertion: proc 31 at 110 %
+insertion: proc 18 at 70 %
+insertion: proc 18 at 80 %
+insertion: proc 18 at 90 %
+insertion: proc 18 at 100 %
+insertion: proc 18 at 110 %
+insertion: proc 39 at 80 %
+insertion: proc 39 at 90 %
+insertion: proc 39 at 100 %
+insertion: proc 39 at 110 %
+insertion: proc 39 at 120 %
+insertion: proc 39 at 130 %
+insertion: proc 60 at 70 %
+insertion: proc 60 at 80 %
+insertion: proc 60 at 90 %
+insertion: proc 60 at 100 %
+insertion: proc 60 at 110 %
+insertion: proc 60 at 120 %
+insertion: proc 60 at 130 %
+insertion: proc 60 at 140 %
+insertion: proc 44 at 60 %
+insertion: proc 44 at 70 %
+insertion: proc 44 at 80 %
+insertion: proc 44 at 90 %
+insertion: proc 44 at 100 %
+insertion: proc 44 at 110 %
+insertion: proc 44 at 120 %
+insertion: proc 44 at 130 %
+insertion: proc 65 at 70 %
+insertion: proc 65 at 80 %
+insertion: proc 65 at 90 %
+insertion: proc 65 at 100 %
+insertion: proc 65 at 110 %
+insertion: proc 64 at 50 %
+insertion: proc 64 at 60 %
+insertion: proc 64 at 70 %
+insertion: proc 64 at 80 %
+insertion: proc 64 at 90 %
+insertion: proc 64 at 100 %
+insertion: proc 64 at 110 %
+insertion: proc 65 at 120 %
+insertion: proc 65 at 130 %
+insertion: proc 62 at 40 %
+insertion: proc 62 at 50 %
+insertion: proc 62 at 60 %
+insertion: proc 62 at 70 %
+insertion: proc 62 at 80 %
+insertion: proc 62 at 90 %
+insertion: proc 77 at 80 %
+insertion: proc 77 at 90 %
+insertion: proc 77 at 100 %
+insertion: proc 77 at 110 %
+insertion: proc 77 at 120 %
+insertion: proc 77 at 130 %
+insertion: proc 77 at 140 %
+insertion: proc 57 at 60 %
+insertion: proc 57 at 70 %
+insertion: proc 57 at 80 %
+insertion: proc 57 at 90 %
+insertion: proc 57 at 100 %
+insertion: proc 57 at 110 %
+insertion: proc 57 at 120 %
+insertion: proc 57 at 130 %
+insertion: proc 74 at 70 %
+insertion: proc 74 at 80 %
+insertion: proc 74 at 90 %
+insertion: proc 74 at 100 %
+insertion: proc 74 at 110 %
+insertion: proc 67 at 50 %
+insertion: proc 67 at 60 %
+insertion: proc 67 at 70 %
+insertion: proc 67 at 80 %
+insertion: proc 67 at 90 %
+insertion: proc 14 at 80 %
+insertion: proc 14 at 90 %
+insertion: proc 14 at 100 %
+insertion: proc 14 at 110 %
+insertion: proc 14 at 120 %
+insertion: proc 67 at 100 %
+insertion: proc 67 at 110 %
+insertion: proc 53 at 70 %
+insertion: proc 53 at 80 %
+insertion: proc 53 at 90 %
+insertion: proc 53 at 100 %
+insertion: proc 53 at 110 %
+insertion: proc 53 at 120 %
+insertion: proc 7 at 70 %
+insertion: proc 7 at 80 %
+insertion: proc 7 at 90 %
+insertion: proc 7 at 100 %
+insertion: proc 7 at 110 %
+insertion: proc 7 at 120 %
+insertion: proc 7 at 130 %
+insertion: proc 7 at 140 %
+insertion: proc 15 at 70 %
+insertion: proc 15 at 80 %
+insertion: proc 15 at 90 %
+insertion: proc 28 at 50 %
+insertion: proc 28 at 60 %
+insertion: proc 28 at 70 %
+insertion: proc 28 at 80 %
+insertion: proc 28 at 90 %
+insertion: proc 28 at 100 %
+insertion: proc 28 at 110 %
+insertion: proc 20 at 60 %
+insertion: proc 20 at 70 %
+insertion: proc 20 at 80 %
+insertion: proc 20 at 90 %
+insertion: proc 20 at 100 %
+insertion: proc 20 at 110 %
+insertion: proc 41 at 70 %
+insertion: proc 41 at 80 %
+insertion: proc 41 at 90 %
+insertion: proc 41 at 100 %
+insertion: proc 41 at 110 %
+insertion: proc 41 at 120 %
+insertion: proc 41 at 130 %
+insertion: proc 41 at 140 %
+insertion: proc 71 at 70 %
+insertion: proc 71 at 80 %
+insertion: proc 71 at 90 %
+insertion: proc 71 at 100 %
+insertion: proc 71 at 110 %
+insertion: proc 10 at 80 %
+insertion: proc 10 at 90 %
+insertion: proc 10 at 100 %
+insertion: proc 10 at 110 %
+insertion: proc 10 at 120 %
+insertion: proc 10 at 130 %
+insertion: proc 3 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 3 at 100 %
+insertion: proc 3 at 110 %
+insertion: proc 68 at 70 %
+insertion: proc 68 at 80 %
+insertion: proc 68 at 90 %
+insertion: proc 68 at 100 %
+insertion: proc 68 at 110 %
+insertion: proc 68 at 120 %
+insertion: proc 68 at 130 %
+insertion: proc 68 at 140 %
+insertion: proc 4 at 70 %
+insertion: proc 4 at 80 %
+insertion: proc 4 at 90 %
+insertion: proc 4 at 100 %
+insertion: proc 4 at 110 %
+insertion: proc 4 at 120 %
+insertion: proc 4 at 130 %
+insertion: proc 34 at 70 %
+insertion: proc 34 at 80 %
+insertion: proc 34 at 90 %
+insertion: proc 34 at 100 %
+insertion: proc 34 at 110 %
+insertion: proc 34 at 120 %
+insertion: proc 34 at 130 %
+insertion: proc 34 at 140 %
+insertion: proc 72 at 70 %
+insertion: proc 72 at 80 %
+insertion: proc 72 at 90 %
+insertion: proc 72 at 100 %
+insertion: proc 72 at 110 %
+insertion: proc 37 at 50 %
+insertion: proc 37 at 60 %
+insertion: proc 37 at 70 %
+insertion: proc 37 at 80 %
+insertion: proc 37 at 90 %
+insertion: proc 37 at 100 %
+insertion: proc 76 at 50 %
+insertion: proc 76 at 60 %
+insertion: proc 76 at 70 %
+insertion: proc 76 at 80 %
+insertion: proc 76 at 90 %
+insertion: proc 76 at 100 %
+insertion: proc 76 at 110 %
+insertion: proc 16 at 70 %
+insertion: proc 16 at 80 %
+insertion: proc 16 at 90 %
+insertion: proc 16 at 100 %
+insertion: proc 16 at 110 %
+insertion: proc 36 at 70 %
+insertion: proc 36 at 80 %
+insertion: proc 36 at 90 %
+insertion: proc 36 at 100 %
+insertion: proc 36 at 110 %
+insertion: proc 36 at 120 %
+insertion: proc 69 at 80 %
+insertion: proc 69 at 90 %
+insertion: proc 69 at 100 %
+insertion: proc 69 at 110 %
+insertion: proc 55 at 50 %
+insertion: proc 55 at 60 %
+insertion: proc 55 at 70 %
+insertion: proc 55 at 80 %
+insertion: proc 55 at 90 %
+insertion: proc 58 at 50 %
+insertion: proc 58 at 60 %
+insertion: proc 58 at 70 %
+insertion: proc 58 at 80 %
+insertion: proc 58 at 90 %
+insertion: proc 58 at 100 %
+insertion: proc 58 at 110 %
+insertion: proc 66 at 50 %
+insertion: proc 66 at 60 %
+insertion: proc 66 at 70 %
+insertion: proc 66 at 80 %
+insertion: proc 66 at 90 %
+insertion: proc 35 at 70 %
+insertion: proc 35 at 80 %
+insertion: proc 35 at 90 %
+insertion: proc 35 at 100 %
+insertion: proc 35 at 110 %
+insertion: proc 35 at 120 %
+insertion: proc 6 at 80 %
+insertion: proc 6 at 90 %
+insertion: proc 6 at 100 %
+insertion: proc 6 at 110 %
+insertion: proc 6 at 120 %
+insertion: proc 105 at 60 %
+insertion: proc 105 at 70 %
+insertion: proc 105 at 80 %
+insertion: proc 105 at 90 %
+insertion: proc 81 at 70 %
+insertion: proc 81 at 80 %
+insertion: proc 81 at 90 %
+insertion: proc 81 at 100 %
+insertion: proc 81 at 110 %
+insertion: proc 81 at 120 %
+insertion: proc 81 at 130 %
+insertion: proc 81 at 140 %
+insertion: proc 92 at 50 %
+insertion: proc 92 at 60 %
+insertion: proc 92 at 70 %
+insertion: proc 92 at 80 %
+insertion: proc 92 at 90 %
+insertion: proc 92 at 100 %
+insertion: proc 13 at 50 %
+insertion: proc 13 at 60 %
+insertion: proc 13 at 70 %
+insertion: proc 13 at 80 %
+insertion: proc 13 at 90 %
+insertion: proc 13 at 100 %
+insertion: proc 80 at 50 %
+insertion: proc 80 at 60 %
+insertion: proc 80 at 70 %
+insertion: proc 80 at 80 %
+insertion: proc 80 at 90 %
+insertion: proc 93 at 60 %
+insertion: proc 93 at 70 %
+insertion: proc 93 at 80 %
+insertion: proc 93 at 90 %
+insertion: proc 93 at 100 %
+insertion: proc 93 at 110 %
+insertion: proc 12 at 70 %
+insertion: proc 12 at 80 %
+insertion: proc 12 at 90 %
+insertion: proc 12 at 100 %
+insertion: proc 12 at 110 %
+insertion: proc 46 at 50 %
+insertion: proc 46 at 60 %
+insertion: proc 46 at 70 %
+insertion: proc 46 at 80 %
+insertion: proc 46 at 90 %
+insertion: proc 46 at 100 %
+insertion: proc 46 at 110 %
+insertion: proc 89 at 60 %
+insertion: proc 89 at 70 %
+insertion: proc 89 at 80 %
+insertion: proc 89 at 90 %
+insertion: proc 89 at 100 %
+insertion: proc 89 at 110 %
+insertion: proc 22 at 50 %
+insertion: proc 22 at 60 %
+insertion: proc 22 at 70 %
+insertion: proc 22 at 80 %
+insertion: proc 22 at 90 %
+insertion: proc 22 at 100 %
+insertion: proc 22 at 110 %
+insertion: proc 70 at 50 %
+insertion: proc 70 at 60 %
+insertion: proc 70 at 70 %
+insertion: proc 70 at 80 %
+insertion: proc 70 at 90 %
+insertion: proc 82 at 60 %
+insertion: proc 82 at 70 %
+insertion: proc 82 at 80 %
+insertion: proc 82 at 90 %
+insertion: proc 82 at 100 %
+insertion: proc 82 at 110 %
+insertion: proc 86 at 80 %
+insertion: proc 86 at 90 %
+insertion: proc 86 at 100 %
+insertion: proc 86 at 110 %
+insertion: proc 86 at 120 %
+insertion: proc 86 at 130 %
+insertion: proc 100 at 60 %
+insertion: proc 100 at 70 %
+insertion: proc 100 at 80 %
+insertion: proc 100 at 90 %
+insertion: proc 100 at 100 %
+insertion: proc 100 at 110 %
+insertion: proc 100 at 120 %
+insertion: proc 100 at 130 %
+insertion: proc 87 at 60 %
+insertion: proc 87 at 70 %
+insertion: proc 87 at 80 %
+insertion: proc 87 at 90 %
+insertion: proc 87 at 100 %
+insertion: proc 87 at 110 %
+insertion: proc 104 at 60 %
+insertion: proc 104 at 70 %
+insertion: proc 104 at 80 %
+insertion: proc 104 at 90 %
+insertion: proc 104 at 100 %
+insertion: proc 104 at 110 %
+insertion: proc 107 at 70 %
+insertion: proc 107 at 80 %
+insertion: proc 107 at 90 %
+insertion: proc 98 at 80 %
+insertion: proc 98 at 90 %
+insertion: proc 98 at 100 %
+insertion: proc 98 at 110 %
+insertion: proc 19 at 50 %
+insertion: proc 19 at 60 %
+insertion: proc 19 at 70 %
+insertion: proc 19 at 80 %
+insertion: proc 19 at 90 %
+insertion: proc 19 at 100 %
+insertion: proc 96 at 70 %
+insertion: proc 96 at 80 %
+insertion: proc 96 at 90 %
+insertion: proc 96 at 100 %
+insertion: proc 96 at 110 %
+insertion: proc 90 at 70 %
+insertion: proc 90 at 80 %
+insertion: proc 90 at 90 %
+insertion: proc 84 at 60 %
+insertion: proc 84 at 70 %
+insertion: proc 84 at 80 %
+insertion: proc 84 at 90 %
+insertion: proc 84 at 100 %
+insertion: proc 84 at 110 %
+insertion: proc 84 at 120 %
+insertion: proc 84 at 130 %
+insertion: proc 84 at 140 %
+insertion: proc 85 at 50 %
+insertion: proc 85 at 60 %
+insertion: proc 85 at 70 %
+insertion: proc 85 at 80 %
+insertion: proc 85 at 90 %
+insertion: proc 85 at 100 %
+insertion: proc 85 at 110 %
+insertion: proc 99 at 80 %
+insertion: proc 99 at 90 %
+insertion: proc 99 at 100 %
+insertion: proc 99 at 110 %
+insertion: proc 103 at 70 %
+insertion: proc 103 at 80 %
+insertion: proc 103 at 90 %
+insertion: proc 103 at 100 %
+insertion: proc 103 at 110 %
+insertion: proc 103 at 120 %
+insertion: proc 103 at 130 %
+insertion: proc 88 at 70 %
+insertion: proc 88 at 80 %
+insertion: proc 88 at 90 %
+insertion: proc 88 at 100 %
+insertion: proc 88 at 110 %
+insertion: proc 88 at 120 %
+insertion: proc 88 at 130 %
+insertion: proc 88 at 140 %
+insertion: proc 102 at 70 %
+insertion: proc 102 at 80 %
+insertion: proc 102 at 90 %
+insertion: proc 102 at 100 %
+insertion: proc 102 at 110 %
+insertion: proc 101 at 70 %
+insertion: proc 101 at 80 %
+insertion: proc 101 at 90 %
+insertion: proc 101 at 100 %
+insertion: proc 101 at 110 %
+insertion: proc 94 at 50 %
+insertion: proc 94 at 60 %
+insertion: proc 94 at 70 %
+insertion: proc 94 at 80 %
+insertion: proc 94 at 90 %
+insertion: proc 106 at 80 %
+insertion: proc 106 at 90 %
+insertion: proc 106 at 100 %
+insertion: proc 106 at 110 %
+insertion: proc 97 at 70 %
+insertion: proc 97 at 80 %
+insertion: proc 97 at 90 %
+insertion: proc 97 at 100 %
+insertion: proc 97 at 110 %
+insertion: proc 97 at 120 %
+insertion: proc 97 at 130 %
+insertion: proc 95 at 70 %
+insertion: proc 95 at 80 %
+insertion: proc 95 at 90 %
+insertion: proc 95 at 100 %
+insertion: proc 95 at 110 %
+insertion: proc 91 at 70 %
+insertion: proc 91 at 80 %
+insertion: proc 91 at 90 %
+insertion: proc 91 at 100 %
+insertion: proc 91 at 110 %
+insertion: proc 91 at 120 %
+INFO: Particle insertion ins1: inserted 2971 particle templates (mass 8.001939e-05) at step 1
+ - a total of 2971 particle templates (mass 8.001939e-05) inserted so far.
+       1 
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+--------------------------------------------------------------------------
+mpiexec noticed that process rank 85 with PID 0 on node node-08 exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------

@@ -1,1 +1,0 @@
-run < in.shear.bp1_1

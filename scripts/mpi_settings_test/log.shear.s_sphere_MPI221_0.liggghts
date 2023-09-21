@@ -1,0 +1,1529 @@
+atom_modify       map array
+
+processors        2 2 1
+
+# Set domain
+region            domain block 0.0 2.16000e-03 0.0 2.16000e-03 0.0 1.08000e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00216 0.00216 0.00108)
+  2 by 2 by 1 MPI processor grid
+
+# Set neighbor and list options
+neighbor          1.721e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/sphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 radius constant 0.000050
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 10000 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.05
+# Apply integration fix
+fix               integr1 nve_group1 nve/sphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Mon Sep 11 14:30:55 2023
+
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.4487 Mbytes
+    Step 
+       0 
+INFO: Particle insertion ins1: inserted 482 particle templates (mass 6.309365e-07) at step 1
+ - a total of 482 particle templates (mass 6.309365e-07) inserted so far.
+       1 
+Loop time of 0.0014092 on 4 procs for 1 steps with 482 atoms, finish time Mon Sep 11 14:30:59 2023
+
+
+Pair  time (%) = 0.000130362 (9.25077)
+Neigh time (%) = 0.000180436 (12.8041)
+Comm  time (%) = 0.000284949 (20.2206)
+Outpt time (%) = 1.30327e-05 (0.924831)
+Other time (%) = 0.000800424 (56.7997)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    252.5 ave 272 max 238 min
+Histogram: 1 0 1 0 1 0 0 0 0 1
+Neighs:    600.5 ave 640 max 564 min
+Histogram: 1 0 0 0 1 1 0 0 0 1
+
+Total # of neighbors = 2402
+Ave neighs/atom = 4.9834
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+482 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 5.35e-06 reset 1000 threshold 1.00e-06 start_dt 2.616e-11 end_dt 1.570e-08
+run               100000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Mon Sep 11 14:30:59 2023
+
+Memory usage per processor = 11.0641 Mbytes
+    Step 
+       1 
+Loop time of 0.201345 on 4 procs for 100000 steps with 482 atoms, finish time Mon Sep 11 14:30:59 2023
+
+
+Pair  time (%) = 0.0145033 (7.20318)
+Neigh time (%) = 0.120785 (59.9889)
+Comm  time (%) = 0.0375989 (18.6738)
+Outpt time (%) = 0 (0)
+Other time (%) = 0.0284584 (14.1341)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    252.5 ave 272 max 238 min
+Histogram: 1 0 1 0 1 0 0 0 0 1
+Neighs:    600.5 ave 640 max 564 min
+Histogram: 1 0 0 0 1 1 0 0 0 1
+
+Total # of neighbors = 2402
+Ave neighs/atom = 4.9834
+Neighbor list builds = 999
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          1.5697e-09
+
+fix               leboundary all lebc 100.0 true gtemp 0.1
+
+# Run desired simulation
+info time
+run 10000
+Setting up run at Mon Sep 11 14:30:59 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+    1000 
+   11000 
+Loop time of 2.2029 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:01 2023
+
+
+Pair  time (%) = 0.148365 (6.73497)
+Neigh time (%) = 1.25638 (57.0331)
+Comm  time (%) = 0.552417 (25.0768)
+Outpt time (%) = 7.79025e-06 (0.000353636)
+Other time (%) = 0.245729 (11.1548)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    333.25 ave 358 max 314 min
+Histogram: 1 0 0 1 1 0 0 0 0 1
+Neighs:    619.75 ave 659 max 584 min
+Histogram: 1 0 0 0 2 0 0 0 0 1
+
+Total # of neighbors = 2479
+Ave neighs/atom = 5.14315
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:01 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+   11000 
+   21000 
+Loop time of 2.2146 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:04 2023
+
+
+Pair  time (%) = 0.148646 (6.7121)
+Neigh time (%) = 1.25748 (56.7816)
+Comm  time (%) = 0.559527 (25.2654)
+Outpt time (%) = 1.39965e-05 (0.000632011)
+Other time (%) = 0.248926 (11.2403)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    333.5 ave 358 max 315 min
+Histogram: 1 0 0 1 1 0 0 0 0 1
+Neighs:    618 ave 654 max 582 min
+Histogram: 1 0 0 0 1 1 0 0 0 1
+
+Total # of neighbors = 2472
+Ave neighs/atom = 5.12863
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:04 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+   21000 
+   31000 
+Loop time of 2.21416 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:06 2023
+
+
+Pair  time (%) = 0.148073 (6.68758)
+Neigh time (%) = 1.25897 (56.8602)
+Comm  time (%) = 0.559138 (25.2529)
+Outpt time (%) = 1.26172e-05 (0.000569844)
+Other time (%) = 0.247958 (11.1988)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    333.5 ave 357 max 315 min
+Histogram: 1 0 0 1 1 0 0 0 0 1
+Neighs:    620.25 ave 657 max 586 min
+Histogram: 1 0 0 0 2 0 0 0 0 1
+
+Total # of neighbors = 2481
+Ave neighs/atom = 5.1473
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:06 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+   31000 
+   41000 
+Loop time of 2.22793 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:08 2023
+
+
+Pair  time (%) = 0.148492 (6.66501)
+Neigh time (%) = 1.26315 (56.6961)
+Comm  time (%) = 0.561682 (25.211)
+Outpt time (%) = 1.35085e-05 (0.000606326)
+Other time (%) = 0.254592 (11.4273)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332 ave 355 max 315 min
+Histogram: 1 0 0 2 0 0 0 0 0 1
+Neighs:    620 ave 658 max 585 min
+Histogram: 1 0 0 0 2 0 0 0 0 1
+
+Total # of neighbors = 2480
+Ave neighs/atom = 5.14523
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:08 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+   41000 
+   51000 
+stress: 0.068347 0.058995 0.004042 0.013610 0.000711 -0.003110
+Loop time of 2.21682 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:10 2023
+
+
+Pair  time (%) = 0.14864 (6.70512)
+Neigh time (%) = 1.25819 (56.7566)
+Comm  time (%) = 0.560528 (25.2853)
+Outpt time (%) = 1.13562e-05 (0.000512277)
+Other time (%) = 0.249447 (11.2525)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332.75 ave 354 max 316 min
+Histogram: 1 0 0 2 0 0 0 0 0 1
+Neighs:    619.25 ave 657 max 585 min
+Histogram: 1 0 0 0 2 0 0 0 0 1
+
+Total # of neighbors = 2477
+Ave neighs/atom = 5.139
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:10 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+   51000 
+   61000 
+Loop time of 2.21346 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:12 2023
+
+
+Pair  time (%) = 0.148786 (6.72189)
+Neigh time (%) = 1.25575 (56.7322)
+Comm  time (%) = 0.559163 (25.262)
+Outpt time (%) = 1.2864e-05 (0.000581172)
+Other time (%) = 0.249752 (11.2833)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332.75 ave 354 max 316 min
+Histogram: 1 0 0 2 0 0 0 0 0 1
+Neighs:    621.5 ave 657 max 588 min
+Histogram: 1 0 0 0 2 0 0 0 0 1
+
+Total # of neighbors = 2486
+Ave neighs/atom = 5.15768
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:12 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+   61000 
+   71000 
+Loop time of 2.21454 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:15 2023
+
+
+Pair  time (%) = 0.14927 (6.74045)
+Neigh time (%) = 1.25523 (56.6813)
+Comm  time (%) = 0.559977 (25.2864)
+Outpt time (%) = 1.47083e-05 (0.000664167)
+Other time (%) = 0.250048 (11.2912)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332.25 ave 352 max 316 min
+Histogram: 1 0 0 1 1 0 0 0 0 1
+Neighs:    623 ave 659 max 590 min
+Histogram: 1 0 0 0 2 0 0 0 0 1
+
+Total # of neighbors = 2492
+Ave neighs/atom = 5.17012
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:15 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+   71000 
+   81000 
+Loop time of 2.21983 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:17 2023
+
+
+Pair  time (%) = 0.149702 (6.74383)
+Neigh time (%) = 1.25588 (56.5755)
+Comm  time (%) = 0.56446 (25.4281)
+Outpt time (%) = 1.33305e-05 (0.000600518)
+Other time (%) = 0.249777 (11.2521)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332.75 ave 352 max 317 min
+Histogram: 1 0 0 0 2 0 0 0 0 1
+Neighs:    624.25 ave 661 max 590 min
+Histogram: 1 0 0 0 2 0 0 0 0 1
+
+Total # of neighbors = 2497
+Ave neighs/atom = 5.1805
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:17 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+   81000 
+   91000 
+Loop time of 2.22777 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:19 2023
+
+
+Pair  time (%) = 0.149598 (6.71516)
+Neigh time (%) = 1.25838 (56.486)
+Comm  time (%) = 0.567649 (25.4806)
+Outpt time (%) = 1.5252e-05 (0.000684632)
+Other time (%) = 0.252129 (11.3175)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    333 ave 352 max 318 min
+Histogram: 1 0 0 2 0 0 0 0 0 1
+Neighs:    624.5 ave 661 max 594 min
+Histogram: 1 0 0 1 1 0 0 0 0 1
+
+Total # of neighbors = 2498
+Ave neighs/atom = 5.18257
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:19 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+   91000 
+  101000 
+stress: 0.068413 0.058906 0.003950 0.074552 0.061654 0.028552
+Loop time of 2.23592 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:21 2023
+
+
+Pair  time (%) = 0.149636 (6.6924)
+Neigh time (%) = 1.25774 (56.2515)
+Comm  time (%) = 0.57393 (25.6687)
+Outpt time (%) = 1.6639e-05 (0.000744169)
+Other time (%) = 0.254597 (11.3867)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332.75 ave 352 max 317 min
+Histogram: 1 0 0 0 2 0 0 0 0 1
+Neighs:    624.25 ave 661 max 594 min
+Histogram: 1 0 0 1 1 0 0 0 0 1
+
+Total # of neighbors = 2497
+Ave neighs/atom = 5.1805
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:21 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  101000 
+  111000 
+Loop time of 2.2226 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:24 2023
+
+
+Pair  time (%) = 0.149193 (6.71256)
+Neigh time (%) = 1.25422 (56.4304)
+Comm  time (%) = 0.567247 (25.5218)
+Outpt time (%) = 1.77983e-05 (0.000800786)
+Other time (%) = 0.25192 (11.3345)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    333 ave 352 max 318 min
+Histogram: 1 0 0 2 0 0 0 0 0 1
+Neighs:    624.5 ave 661 max 594 min
+Histogram: 1 0 0 1 1 0 0 0 0 1
+
+Total # of neighbors = 2498
+Ave neighs/atom = 5.18257
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:24 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  111000 
+  121000 
+Loop time of 2.22153 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:26 2023
+
+
+Pair  time (%) = 0.149541 (6.73146)
+Neigh time (%) = 1.25426 (56.4595)
+Comm  time (%) = 0.566679 (25.5085)
+Outpt time (%) = 1.20458e-05 (0.000542228)
+Other time (%) = 0.251032 (11.3)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    333 ave 352 max 318 min
+Histogram: 1 0 0 2 0 0 0 0 0 1
+Neighs:    627.25 ave 663 max 597 min
+Histogram: 1 0 0 1 0 1 0 0 0 1
+
+Total # of neighbors = 2509
+Ave neighs/atom = 5.20539
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:26 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  121000 
+  131000 
+Loop time of 2.22611 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:28 2023
+
+
+Pair  time (%) = 0.14983 (6.73056)
+Neigh time (%) = 1.25634 (56.4365)
+Comm  time (%) = 0.566944 (25.468)
+Outpt time (%) = 1.29395e-05 (0.000581261)
+Other time (%) = 0.252985 (11.3644)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    333 ave 352 max 318 min
+Histogram: 1 0 0 2 0 0 0 0 0 1
+Neighs:    628.25 ave 666 max 598 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2513
+Ave neighs/atom = 5.21369
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:28 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  131000 
+  141000 
+Loop time of 2.22869 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:30 2023
+
+
+Pair  time (%) = 0.150112 (6.73546)
+Neigh time (%) = 1.2552 (56.32)
+Comm  time (%) = 0.569497 (25.553)
+Outpt time (%) = 1.54395e-05 (0.000692762)
+Other time (%) = 0.253867 (11.3909)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    333 ave 352 max 318 min
+Histogram: 1 0 0 2 0 0 0 0 0 1
+Neighs:    627.25 ave 668 max 596 min
+Histogram: 1 0 1 0 1 0 0 0 0 1
+
+Total # of neighbors = 2509
+Ave neighs/atom = 5.20539
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:30 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  141000 
+  151000 
+stress: 0.068168 0.059004 0.003894 0.148497 0.083986 0.036180
+Loop time of 2.22034 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:32 2023
+
+
+Pair  time (%) = 0.150061 (6.75843)
+Neigh time (%) = 1.25433 (56.4925)
+Comm  time (%) = 0.563515 (25.3796)
+Outpt time (%) = 1.53387e-05 (0.000690827)
+Other time (%) = 0.252424 (11.3687)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332 ave 352 max 318 min
+Histogram: 1 0 0 2 0 0 0 0 0 1
+Neighs:    628.5 ave 667 max 595 min
+Histogram: 1 0 0 1 0 1 0 0 0 1
+
+Total # of neighbors = 2514
+Ave neighs/atom = 5.21577
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:32 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  151000 
+  161000 
+Loop time of 2.22113 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:35 2023
+
+
+Pair  time (%) = 0.150324 (6.76789)
+Neigh time (%) = 1.25602 (56.5485)
+Comm  time (%) = 0.562931 (25.3443)
+Outpt time (%) = 1.18555e-05 (0.00053376)
+Other time (%) = 0.251849 (11.3388)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332.5 ave 352 max 318 min
+Histogram: 1 0 0 2 0 0 0 0 0 1
+Neighs:    628.75 ave 666 max 595 min
+Histogram: 1 0 0 1 0 1 0 0 0 1
+
+Total # of neighbors = 2515
+Ave neighs/atom = 5.21784
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:35 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  161000 
+  171000 
+Loop time of 2.225 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:37 2023
+
+
+Pair  time (%) = 0.15043 (6.76093)
+Neigh time (%) = 1.2559 (56.4452)
+Comm  time (%) = 0.566213 (25.4478)
+Outpt time (%) = 1.14325e-05 (0.000513821)
+Other time (%) = 0.252437 (11.3455)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332 ave 352 max 319 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    630.5 ave 667 max 600 min
+Histogram: 1 0 0 1 0 1 0 0 0 1
+
+Total # of neighbors = 2522
+Ave neighs/atom = 5.23237
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:37 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  171000 
+  181000 
+Loop time of 2.23019 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:39 2023
+
+
+Pair  time (%) = 0.151025 (6.77185)
+Neigh time (%) = 1.25687 (56.357)
+Comm  time (%) = 0.570712 (25.5903)
+Outpt time (%) = 1.34613e-05 (0.000603593)
+Other time (%) = 0.251571 (11.2803)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    331.25 ave 350 max 319 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    632.25 ave 668 max 602 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2529
+Ave neighs/atom = 5.24689
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:39 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  181000 
+  191000 
+Loop time of 2.2332 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:41 2023
+
+
+Pair  time (%) = 0.151157 (6.76862)
+Neigh time (%) = 1.2572 (56.2959)
+Comm  time (%) = 0.572474 (25.6347)
+Outpt time (%) = 1.33995e-05 (0.000600013)
+Other time (%) = 0.252356 (11.3002)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    330.75 ave 350 max 319 min
+Histogram: 1 1 0 1 0 0 0 0 0 1
+Neighs:    633 ave 666 max 604 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2532
+Ave neighs/atom = 5.25311
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:41 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  191000 
+  201000 
+stress: 0.068117 0.059121 0.003797 0.204887 0.107854 0.049772
+Loop time of 2.2279 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:44 2023
+
+
+Pair  time (%) = 0.151481 (6.79928)
+Neigh time (%) = 1.25598 (56.3751)
+Comm  time (%) = 0.570866 (25.6235)
+Outpt time (%) = 1.43322e-05 (0.000643306)
+Other time (%) = 0.249558 (11.2015)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    330.5 ave 350 max 318 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    633.75 ave 666 max 605 min
+Histogram: 1 0 1 0 0 0 1 0 0 1
+
+Total # of neighbors = 2535
+Ave neighs/atom = 5.25934
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:44 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  201000 
+  211000 
+Loop time of 2.22686 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:46 2023
+
+
+Pair  time (%) = 0.151573 (6.80658)
+Neigh time (%) = 1.25616 (56.4097)
+Comm  time (%) = 0.566238 (25.4277)
+Outpt time (%) = 1.18507e-05 (0.000532173)
+Other time (%) = 0.252872 (11.3555)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    330 ave 350 max 318 min
+Histogram: 1 1 0 1 0 0 0 0 0 1
+Neighs:    633 ave 664 max 605 min
+Histogram: 1 0 0 1 0 1 0 0 0 1
+
+Total # of neighbors = 2532
+Ave neighs/atom = 5.25311
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:46 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  211000 
+  221000 
+Loop time of 2.21858 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:48 2023
+
+
+Pair  time (%) = 0.151561 (6.83142)
+Neigh time (%) = 1.25439 (56.5402)
+Comm  time (%) = 0.56365 (25.4058)
+Outpt time (%) = 1.26188e-05 (0.000568775)
+Other time (%) = 0.248969 (11.222)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    329.75 ave 348 max 318 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    633 ave 665 max 604 min
+Histogram: 1 0 0 1 0 1 0 0 0 1
+
+Total # of neighbors = 2532
+Ave neighs/atom = 5.25311
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:48 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  221000 
+  231000 
+Loop time of 2.22358 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:50 2023
+
+
+Pair  time (%) = 0.15141 (6.80927)
+Neigh time (%) = 1.25394 (56.3931)
+Comm  time (%) = 0.56764 (25.5282)
+Outpt time (%) = 1.14705e-05 (0.000515858)
+Other time (%) = 0.250574 (11.2689)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    330 ave 349 max 317 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    633.5 ave 662 max 605 min
+Histogram: 1 0 0 1 0 0 1 0 0 1
+
+Total # of neighbors = 2534
+Ave neighs/atom = 5.25726
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:50 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  231000 
+  241000 
+Loop time of 2.22503 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:52 2023
+
+
+Pair  time (%) = 0.151481 (6.80805)
+Neigh time (%) = 1.25436 (56.3748)
+Comm  time (%) = 0.567522 (25.5062)
+Outpt time (%) = 1.38002e-05 (0.000620227)
+Other time (%) = 0.251657 (11.3103)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    330 ave 349 max 317 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    634 ave 662 max 607 min
+Histogram: 1 0 0 1 0 0 1 0 0 1
+
+Total # of neighbors = 2536
+Ave neighs/atom = 5.26141
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:52 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  241000 
+  251000 
+stress: 0.068302 0.059056 0.003664 0.207530 0.152353 0.007999
+Loop time of 2.22526 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:55 2023
+
+
+Pair  time (%) = 0.151989 (6.83015)
+Neigh time (%) = 1.25375 (56.3415)
+Comm  time (%) = 0.566559 (25.4603)
+Outpt time (%) = 1.23032e-05 (0.000552889)
+Other time (%) = 0.252958 (11.3675)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    329.75 ave 348 max 317 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    633.5 ave 662 max 609 min
+Histogram: 1 0 1 0 0 0 1 0 0 1
+
+Total # of neighbors = 2534
+Ave neighs/atom = 5.25726
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:55 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  251000 
+  261000 
+Loop time of 2.2252 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:57 2023
+
+
+Pair  time (%) = 0.151717 (6.81813)
+Neigh time (%) = 1.25398 (56.3536)
+Comm  time (%) = 0.567753 (25.5147)
+Outpt time (%) = 1.43333e-05 (0.000644133)
+Other time (%) = 0.251736 (11.313)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    331 ave 350 max 318 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    633.5 ave 663 max 610 min
+Histogram: 1 1 0 0 0 1 0 0 0 1
+
+Total # of neighbors = 2534
+Ave neighs/atom = 5.25726
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:57 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  261000 
+  271000 
+Loop time of 2.22436 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:31:59 2023
+
+
+Pair  time (%) = 0.152045 (6.83543)
+Neigh time (%) = 1.25402 (56.3765)
+Comm  time (%) = 0.566749 (25.4792)
+Outpt time (%) = 1.43115e-05 (0.000643398)
+Other time (%) = 0.251536 (11.3082)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    330.5 ave 350 max 318 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    632.5 ave 660 max 611 min
+Histogram: 1 1 0 0 0 1 0 0 0 1
+
+Total # of neighbors = 2530
+Ave neighs/atom = 5.24896
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:31:59 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  271000 
+  281000 
+Loop time of 2.22029 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:01 2023
+
+
+Pair  time (%) = 0.152083 (6.84969)
+Neigh time (%) = 1.25269 (56.42)
+Comm  time (%) = 0.566309 (25.5061)
+Outpt time (%) = 1.45497e-05 (0.000655309)
+Other time (%) = 0.249196 (11.2236)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    331 ave 352 max 317 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    632 ave 660 max 610 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2528
+Ave neighs/atom = 5.24481
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:01 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  281000 
+  291000 
+Loop time of 2.22406 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:04 2023
+
+
+Pair  time (%) = 0.15171 (6.82129)
+Neigh time (%) = 1.25256 (56.3189)
+Comm  time (%) = 0.569655 (25.6133)
+Outpt time (%) = 1.25677e-05 (0.000565081)
+Other time (%) = 0.250118 (11.246)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    330.5 ave 351 max 317 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    631.25 ave 659 max 609 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2525
+Ave neighs/atom = 5.23859
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:04 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  291000 
+  301000 
+stress: 0.068335 0.059029 0.003231 0.297236 0.255865 -0.021907
+Loop time of 2.22638 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:06 2023
+
+
+Pair  time (%) = 0.151495 (6.80455)
+Neigh time (%) = 1.2531 (56.2843)
+Comm  time (%) = 0.56926 (25.5688)
+Outpt time (%) = 1.30198e-05 (0.000584794)
+Other time (%) = 0.252511 (11.3418)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    331.75 ave 353 max 318 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    631.75 ave 662 max 609 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2527
+Ave neighs/atom = 5.24274
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:06 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  301000 
+  311000 
+Loop time of 2.22448 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:08 2023
+
+
+Pair  time (%) = 0.151546 (6.81264)
+Neigh time (%) = 1.25258 (56.3088)
+Comm  time (%) = 0.567249 (25.5003)
+Outpt time (%) = 1.31307e-05 (0.000590285)
+Other time (%) = 0.253092 (11.3776)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332 ave 353 max 319 min
+Histogram: 1 0 2 0 0 0 0 0 0 1
+Neighs:    632.25 ave 663 max 609 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2529
+Ave neighs/atom = 5.24689
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:08 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  311000 
+  321000 
+Loop time of 2.22748 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:10 2023
+
+
+Pair  time (%) = 0.15119 (6.78749)
+Neigh time (%) = 1.25207 (56.2104)
+Comm  time (%) = 0.569318 (25.5589)
+Outpt time (%) = 1.36775e-05 (0.000614036)
+Other time (%) = 0.254882 (11.4427)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332.5 ave 355 max 319 min
+Histogram: 1 0 2 0 0 0 0 0 0 1
+Neighs:    631.5 ave 661 max 609 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2526
+Ave neighs/atom = 5.24066
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:10 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  321000 
+  331000 
+Loop time of 2.22768 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:13 2023
+
+
+Pair  time (%) = 0.151136 (6.78445)
+Neigh time (%) = 1.25217 (56.2095)
+Comm  time (%) = 0.569657 (25.5718)
+Outpt time (%) = 1.59498e-05 (0.00071598)
+Other time (%) = 0.254702 (11.4335)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332 ave 355 max 317 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    632.25 ave 662 max 610 min
+Histogram: 1 0 1 0 1 0 0 0 0 1
+
+Total # of neighbors = 2529
+Ave neighs/atom = 5.24689
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:13 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  331000 
+  341000 
+Loop time of 2.22743 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:15 2023
+
+
+Pair  time (%) = 0.150699 (6.7656)
+Neigh time (%) = 1.25326 (56.2648)
+Comm  time (%) = 0.568953 (25.543)
+Outpt time (%) = 1.29808e-05 (0.000582767)
+Other time (%) = 0.254508 (11.4261)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332 ave 355 max 317 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    633.25 ave 661 max 611 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2533
+Ave neighs/atom = 5.25519
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:15 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  341000 
+  351000 
+stress: 0.068196 0.058981 0.003236 0.302842 0.259938 -0.035463
+Loop time of 2.23298 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:17 2023
+
+
+Pair  time (%) = 0.151536 (6.78629)
+Neigh time (%) = 1.25278 (56.1034)
+Comm  time (%) = 0.569688 (25.5125)
+Outpt time (%) = 1.38875e-05 (0.000621928)
+Other time (%) = 0.258962 (11.5972)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332.75 ave 356 max 317 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    633.75 ave 661 max 611 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2535
+Ave neighs/atom = 5.25934
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:17 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  351000 
+  361000 
+Loop time of 2.23438 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:19 2023
+
+
+Pair  time (%) = 0.151499 (6.78039)
+Neigh time (%) = 1.253 (56.0782)
+Comm  time (%) = 0.570143 (25.5169)
+Outpt time (%) = 1.36895e-05 (0.000612677)
+Other time (%) = 0.259722 (11.6239)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    331.75 ave 356 max 317 min
+Histogram: 1 1 0 1 0 0 0 0 0 1
+Neighs:    633.5 ave 661 max 612 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2534
+Ave neighs/atom = 5.25726
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:19 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  361000 
+  371000 
+Loop time of 2.23597 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:21 2023
+
+
+Pair  time (%) = 0.151726 (6.78569)
+Neigh time (%) = 1.25439 (56.1005)
+Comm  time (%) = 0.571087 (25.5409)
+Outpt time (%) = 1.2404e-05 (0.000554748)
+Other time (%) = 0.258755 (11.5724)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    332.5 ave 356 max 319 min
+Histogram: 1 1 1 0 0 0 0 0 0 1
+Neighs:    635 ave 664 max 612 min
+Histogram: 1 0 1 0 0 1 0 0 0 1
+
+Total # of neighbors = 2540
+Ave neighs/atom = 5.26971
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:21 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  371000 
+  381000 
+Loop time of 2.23563 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:24 2023
+
+
+Pair  time (%) = 0.152254 (6.81033)
+Neigh time (%) = 1.255 (56.1365)
+Comm  time (%) = 0.56997 (25.4949)
+Outpt time (%) = 1.60077e-05 (0.000716029)
+Other time (%) = 0.258384 (11.5576)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    329.5 ave 352 max 318 min
+Histogram: 1 1 1 0 0 0 0 0 0 1
+Neighs:    636.5 ave 662 max 614 min
+Histogram: 1 0 0 1 0 1 0 0 0 1
+
+Total # of neighbors = 2546
+Ave neighs/atom = 5.28216
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:24 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  381000 
+  391000 
+Loop time of 2.23165 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:26 2023
+
+
+Pair  time (%) = 0.15187 (6.80529)
+Neigh time (%) = 1.25209 (56.1059)
+Comm  time (%) = 0.564575 (25.2985)
+Outpt time (%) = 1.4477e-05 (0.000648712)
+Other time (%) = 0.263103 (11.7896)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    329 ave 352 max 318 min
+Histogram: 1 2 0 0 0 0 0 0 0 1
+Neighs:    636.75 ave 664 max 615 min
+Histogram: 1 0 1 0 1 0 0 0 0 1
+
+Total # of neighbors = 2547
+Ave neighs/atom = 5.28423
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:26 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  391000 
+  401000 
+stress: 0.068251 0.058921 0.003202 0.290820 0.327640 -0.032145
+Loop time of 2.23794 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:28 2023
+
+
+Pair  time (%) = 0.152744 (6.82521)
+Neigh time (%) = 1.2517 (55.9309)
+Comm  time (%) = 0.56831 (25.3944)
+Outpt time (%) = 1.40203e-05 (0.000626481)
+Other time (%) = 0.265171 (11.8489)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    329.25 ave 352 max 317 min
+Histogram: 1 1 1 0 0 0 0 0 0 1
+Neighs:    636.5 ave 666 max 616 min
+Histogram: 1 1 0 0 1 0 0 0 0 1
+
+Total # of neighbors = 2546
+Ave neighs/atom = 5.28216
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:28 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  401000 
+  411000 
+Loop time of 2.2355 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:30 2023
+
+
+Pair  time (%) = 0.152945 (6.84166)
+Neigh time (%) = 1.25231 (56.0195)
+Comm  time (%) = 0.566292 (25.3318)
+Outpt time (%) = 1.3917e-05 (0.000622547)
+Other time (%) = 0.26393 (11.8064)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    329.25 ave 351 max 316 min
+Histogram: 1 0 2 0 0 0 0 0 0 1
+Neighs:    636.75 ave 668 max 612 min
+Histogram: 1 1 0 0 0 1 0 0 0 1
+
+Total # of neighbors = 2547
+Ave neighs/atom = 5.28423
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:30 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  411000 
+  421000 
+Loop time of 2.23711 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:33 2023
+
+
+Pair  time (%) = 0.152968 (6.83773)
+Neigh time (%) = 1.25232 (55.9794)
+Comm  time (%) = 0.56728 (25.3577)
+Outpt time (%) = 1.38893e-05 (0.000620857)
+Other time (%) = 0.264527 (11.8245)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    329 ave 350 max 316 min
+Histogram: 1 0 2 0 0 0 0 0 0 1
+Neighs:    635.5 ave 666 max 613 min
+Histogram: 1 1 0 0 0 1 0 0 0 1
+
+Total # of neighbors = 2542
+Ave neighs/atom = 5.27386
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:33 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  421000 
+  431000 
+Loop time of 2.23414 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:35 2023
+
+
+Pair  time (%) = 0.153147 (6.85485)
+Neigh time (%) = 1.25092 (55.9912)
+Comm  time (%) = 0.566855 (25.3724)
+Outpt time (%) = 1.33485e-05 (0.000597477)
+Other time (%) = 0.263204 (11.781)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    329.25 ave 350 max 316 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    635.25 ave 665 max 615 min
+Histogram: 2 0 0 0 0 1 0 0 0 1
+
+Total # of neighbors = 2541
+Ave neighs/atom = 5.27178
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:35 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  431000 
+  441000 
+Loop time of 2.23095 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:37 2023
+
+
+Pair  time (%) = 0.152384 (6.83044)
+Neigh time (%) = 1.25273 (56.1521)
+Comm  time (%) = 0.565757 (25.3594)
+Outpt time (%) = 1.2954e-05 (0.000580648)
+Other time (%) = 0.260072 (11.6574)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    329.25 ave 350 max 316 min
+Histogram: 1 0 1 1 0 0 0 0 0 1
+Neighs:    635.5 ave 664 max 616 min
+Histogram: 1 1 0 0 0 1 0 0 0 1
+
+Total # of neighbors = 2542
+Ave neighs/atom = 5.27386
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:37 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  441000 
+  451000 
+stress: 0.068519 0.058813 0.003636 0.363096 0.425179 -0.092785
+Loop time of 2.22732 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:39 2023
+
+
+Pair  time (%) = 0.15194 (6.82167)
+Neigh time (%) = 1.25279 (56.2467)
+Comm  time (%) = 0.566464 (25.4326)
+Outpt time (%) = 1.3158e-05 (0.000590755)
+Other time (%) = 0.256109 (11.4985)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    329 ave 350 max 317 min
+Histogram: 1 0 2 0 0 0 0 0 0 1
+Neighs:    635.75 ave 654 max 617 min
+Histogram: 1 0 0 0 1 0 1 0 0 1
+
+Total # of neighbors = 2543
+Ave neighs/atom = 5.27593
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:39 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  451000 
+  461000 
+Loop time of 2.23056 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:42 2023
+
+
+Pair  time (%) = 0.152352 (6.83021)
+Neigh time (%) = 1.25194 (56.1268)
+Comm  time (%) = 0.567148 (25.4263)
+Outpt time (%) = 1.30057e-05 (0.000583071)
+Other time (%) = 0.259105 (11.6161)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    328 ave 350 max 317 min
+Histogram: 1 2 0 0 0 0 0 0 0 1
+Neighs:    635.5 ave 658 max 615 min
+Histogram: 1 0 0 1 0 1 0 0 0 1
+
+Total # of neighbors = 2542
+Ave neighs/atom = 5.27386
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:42 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  461000 
+  471000 
+Loop time of 2.21732 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:44 2023
+
+
+Pair  time (%) = 0.152112 (6.8602)
+Neigh time (%) = 1.24992 (56.371)
+Comm  time (%) = 0.565198 (25.4902)
+Outpt time (%) = 1.30765e-05 (0.000589744)
+Other time (%) = 0.250069 (11.278)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    328.25 ave 352 max 317 min
+Histogram: 1 2 0 0 0 0 0 0 0 1
+Neighs:    635.25 ave 657 max 623 min
+Histogram: 1 0 2 0 0 0 0 0 0 1
+
+Total # of neighbors = 2541
+Ave neighs/atom = 5.27178
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:44 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  471000 
+  481000 
+Loop time of 2.21756 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:46 2023
+
+
+Pair  time (%) = 0.151761 (6.84363)
+Neigh time (%) = 1.24917 (56.3308)
+Comm  time (%) = 0.564659 (25.4631)
+Outpt time (%) = 1.45525e-05 (0.000656241)
+Other time (%) = 0.251955 (11.3618)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    328.25 ave 352 max 317 min
+Histogram: 1 2 0 0 0 0 0 0 0 1
+Neighs:    634.75 ave 658 max 622 min
+Histogram: 1 1 1 0 0 0 0 0 0 1
+
+Total # of neighbors = 2539
+Ave neighs/atom = 5.26763
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:46 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  481000 
+  491000 
+Loop time of 2.22131 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:48 2023
+
+
+Pair  time (%) = 0.151466 (6.81874)
+Neigh time (%) = 1.25229 (56.3762)
+Comm  time (%) = 0.56923 (25.6259)
+Outpt time (%) = 1.2777e-05 (0.000575201)
+Other time (%) = 0.248313 (11.1786)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    328.25 ave 352 max 317 min
+Histogram: 1 2 0 0 0 0 0 0 0 1
+Neighs:    635 ave 657 max 622 min
+Histogram: 1 0 2 0 0 0 0 0 0 1
+
+Total # of neighbors = 2540
+Ave neighs/atom = 5.26971
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Mon Sep 11 14:32:48 2023
+
+Memory usage per processor = 11.0734 Mbytes
+    Step 
+  491000 
+  501000 
+stress: 0.068307 0.058596 0.003551 0.184109 0.252206 -0.009889
+Loop time of 2.22664 on 4 procs for 10000 steps with 482 atoms, finish time Mon Sep 11 14:32:50 2023
+
+
+Pair  time (%) = 0.151991 (6.82602)
+Neigh time (%) = 1.25462 (56.3459)
+Comm  time (%) = 0.569558 (25.5793)
+Outpt time (%) = 1.24808e-05 (0.000560521)
+Other time (%) = 0.250456 (11.2482)
+
+Nlocal:    120.5 ave 121 max 120 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Nghost:    328.25 ave 352 max 317 min
+Histogram: 1 2 0 0 0 0 0 0 0 1
+Neighs:    635.25 ave 659 max 621 min
+Histogram: 1 0 2 0 0 0 0 0 0 1
+
+Total # of neighbors = 2541
+Ave neighs/atom = 5.27178
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time

@@ -88,6 +88,8 @@ namespace LAMMPS_NS
         FixMultisphere(class LAMMPS *, int, char **);
         virtual ~FixMultisphere();
 
+        void update_dt();
+
         void post_create();
         void pre_delete(bool unfixflag);
         virtual int setmask();

@@ -1,0 +1,149 @@
+atom_modify       map array
+
+processors        3 3 2
+
+# Set domain
+region            domain block 0.0 5.72238e-04 0.0 5.72238e-04 0.0 2.86119e-04 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.000572238 0.000572238 0.000286119)
+  3 by 3 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          2.010e-05 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 6 ntry 10000000 spheres file particle_data.txt scale 1.0 type 1
+Finished calculating properties of template
+   mass = 6.281159e-11, radius of bounding sphere = 6.000000e-05, radius of equivalent sphere = 1.816925e-05
+   center of mass = 0.000000e+00, 0.000000e+00, 0.000000e+00
+   center of bounding sphere in body coords = -1.279411e-08, 1.836644e-09, -7.992997e-10
+   Principal moments of inertia_: 2.513759e-21, 7.585646e-20, 7.585610e-20
+     Eigenvector: 1.000000e+00, 4.563739e-05, 8.035656e-05
+     Eigenvector: -7.401838e-05, 9.161651e-01, 4.008010e-01
+     Eigenvector: -5.532837e-05, -4.008010e-01, 9.161651e-01
+     Inertia tensor: 2.513760e-21, -3.347177e-24, -5.893549e-24
+     Inertia tensor: -3.347177e-24, 7.585640e-20, 1.303636e-25
+     Inertia tensor: -5.893549e-24, 1.303636e-25, 7.585616e-20
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 3 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.55
+# Apply integration fix
+fix               ms nve_group1 multisphere
+fix               integr1 nve_group1 nve/sphere
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Thu Sep 14 17:21:29 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1531)
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.49154 Mbytes
+    Step 
+       0 
+INFO: Particle insertion ins1: inserted 2051 particle templates (mass 1.288266e-07) at step 1
+ - a total of 2051 particle templates (mass 1.288266e-07) inserted so far.
+       1 
+Loop time of 0.0141039 on 18 procs for 1 steps with 12306 atoms, finish time Thu Sep 14 17:21:33 2023
+
+
+Pair  time (%) = 0.000970851 (6.88355)
+Neigh time (%) = 0.00310818 (22.0377)
+Comm  time (%) = 0.00222555 (15.7797)
+Outpt time (%) = 0.00339345 (24.0604)
+Other time (%) = 0.00440588 (31.2387)
+
+Nlocal:    683.667 ave 1087 max 499 min
+Histogram: 8 0 0 1 7 0 0 0 0 2
+Nghost:    5404.67 ave 8500 max 4059 min
+Histogram: 8 0 0 4 4 0 0 0 0 2
+Neighs:    36515.7 ave 69479 max 22221 min
+Histogram: 7 1 1 4 2 1 0 0 0 2
+
+Total # of neighbors = 657282
+Ave neighs/atom = 53.4115
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+12306 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 1.00e-06 reset 1000 threshold 1.00e-09 start_dt 5.868e-12 end_dt 5.868e-10
+run               100000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Thu Sep 14 17:21:33 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1531)
+Memory usage per processor = 12.3873 Mbytes
+    Step 
+       1 
+  100001 
+Loop time of 477.738 on 18 procs for 100000 steps with 12306 atoms, finish time Thu Sep 14 17:29:31 2023
+
+
+Pair  time (%) = 34.4632 (7.21383)
+Neigh time (%) = 157.53 (32.9741)
+Comm  time (%) = 60.5262 (12.6693)
+Outpt time (%) = 0.000254736 (5.33213e-05)
+Other time (%) = 225.219 (47.1427)
+
+Nlocal:    683.667 ave 705 max 663 min
+Histogram: 1 0 1 5 3 4 0 1 1 2
+Nghost:    5142.11 ave 5246 max 5077 min
+Histogram: 4 5 1 1 1 0 2 0 2 2
+Neighs:    16745.1 ave 17653 max 16236 min
+Histogram: 5 2 2 3 2 0 1 0 1 2
+
+Total # of neighbors = 301411
+Ave neighs/atom = 24.493
+Neighbor list builds = 100000
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          1.1736e-08
+
+fix               leboundary all lebc 100.0 true gtemp 1.00e-06
+
+# Run desired simulation
+run               15000000
+Setting up run at Thu Sep 14 17:29:31 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1531)
+Memory usage per processor = 12.4121 Mbytes
+    Step 
+  100001 
+stress: 469.486602 379.848175 3.480775 2154055.817974 2633333.460567 -28497.743755
+stress: 298.421677 434.444855 -2.646127 1485513.382105 1698675.488017 -47916.510854
+stress: 105.202676 85.961223 3.273722 1205535.459179 1378910.815508 -67934.462201
+stress: 210.080427 281.241467 1.557179 1138459.111305 1348706.889586 -77258.478506
+stress: 93.311796 75.914194 5.312112 1170420.008041 1355254.445924 -112087.466520
+stress: 123.091331 104.145419 6.202941 1173167.266710 1331807.645154 -96415.203099
+stress: 286.066906 369.579544 4.774305 885347.714608 988427.158254 -44367.696975
+stress: 141.036646 127.834214 4.622660 772786.568433 858311.805473 -49848.477567
+stress: 161.505158 153.514988 4.329053 738588.013983 819202.973465 -49812.227152
+stress: 884.259424 1833.950150 -37.920483 781358.061868 852674.537084 -42460.822120
+stress: 176.999076 178.105792 0.084220 602582.814516 678247.807128 -26358.206209

@@ -1,0 +1,1591 @@
+atom_modify       map array
+
+processors        4 4 2
+
+# Set domain
+region            domain block 0.0 5.04000e-03 0.0 5.04000e-03 0.0 2.52000e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00504 0.00504 0.00252)
+  4 by 4 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          1.721e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 93 ntry 10000000 spheres file multisphere93.txt scale 1.0 type 1
+Finished calculating properties of template
+   mass = 2.760772e-08, radius of bounding sphere = 1.391000e-04, radius of equivalent sphere = 1.381446e-04
+   center of mass = 0.000000e+00, 0.000000e+00, 0.000000e+00
+   center of bounding sphere in body coords = -1.767384e-08, -6.601520e-09, 2.552590e-08
+   Principal moments of inertia_: 2.104960e-16, 2.106500e-16, 2.106852e-16
+     Eigenvector: 9.218533e-01, 3.633681e-02, -3.858317e-01
+     Eigenvector: -2.065396e-01, 8.884841e-01, -4.098017e-01
+     Eigenvector: 3.279145e-01, 4.574666e-01, 8.265570e-01
+     Inertia tensor: 2.105229e-16, 1.304116e-22, 6.431148e-20
+     Inertia tensor: 1.304116e-22, 2.106571e-16, 1.548612e-20
+     Inertia tensor: 6.431148e-20, 1.548612e-20, 2.106511e-16
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 46 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.05
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Fri Sep  8 10:22:25 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.45116 Mbytes
+    Step 
+       0 
+INFO: Particle insertion ins1: inserted 290 particle templates (mass 8.006238e-06) at step 1
+ - a total of 290 particle templates (mass 8.006238e-06) inserted so far.
+       1 
+Loop time of 0.0107198 on 32 procs for 1 steps with 26970 atoms, finish time Fri Sep  8 10:22:29 2023
+
+
+Pair  time (%) = 0.000524036 (4.88848)
+Neigh time (%) = 0.00295454 (27.5615)
+Comm  time (%) = 0.00146222 (13.6403)
+Outpt time (%) = 0.00143168 (13.3555)
+Other time (%) = 0.00434734 (40.5542)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2187.66 ave 2648 max 1644 min
+Histogram: 2 0 3 4 5 5 4 6 1 2
+Neighs:    25245.2 ave 54168 max 4822 min
+Histogram: 4 2 4 7 3 4 3 3 1 1
+
+Total # of neighbors = 807845
+Ave neighs/atom = 29.9535
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+26970 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 5.35e-06 reset 1000 threshold 1.00e-06 start_dt 2.616e-11 end_dt 1.570e-08
+run               100000
+Setting up run at Fri Sep  8 10:22:29 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9184 Mbytes
+    Step 
+       1 
+Loop time of 5.81609 on 32 procs for 100000 steps with 26970 atoms, finish time Fri Sep  8 10:22:35 2023
+
+
+Pair  time (%) = 0.389793 (6.70198)
+Neigh time (%) = 2.50219 (43.0218)
+Comm  time (%) = 0.393526 (6.76616)
+Outpt time (%) = 0 (0)
+Other time (%) = 2.53058 (43.5101)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2187.66 ave 2648 max 1644 min
+Histogram: 2 0 3 4 5 5 4 6 1 2
+Neighs:    25245.2 ave 54168 max 4822 min
+Histogram: 4 2 4 7 3 4 3 3 1 1
+
+Total # of neighbors = 807845
+Ave neighs/atom = 29.9535
+Neighbor list builds = 999
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          1.5697e-09
+
+fix               leboundary all lebc 100.0 true gtemp 0.1
+
+# Run desired simulation
+info time
+run 10000
+Setting up run at Fri Sep  8 10:22:35 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+    1000 
+   11000 
+Loop time of 59.7855 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:23:34 2023
+
+
+Pair  time (%) = 3.91922 (6.55547)
+Neigh time (%) = 25.6616 (42.9228)
+Comm  time (%) = 5.42345 (9.07152)
+Outpt time (%) = 0.00109469 (0.00183102)
+Other time (%) = 24.7801 (41.4483)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2497.19 ave 3309 max 1655 min
+Histogram: 1 3 4 3 5 3 5 4 2 2
+Neighs:    25232.9 ave 53893 max 4760 min
+Histogram: 4 1 5 7 3 4 3 2 2 1
+
+Total # of neighbors = 807453
+Ave neighs/atom = 29.9389
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:23:34 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+   11000 
+   21000 
+Loop time of 59.4001 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:24:34 2023
+
+
+Pair  time (%) = 3.90364 (6.57177)
+Neigh time (%) = 25.4424 (42.8323)
+Comm  time (%) = 5.38202 (9.06062)
+Outpt time (%) = 0.00113903 (0.00191756)
+Other time (%) = 24.6709 (41.5334)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2497.25 ave 3307 max 1643 min
+Histogram: 1 3 3 3 6 3 5 4 2 2
+Neighs:    25229.2 ave 53685 max 4710 min
+Histogram: 3 2 5 6 4 4 3 2 2 1
+
+Total # of neighbors = 807336
+Ave neighs/atom = 29.9346
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:24:34 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+   21000 
+   31000 
+Loop time of 58.9851 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:25:33 2023
+
+
+Pair  time (%) = 3.88334 (6.58358)
+Neigh time (%) = 25.3628 (42.9987)
+Comm  time (%) = 5.30883 (9.00028)
+Outpt time (%) = 0.00105222 (0.00178387)
+Other time (%) = 24.4291 (41.4157)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2497.09 ave 3291 max 1653 min
+Histogram: 1 3 3 3 6 3 5 3 3 2
+Neighs:    25229.9 ave 53375 max 4661 min
+Histogram: 3 2 5 6 4 4 3 2 2 1
+
+Total # of neighbors = 807358
+Ave neighs/atom = 29.9354
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:25:33 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+   31000 
+   41000 
+Loop time of 58.7848 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:26:32 2023
+
+
+Pair  time (%) = 3.88322 (6.60581)
+Neigh time (%) = 25.3648 (43.1485)
+Comm  time (%) = 5.30323 (9.02142)
+Outpt time (%) = 0.00106521 (0.00181205)
+Other time (%) = 24.2325 (41.2224)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2495.97 ave 3267 max 1652 min
+Histogram: 1 3 2 4 6 3 3 4 4 2
+Neighs:    25226.4 ave 53127 max 4600 min
+Histogram: 3 2 5 7 3 4 3 2 2 1
+
+Total # of neighbors = 807245
+Ave neighs/atom = 29.9312
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:26:32 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+   41000 
+   51000 
+stress: 0.212376 0.659450 0.125005 0.024037 0.027524 0.026205
+Loop time of 58.6773 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:27:30 2023
+
+
+Pair  time (%) = 3.88635 (6.62326)
+Neigh time (%) = 25.4012 (43.2895)
+Comm  time (%) = 5.2912 (9.01745)
+Outpt time (%) = 0.00109722 (0.00186992)
+Other time (%) = 24.0975 (41.0679)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2494.12 ave 3258 max 1646 min
+Histogram: 1 3 2 4 6 3 3 4 4 2
+Neighs:    25219.6 ave 52923 max 4469 min
+Histogram: 3 2 5 7 2 4 4 2 2 1
+
+Total # of neighbors = 807026
+Ave neighs/atom = 29.9231
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:27:30 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+   51000 
+   61000 
+Loop time of 58.6159 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:28:29 2023
+
+
+Pair  time (%) = 3.88707 (6.63141)
+Neigh time (%) = 25.3958 (43.3257)
+Comm  time (%) = 5.2819 (9.01103)
+Outpt time (%) = 0.00111337 (0.00189943)
+Other time (%) = 24.0501 (41.03)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2490.34 ave 3247 max 1634 min
+Histogram: 1 3 2 4 6 3 3 4 4 2
+Neighs:    25217.6 ave 52643 max 4417 min
+Histogram: 3 2 5 7 2 4 4 2 2 1
+
+Total # of neighbors = 806962
+Ave neighs/atom = 29.9207
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:28:29 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+   61000 
+   71000 
+Loop time of 58.6174 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:29:27 2023
+
+
+Pair  time (%) = 3.8887 (6.63404)
+Neigh time (%) = 25.4044 (43.3393)
+Comm  time (%) = 5.28404 (9.01447)
+Outpt time (%) = 0.00106001 (0.00180835)
+Other time (%) = 24.0392 (41.0104)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2488.91 ave 3242 max 1636 min
+Histogram: 1 3 2 4 6 3 3 3 5 2
+Neighs:    25222.9 ave 52400 max 4367 min
+Histogram: 3 2 5 7 2 4 4 2 2 1
+
+Total # of neighbors = 807133
+Ave neighs/atom = 29.9271
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:29:27 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+   71000 
+   81000 
+Loop time of 58.7406 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:30:26 2023
+
+
+Pair  time (%) = 3.88994 (6.62222)
+Neigh time (%) = 25.4026 (43.2454)
+Comm  time (%) = 5.26568 (8.96428)
+Outpt time (%) = 0.00107526 (0.00183052)
+Other time (%) = 24.1813 (41.1663)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2484.84 ave 3224 max 1634 min
+Histogram: 1 3 2 4 5 4 3 3 5 2
+Neighs:    25232.9 ave 52252 max 4279 min
+Histogram: 3 2 5 7 2 4 3 3 2 1
+
+Total # of neighbors = 807453
+Ave neighs/atom = 29.9389
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:30:26 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+   81000 
+   91000 
+Loop time of 58.9044 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:31:25 2023
+
+
+Pair  time (%) = 3.89091 (6.60546)
+Neigh time (%) = 25.4398 (43.1882)
+Comm  time (%) = 5.2997 (8.99712)
+Outpt time (%) = 0.00107143 (0.00181893)
+Other time (%) = 24.2729 (41.2074)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2490.06 ave 3230 max 1632 min
+Histogram: 1 3 2 4 5 4 3 3 5 2
+Neighs:    25223.8 ave 52041 max 4243 min
+Histogram: 3 2 5 7 2 4 3 3 2 1
+
+Total # of neighbors = 807161
+Ave neighs/atom = 29.9281
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:31:25 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+   91000 
+  101000 
+stress: 0.213117 0.659659 0.125278 0.318848 0.197144 0.233681
+Loop time of 58.8726 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:32:24 2023
+
+
+Pair  time (%) = 3.89013 (6.60771)
+Neigh time (%) = 25.4144 (43.1684)
+Comm  time (%) = 5.36623 (9.11499)
+Outpt time (%) = 0.00106509 (0.00180915)
+Other time (%) = 24.2008 (41.1071)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2490.91 ave 3240 max 1620 min
+Histogram: 1 3 1 5 5 4 3 3 5 2
+Neighs:    25218.4 ave 51750 max 4236 min
+Histogram: 3 3 4 7 2 4 3 2 3 1
+
+Total # of neighbors = 806990
+Ave neighs/atom = 29.9218
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:32:24 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  101000 
+  111000 
+Loop time of 59.0697 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:33:23 2023
+
+
+Pair  time (%) = 3.88982 (6.58513)
+Neigh time (%) = 25.4101 (43.0172)
+Comm  time (%) = 5.49842 (9.30835)
+Outpt time (%) = 0.00106263 (0.00179895)
+Other time (%) = 24.2703 (41.0876)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2488.03 ave 3224 max 1620 min
+Histogram: 1 3 1 5 5 4 3 3 5 2
+Neighs:    25220.5 ave 51535 max 4195 min
+Histogram: 3 3 4 7 2 4 3 2 3 1
+
+Total # of neighbors = 807056
+Ave neighs/atom = 29.9242
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:33:23 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  111000 
+  121000 
+Loop time of 59.0995 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:34:22 2023
+
+
+Pair  time (%) = 3.89039 (6.58278)
+Neigh time (%) = 25.4243 (43.0194)
+Comm  time (%) = 5.48145 (9.27496)
+Outpt time (%) = 0.0011279 (0.00190847)
+Other time (%) = 24.3023 (41.1209)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2483.75 ave 3222 max 1616 min
+Histogram: 1 3 1 5 5 4 3 3 5 2
+Neighs:    25230.6 ave 51182 max 4152 min
+Histogram: 3 3 4 6 3 3 4 2 3 1
+
+Total # of neighbors = 807378
+Ave neighs/atom = 29.9362
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:34:22 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  121000 
+  131000 
+Loop time of 59.2041 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:35:21 2023
+
+
+Pair  time (%) = 3.89025 (6.57092)
+Neigh time (%) = 25.4344 (42.9606)
+Comm  time (%) = 5.54085 (9.35889)
+Outpt time (%) = 0.00111341 (0.00188063)
+Other time (%) = 24.3375 (41.1077)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2485.44 ave 3200 max 1618 min
+Histogram: 1 3 1 5 5 4 2 4 4 3
+Neighs:    25230 ave 50891 max 4096 min
+Histogram: 3 3 4 6 3 3 4 2 3 1
+
+Total # of neighbors = 807359
+Ave neighs/atom = 29.9354
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:35:21 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  131000 
+  141000 
+Loop time of 59.1157 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:36:21 2023
+
+
+Pair  time (%) = 3.89027 (6.58077)
+Neigh time (%) = 25.4254 (43.0096)
+Comm  time (%) = 5.53289 (9.35943)
+Outpt time (%) = 0.0010567 (0.0017875)
+Other time (%) = 24.2661 (41.0484)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2481.34 ave 3176 max 1602 min
+Histogram: 1 3 1 5 3 4 4 3 5 3
+Neighs:    25235.7 ave 50644 max 4074 min
+Histogram: 3 2 5 6 2 4 4 2 3 1
+
+Total # of neighbors = 807541
+Ave neighs/atom = 29.9422
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:36:21 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  141000 
+  151000 
+stress: 0.212717 0.659453 0.124710 0.754859 0.373540 0.344748
+Loop time of 59.1307 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:37:20 2023
+
+
+Pair  time (%) = 3.88993 (6.57853)
+Neigh time (%) = 25.4219 (42.9928)
+Comm  time (%) = 5.57538 (9.42891)
+Outpt time (%) = 0.00109787 (0.00185668)
+Other time (%) = 24.2424 (40.9979)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2482.47 ave 3175 max 1610 min
+Histogram: 1 3 1 5 3 5 3 3 5 3
+Neighs:    25232.6 ave 50348 max 4030 min
+Histogram: 3 2 5 6 2 4 4 2 3 1
+
+Total # of neighbors = 807444
+Ave neighs/atom = 29.9386
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:37:20 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  151000 
+  161000 
+Loop time of 59.1788 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:38:19 2023
+
+
+Pair  time (%) = 3.88911 (6.57179)
+Neigh time (%) = 25.4081 (42.9344)
+Comm  time (%) = 5.57677 (9.42359)
+Outpt time (%) = 0.00110881 (0.00187366)
+Other time (%) = 24.3037 (41.0683)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2485.25 ave 3177 max 1606 min
+Histogram: 1 3 1 5 3 4 3 4 5 3
+Neighs:    25238.3 ave 50012 max 4006 min
+Histogram: 3 2 5 6 2 4 4 2 3 1
+
+Total # of neighbors = 807626
+Ave neighs/atom = 29.9453
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:38:19 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  161000 
+  171000 
+Loop time of 59.0175 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:39:18 2023
+
+
+Pair  time (%) = 3.88883 (6.58928)
+Neigh time (%) = 25.3996 (43.0374)
+Comm  time (%) = 5.57608 (9.44818)
+Outpt time (%) = 0.00110306 (0.00186903)
+Other time (%) = 24.1519 (40.9233)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2479.88 ave 3135 max 1610 min
+Histogram: 1 3 1 5 3 4 3 3 5 4
+Neighs:    25235.6 ave 49753 max 3967 min
+Histogram: 3 1 6 6 2 4 4 2 3 1
+
+Total # of neighbors = 807539
+Ave neighs/atom = 29.9421
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:39:18 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  171000 
+  181000 
+Loop time of 58.9601 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:40:17 2023
+
+
+Pair  time (%) = 3.88935 (6.59657)
+Neigh time (%) = 25.3985 (43.0775)
+Comm  time (%) = 5.54153 (9.39878)
+Outpt time (%) = 0.00106592 (0.00180786)
+Other time (%) = 24.1296 (40.9253)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2479.56 ave 3136 max 1607 min
+Histogram: 1 3 1 5 3 4 3 3 5 4
+Neighs:    25237.4 ave 49406 max 3931 min
+Histogram: 3 1 6 5 3 2 6 1 4 1
+
+Total # of neighbors = 807598
+Ave neighs/atom = 29.9443
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:40:17 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  181000 
+  191000 
+Loop time of 59.0066 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:41:16 2023
+
+
+Pair  time (%) = 3.88857 (6.59005)
+Neigh time (%) = 25.3684 (42.9925)
+Comm  time (%) = 5.56242 (9.42678)
+Outpt time (%) = 0.00109585 (0.00185716)
+Other time (%) = 24.1861 (40.9889)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2477.59 ave 3118 max 1605 min
+Histogram: 1 2 2 5 2 5 3 3 4 5
+Neighs:    25236.1 ave 49100 max 3945 min
+Histogram: 3 1 6 5 3 2 5 2 4 1
+
+Total # of neighbors = 807554
+Ave neighs/atom = 29.9427
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:41:16 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  191000 
+  201000 
+stress: 0.212317 0.659106 0.123197 1.572237 0.770417 -0.085554
+Loop time of 58.9302 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:42:15 2023
+
+
+Pair  time (%) = 3.89011 (6.60121)
+Neigh time (%) = 25.3585 (43.0314)
+Comm  time (%) = 5.55552 (9.42728)
+Outpt time (%) = 0.00104905 (0.00178016)
+Other time (%) = 24.1251 (40.9383)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2480 ave 3099 max 1609 min
+Histogram: 1 2 2 5 2 4 4 2 5 5
+Neighs:    25239.1 ave 48661 max 3915 min
+Histogram: 3 1 6 5 3 2 5 1 5 1
+
+Total # of neighbors = 807650
+Ave neighs/atom = 29.9462
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:42:15 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  201000 
+  211000 
+Loop time of 58.95 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:43:14 2023
+
+
+Pair  time (%) = 3.89148 (6.60132)
+Neigh time (%) = 25.3613 (43.0216)
+Comm  time (%) = 5.57604 (9.45892)
+Outpt time (%) = 0.00110972 (0.00188248)
+Other time (%) = 24.1202 (40.9163)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2480.88 ave 3086 max 1605 min
+Histogram: 1 2 2 5 2 4 4 2 5 5
+Neighs:    25253.6 ave 48403 max 3902 min
+Histogram: 3 1 6 5 3 2 4 2 4 2
+
+Total # of neighbors = 808114
+Ave neighs/atom = 29.9634
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:43:14 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  211000 
+  221000 
+Loop time of 58.8315 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:44:13 2023
+
+
+Pair  time (%) = 3.88997 (6.61205)
+Neigh time (%) = 25.3384 (43.0694)
+Comm  time (%) = 5.54023 (9.41711)
+Outpt time (%) = 0.00108104 (0.00183752)
+Other time (%) = 24.0618 (40.8996)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2479.5 ave 3077 max 1605 min
+Histogram: 1 2 2 4 3 5 3 2 4 6
+Neighs:    25253.4 ave 48070 max 3902 min
+Histogram: 2 2 5 6 3 2 3 3 4 2
+
+Total # of neighbors = 808108
+Ave neighs/atom = 29.9632
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:44:13 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  221000 
+  231000 
+Loop time of 58.7782 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:45:11 2023
+
+
+Pair  time (%) = 3.89178 (6.62112)
+Neigh time (%) = 25.3281 (43.0909)
+Comm  time (%) = 5.55212 (9.44587)
+Outpt time (%) = 0.00106226 (0.00180724)
+Other time (%) = 24.0052 (40.8403)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2473.94 ave 3057 max 1601 min
+Histogram: 1 2 2 3 4 4 4 2 4 6
+Neighs:    25265 ave 47851 max 3907 min
+Histogram: 2 2 5 6 3 2 3 3 4 2
+
+Total # of neighbors = 808480
+Ave neighs/atom = 29.977
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:45:11 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  231000 
+  241000 
+Loop time of 58.5782 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:46:10 2023
+
+
+Pair  time (%) = 3.89433 (6.64809)
+Neigh time (%) = 25.3174 (43.2198)
+Comm  time (%) = 5.51934 (9.42216)
+Outpt time (%) = 0.00105521 (0.00180137)
+Other time (%) = 23.8461 (40.7081)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2470.56 ave 3058 max 1601 min
+Histogram: 1 3 1 3 4 4 4 2 4 6
+Neighs:    25275.5 ave 47468 max 3924 min
+Histogram: 2 2 3 8 3 2 3 3 4 2
+
+Total # of neighbors = 808815
+Ave neighs/atom = 29.9894
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:46:10 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  241000 
+  251000 
+stress: 0.211806 0.656814 0.122395 1.648195 1.464735 0.106798
+Loop time of 58.6035 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:47:09 2023
+
+
+Pair  time (%) = 3.89667 (6.64921)
+Neigh time (%) = 25.3075 (43.1844)
+Comm  time (%) = 5.51094 (9.40377)
+Outpt time (%) = 0.00109536 (0.00186911)
+Other time (%) = 23.8872 (40.7608)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2468.47 ave 3053 max 1600 min
+Histogram: 1 2 2 3 4 4 4 2 4 6
+Neighs:    25290 ave 47180 max 3911 min
+Histogram: 2 2 3 8 3 1 3 4 4 2
+
+Total # of neighbors = 809279
+Ave neighs/atom = 30.0066
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:47:09 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  251000 
+  261000 
+Loop time of 58.5216 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:48:07 2023
+
+
+Pair  time (%) = 3.89858 (6.66178)
+Neigh time (%) = 25.2912 (43.2169)
+Comm  time (%) = 5.50295 (9.40328)
+Outpt time (%) = 0.00107035 (0.00182898)
+Other time (%) = 23.8278 (40.7162)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2471.16 ave 3036 max 1603 min
+Histogram: 1 2 2 3 4 4 3 3 4 6
+Neighs:    25297.8 ave 46873 max 3909 min
+Histogram: 2 2 3 8 3 1 3 3 5 2
+
+Total # of neighbors = 809530
+Ave neighs/atom = 30.0159
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:48:07 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  261000 
+  271000 
+Loop time of 58.6494 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:49:06 2023
+
+
+Pair  time (%) = 3.90044 (6.65043)
+Neigh time (%) = 25.2578 (43.0658)
+Comm  time (%) = 5.50102 (9.3795)
+Outpt time (%) = 0.00112481 (0.00191785)
+Other time (%) = 23.9889 (40.9023)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2466.12 ave 3024 max 1593 min
+Histogram: 1 2 2 3 4 4 3 3 4 6
+Neighs:    25309.3 ave 46592 max 3944 min
+Histogram: 2 2 3 8 3 1 3 3 4 3
+
+Total # of neighbors = 809897
+Ave neighs/atom = 30.0296
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:49:06 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  271000 
+  281000 
+Loop time of 58.6052 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:50:04 2023
+
+
+Pair  time (%) = 3.90291 (6.65967)
+Neigh time (%) = 25.2318 (43.0538)
+Comm  time (%) = 5.47035 (9.33425)
+Outpt time (%) = 0.00111756 (0.00190693)
+Other time (%) = 23.999 (40.9503)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2466.47 ave 3020 max 1593 min
+Histogram: 1 2 2 3 4 3 4 3 4 6
+Neighs:    25328.6 ave 46287 max 3977 min
+Histogram: 2 2 3 8 2 2 3 3 4 3
+
+Total # of neighbors = 810516
+Ave neighs/atom = 30.0525
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:50:04 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  281000 
+  291000 
+Loop time of 58.7345 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:51:03 2023
+
+
+Pair  time (%) = 3.90547 (6.64937)
+Neigh time (%) = 25.2187 (42.9369)
+Comm  time (%) = 5.48684 (9.34177)
+Outpt time (%) = 0.00116622 (0.00198558)
+Other time (%) = 24.1222 (41.07)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2462.38 ave 3031 max 1571 min
+Histogram: 1 2 2 3 4 3 4 3 4 6
+Neighs:    25345.6 ave 45953 max 4036 min
+Histogram: 2 2 3 8 2 2 3 3 4 3
+
+Total # of neighbors = 811059
+Ave neighs/atom = 30.0726
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:51:03 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  291000 
+  301000 
+stress: 0.212943 0.656297 0.120278 2.145701 1.714856 0.204268
+Loop time of 58.7356 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:52:02 2023
+
+
+Pair  time (%) = 3.90815 (6.65381)
+Neigh time (%) = 25.2288 (42.9533)
+Comm  time (%) = 5.47098 (9.3146)
+Outpt time (%) = 0.00113807 (0.00193762)
+Other time (%) = 24.1264 (41.0764)
+
+Nlocal:    842.812 ave 1023 max 744 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2459.91 ave 3024 max 1581 min
+Histogram: 1 2 2 3 4 2 5 3 4 6
+Neighs:    25355.1 ave 45601 max 4063 min
+Histogram: 2 2 3 8 2 2 3 3 4 3
+
+Total # of neighbors = 811364
+Ave neighs/atom = 30.0839
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:52:02 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  301000 
+  311000 
+Loop time of 58.8018 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:53:01 2023
+
+
+Pair  time (%) = 3.90884 (6.64747)
+Neigh time (%) = 25.1914 (42.8412)
+Comm  time (%) = 5.48303 (9.32459)
+Outpt time (%) = 0.00111575 (0.00189747)
+Other time (%) = 24.2174 (41.1848)
+
+Nlocal:    842.812 ave 1023 max 742 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2458.12 ave 3025 max 1578 min
+Histogram: 1 2 2 3 4 4 3 3 4 6
+Neighs:    25358.1 ave 45314 max 4103 min
+Histogram: 2 2 2 9 2 2 3 3 4 3
+
+Total # of neighbors = 811459
+Ave neighs/atom = 30.0875
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:53:01 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  311000 
+  321000 
+Loop time of 58.8436 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:53:59 2023
+
+
+Pair  time (%) = 3.90863 (6.64241)
+Neigh time (%) = 25.2108 (42.8437)
+Comm  time (%) = 5.48678 (9.32435)
+Outpt time (%) = 0.00113372 (0.00192666)
+Other time (%) = 24.2363 (41.1876)
+
+Nlocal:    842.812 ave 1023 max 740 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2458.69 ave 3028 max 1572 min
+Histogram: 1 2 2 3 4 3 4 3 5 5
+Neighs:    25353.7 ave 44962 max 4179 min
+Histogram: 2 2 2 8 3 2 3 3 4 3
+
+Total # of neighbors = 811319
+Ave neighs/atom = 30.0823
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:53:59 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  321000 
+  331000 
+Loop time of 58.8268 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:54:58 2023
+
+
+Pair  time (%) = 3.90979 (6.64626)
+Neigh time (%) = 25.1865 (42.8147)
+Comm  time (%) = 5.48506 (9.32408)
+Outpt time (%) = 0.00117586 (0.00199885)
+Other time (%) = 24.2443 (41.2129)
+
+Nlocal:    842.812 ave 1023 max 734 min
+Histogram: 7 0 0 17 0 0 7 0 0 1
+Nghost:    2461.19 ave 3037 max 1573 min
+Histogram: 1 2 2 3 4 4 3 4 3 6
+Neighs:    25353.1 ave 44605 max 4250 min
+Histogram: 2 2 2 8 3 2 2 4 3 4
+
+Total # of neighbors = 811299
+Ave neighs/atom = 30.0815
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:54:58 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  331000 
+  341000 
+Loop time of 58.8395 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:55:57 2023
+
+
+Pair  time (%) = 3.90843 (6.64254)
+Neigh time (%) = 25.1636 (42.7666)
+Comm  time (%) = 5.48567 (9.32312)
+Outpt time (%) = 0.00110721 (0.00188175)
+Other time (%) = 24.2806 (41.2659)
+
+Nlocal:    842.812 ave 1023 max 734 min
+Histogram: 7 0 0 16 1 0 7 0 0 1
+Nghost:    2458.25 ave 3040 max 1575 min
+Histogram: 1 2 2 3 4 4 3 4 3 6
+Neighs:    25358.2 ave 44292 max 4318 min
+Histogram: 3 0 3 8 2 3 2 4 3 4
+
+Total # of neighbors = 811463
+Ave neighs/atom = 30.0876
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:55:57 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  341000 
+  351000 
+stress: 0.213444 0.654575 0.120968 3.184807 2.410625 -0.050574
+Loop time of 58.6965 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:56:56 2023
+
+
+Pair  time (%) = 3.91069 (6.66256)
+Neigh time (%) = 25.1322 (42.8171)
+Comm  time (%) = 5.47369 (9.32541)
+Outpt time (%) = 0.00116707 (0.00198831)
+Other time (%) = 24.1788 (41.1929)
+
+Nlocal:    842.812 ave 1023 max 726 min
+Histogram: 7 0 0 15 2 0 7 0 0 1
+Nghost:    2452.44 ave 3044 max 1569 min
+Histogram: 1 2 2 3 4 4 3 4 3 6
+Neighs:    25353.7 ave 44211 max 4374 min
+Histogram: 3 0 3 8 2 3 2 4 3 4
+
+Total # of neighbors = 811319
+Ave neighs/atom = 30.0823
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:56:56 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  351000 
+  361000 
+Loop time of 58.6562 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:57:55 2023
+
+
+Pair  time (%) = 3.90816 (6.66282)
+Neigh time (%) = 25.1005 (42.7926)
+Comm  time (%) = 5.45353 (9.29744)
+Outpt time (%) = 0.00119497 (0.00203725)
+Other time (%) = 24.1928 (41.2451)
+
+Nlocal:    842.812 ave 1023 max 722 min
+Histogram: 7 0 0 15 2 0 7 0 0 1
+Nghost:    2453.12 ave 3044 max 1577 min
+Histogram: 1 2 2 4 3 4 3 4 4 5
+Neighs:    25352.9 ave 44142 max 4498 min
+Histogram: 3 0 3 8 2 3 2 4 3 4
+
+Total # of neighbors = 811292
+Ave neighs/atom = 30.0813
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:57:55 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  361000 
+  371000 
+Loop time of 58.7377 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:58:53 2023
+
+
+Pair  time (%) = 3.91126 (6.65885)
+Neigh time (%) = 25.098 (42.729)
+Comm  time (%) = 5.45534 (9.28763)
+Outpt time (%) = 0.00120275 (0.00204766)
+Other time (%) = 24.2719 (41.3225)
+
+Nlocal:    842.812 ave 1023 max 720 min
+Histogram: 7 0 0 15 2 0 7 0 0 1
+Nghost:    2454.31 ave 3049 max 1569 min
+Histogram: 1 2 2 3 4 4 4 3 4 5
+Neighs:    25360.6 ave 44111 max 4621 min
+Histogram: 3 0 3 8 2 3 2 4 3 4
+
+Total # of neighbors = 811540
+Ave neighs/atom = 30.0905
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:58:53 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  371000 
+  381000 
+Loop time of 58.6535 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 10:59:52 2023
+
+
+Pair  time (%) = 3.91035 (6.66687)
+Neigh time (%) = 25.0884 (42.7739)
+Comm  time (%) = 5.46694 (9.32073)
+Outpt time (%) = 0.00115986 (0.00197748)
+Other time (%) = 24.1867 (41.2365)
+
+Nlocal:    842.812 ave 1023 max 720 min
+Histogram: 7 0 0 15 2 0 7 0 0 1
+Nghost:    2454.47 ave 3076 max 1573 min
+Histogram: 1 2 2 4 3 5 3 5 2 5
+Neighs:    25376.1 ave 44124 max 4759 min
+Histogram: 3 0 3 8 2 3 2 3 4 4
+
+Total # of neighbors = 812034
+Ave neighs/atom = 30.1088
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 10:59:52 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  381000 
+  391000 
+Loop time of 58.4928 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:00:50 2023
+
+
+Pair  time (%) = 3.91397 (6.69138)
+Neigh time (%) = 25.0705 (42.8608)
+Comm  time (%) = 5.47813 (9.36548)
+Outpt time (%) = 0.00117342 (0.00200609)
+Other time (%) = 24.029 (41.0803)
+
+Nlocal:    842.812 ave 1023 max 710 min
+Histogram: 1 6 0 1 14 2 0 7 0 1
+Nghost:    2454.09 ave 3071 max 1580 min
+Histogram: 1 2 2 4 3 5 3 4 3 5
+Neighs:    25389.8 ave 44061 max 4886 min
+Histogram: 3 0 4 7 3 2 2 3 4 4
+
+Total # of neighbors = 812473
+Ave neighs/atom = 30.1251
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 11:00:50 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  391000 
+  401000 
+stress: 0.213652 0.654231 0.121441 3.555331 2.434827 -0.112483
+Loop time of 58.6016 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:01:49 2023
+
+
+Pair  time (%) = 3.91369 (6.67847)
+Neigh time (%) = 25.0533 (42.752)
+Comm  time (%) = 5.47663 (9.34553)
+Outpt time (%) = 0.00119822 (0.00204469)
+Other time (%) = 24.1568 (41.222)
+
+Nlocal:    842.812 ave 1023 max 710 min
+Histogram: 1 6 1 0 14 2 0 7 0 1
+Nghost:    2450.56 ave 3086 max 1565 min
+Histogram: 1 1 3 4 3 5 3 5 2 5
+Neighs:    25402.5 ave 44023 max 5010 min
+Histogram: 3 0 4 7 3 2 2 3 4 4
+
+Total # of neighbors = 812880
+Ave neighs/atom = 30.1402
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 11:01:49 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  401000 
+  411000 
+Loop time of 58.6769 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:02:48 2023
+
+
+Pair  time (%) = 3.91837 (6.67787)
+Neigh time (%) = 25.0788 (42.7405)
+Comm  time (%) = 5.48139 (9.34165)
+Outpt time (%) = 0.001169 (0.00199226)
+Other time (%) = 24.1972 (41.238)
+
+Nlocal:    842.812 ave 1023 max 704 min
+Histogram: 1 6 1 0 14 2 0 7 0 1
+Nghost:    2451.16 ave 3088 max 1573 min
+Histogram: 1 1 3 4 3 5 3 4 3 5
+Neighs:    25418.1 ave 44018 max 5147 min
+Histogram: 3 0 5 6 3 2 2 3 4 4
+
+Total # of neighbors = 813379
+Ave neighs/atom = 30.1587
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 11:02:48 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  411000 
+  421000 
+Loop time of 58.6556 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:03:46 2023
+
+
+Pair  time (%) = 3.92098 (6.68474)
+Neigh time (%) = 25.0841 (42.7651)
+Comm  time (%) = 5.48252 (9.34696)
+Outpt time (%) = 0.00114462 (0.00195143)
+Other time (%) = 24.1669 (41.2013)
+
+Nlocal:    842.812 ave 1023 max 706 min
+Histogram: 2 5 1 0 14 2 0 7 0 1
+Nghost:    2452.59 ave 3095 max 1584 min
+Histogram: 1 2 2 4 3 5 4 3 3 5
+Neighs:    25435.3 ave 43874 max 5332 min
+Histogram: 3 0 5 7 2 2 2 3 4 4
+
+Total # of neighbors = 813931
+Ave neighs/atom = 30.1791
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 11:03:46 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  421000 
+  431000 
+Loop time of 58.6353 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:04:45 2023
+
+
+Pair  time (%) = 3.92504 (6.69399)
+Neigh time (%) = 25.0696 (42.7551)
+Comm  time (%) = 5.50582 (9.38994)
+Outpt time (%) = 0.00112708 (0.00192219)
+Other time (%) = 24.1337 (41.1591)
+
+Nlocal:    842.812 ave 1023 max 697 min
+Histogram: 1 6 0 1 14 2 0 7 0 1
+Nghost:    2451.56 ave 3087 max 1586 min
+Histogram: 1 2 2 4 3 5 3 4 3 5
+Neighs:    25475.3 ave 43879 max 5510 min
+Histogram: 3 0 5 7 1 3 2 3 4 4
+
+Total # of neighbors = 815209
+Ave neighs/atom = 30.2265
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 11:04:45 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  431000 
+  441000 
+Loop time of 58.5605 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:05:44 2023
+
+
+Pair  time (%) = 3.92872 (6.70882)
+Neigh time (%) = 25.1077 (42.8747)
+Comm  time (%) = 5.48963 (9.37429)
+Outpt time (%) = 0.00117207 (0.00200146)
+Other time (%) = 24.0333 (41.0402)
+
+Nlocal:    842.812 ave 1023 max 705 min
+Histogram: 3 4 1 0 14 2 0 7 0 1
+Nghost:    2446.69 ave 3082 max 1583 min
+Histogram: 1 2 2 4 3 5 4 3 3 5
+Neighs:    25483.1 ave 43865 max 5525 min
+Histogram: 3 0 6 6 1 3 2 3 4 4
+
+Total # of neighbors = 815459
+Ave neighs/atom = 30.2358
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 11:05:44 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  441000 
+  451000 
+stress: 0.212313 0.652444 0.120412 4.155498 3.654651 0.218935
+Loop time of 58.4805 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:06:42 2023
+
+
+Pair  time (%) = 3.9335 (6.72617)
+Neigh time (%) = 25.0962 (42.9137)
+Comm  time (%) = 5.4902 (9.38809)
+Outpt time (%) = 0.00119455 (0.00204265)
+Other time (%) = 23.9594 (40.97)
+
+Nlocal:    842.812 ave 1023 max 709 min
+Histogram: 3 4 1 0 14 2 0 7 0 1
+Nghost:    2446.47 ave 3089 max 1582 min
+Histogram: 1 1 3 4 3 5 4 3 3 5
+Neighs:    25508.5 ave 44207 max 5257 min
+Histogram: 3 0 7 5 1 3 2 3 4 4
+
+Total # of neighbors = 816272
+Ave neighs/atom = 30.2659
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 11:06:42 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  451000 
+  461000 
+Loop time of 58.609 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:07:41 2023
+
+
+Pair  time (%) = 3.93719 (6.71772)
+Neigh time (%) = 25.1057 (42.836)
+Comm  time (%) = 5.53065 (9.43651)
+Outpt time (%) = 0.00114995 (0.00196207)
+Other time (%) = 24.0343 (41.0078)
+
+Nlocal:    842.812 ave 1023 max 713 min
+Histogram: 4 3 1 1 13 2 0 7 0 1
+Nghost:    2443.91 ave 3095 max 1594 min
+Histogram: 1 2 3 3 3 6 4 3 3 4
+Neighs:    25534 ave 44348 max 5034 min
+Histogram: 3 0 6 6 1 3 2 3 4 4
+
+Total # of neighbors = 817089
+Ave neighs/atom = 30.2962
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 11:07:41 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  461000 
+  471000 
+Loop time of 58.5938 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:08:39 2023
+
+
+Pair  time (%) = 3.94128 (6.72645)
+Neigh time (%) = 25.1044 (42.8448)
+Comm  time (%) = 5.52205 (9.42428)
+Outpt time (%) = 0.00123447 (0.00210682)
+Other time (%) = 24.0248 (41.0023)
+
+Nlocal:    842.812 ave 1023 max 713 min
+Histogram: 4 3 1 1 13 2 0 7 0 1
+Nghost:    2440.12 ave 3099 max 1590 min
+Histogram: 1 2 3 3 3 5 5 3 4 3
+Neighs:    25554.4 ave 44360 max 4747 min
+Histogram: 3 0 5 6 2 3 2 2 5 4
+
+Total # of neighbors = 817741
+Ave neighs/atom = 30.3204
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 11:08:39 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  471000 
+  481000 
+Loop time of 58.6103 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:09:38 2023
+
+
+Pair  time (%) = 3.94512 (6.7311)
+Neigh time (%) = 25.1029 (42.8302)
+Comm  time (%) = 5.55385 (9.47588)
+Outpt time (%) = 0.00114962 (0.00196146)
+Other time (%) = 24.0073 (40.9609)
+
+Nlocal:    842.812 ave 1023 max 710 min
+Histogram: 4 3 1 0 13 1 2 7 0 1
+Nghost:    2438.91 ave 3104 max 1579 min
+Histogram: 1 1 4 3 3 6 4 3 5 2
+Neighs:    25580.2 ave 44947 max 4521 min
+Histogram: 2 1 6 6 1 3 2 3 5 3
+
+Total # of neighbors = 818566
+Ave neighs/atom = 30.351
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 11:09:38 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  481000 
+  491000 
+Loop time of 58.496 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:10:36 2023
+
+
+Pair  time (%) = 3.9501 (6.75278)
+Neigh time (%) = 25.1268 (42.9548)
+Comm  time (%) = 5.54561 (9.48034)
+Outpt time (%) = 0.00118962 (0.00203368)
+Other time (%) = 23.8722 (40.81)
+
+Nlocal:    842.812 ave 1023 max 706 min
+Histogram: 4 4 0 0 13 1 2 7 0 1
+Nghost:    2437.12 ave 3112 max 1574 min
+Histogram: 1 1 4 3 4 5 4 3 5 2
+Neighs:    25597.1 ave 45334 max 4347 min
+Histogram: 2 1 7 5 1 3 2 3 5 3
+
+Total # of neighbors = 819106
+Ave neighs/atom = 30.371
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 11:10:36 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.9636 Mbytes
+    Step 
+  491000 
+  501000 
+stress: 0.212387 0.647895 0.115257 4.152920 5.854009 0.305467
+Loop time of 58.4147 on 32 procs for 10000 steps with 26970 atoms, finish time Fri Sep  8 11:11:35 2023
+
+
+Pair  time (%) = 3.95156 (6.76467)
+Neigh time (%) = 25.1304 (43.0208)
+Comm  time (%) = 5.5493 (9.49984)
+Outpt time (%) = 0.00112507 (0.001926)
+Other time (%) = 23.7822 (40.7128)
+
+Nlocal:    842.812 ave 1023 max 698 min
+Histogram: 4 3 1 0 13 1 2 7 0 1
+Nghost:    2435.03 ave 3118 max 1574 min
+Histogram: 1 1 4 3 4 5 5 2 5 2
+Neighs:    25626.5 ave 45937 max 4156 min
+Histogram: 2 1 8 4 1 3 4 2 4 3
+
+Total # of neighbors = 820047
+Ave neighs/atom = 30.4059
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time

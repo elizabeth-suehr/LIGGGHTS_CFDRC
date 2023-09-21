@@ -184,7 +184,7 @@ class FixTemplateSphere : public Fix {
   // access to protected properties
   virtual double volexpect();           
   virtual double massexpect();          
-  virtual double densityexpect();
+
   bool use_rad_for_cut_neigh_and_ghost()
   { return !relative; }
 
@@ -244,8 +244,6 @@ class FixTemplateSphere : public Fix {
   double volume_expect;
   double mass_expect;
   double vol_limit;
-  double density_expect;
-  double density2;
 
   bool relative;
 

@@ -461,11 +461,7 @@ void FixTemplateMultiplespheres::calc_center_of_mass()
   int nsuccess = 0;
 
   double x_try[3],xcm[3],dist_j_sqr;
-  double volweight1= 0.0;
-  double volweight2=0.0;
-  double densitypi;
-  double density1= expectancy(pdf_density);
-  double totalmass;
+
   vectorZeroize3D(xcm);
 
   bool alreadyChecked = false;
@@ -482,52 +478,19 @@ void FixTemplateMultiplespheres::calc_center_of_mass()
           if (alreadyChecked) break;
           if(dist_j_sqr < r_sphere[j]*r_sphere[j])
           {
-	    if (atom_type_sphere){//need specific mass
-               if (atom_type_sphere[j] == 1) {
-		   volweight1 += 4.0/3.0*M_PI*r_sphere[j]*r_sphere[j]*r_sphere[j];
-                   densitypi= density1;
-
-                }
-                else if (atom_type_sphere[j] == 2){
-		  volweight2 += 4.0/3.0*M_PI*r_sphere[j]*r_sphere[j]*r_sphere[j];
-                  densitypi= density2;
-                }
-                else {
-                     printf("atom type not defined!");
-                }
-		  xcm[0] = (xcm[0]*static_cast<double>(nsuccess)+(densitypi)*x_try[0])/static_cast<double>(nsuccess+1);
-                  xcm[1] = (xcm[1]*static_cast<double>(nsuccess)+(densitypi)*x_try[1])/static_cast<double>(nsuccess+1);
-                  xcm[2] = (xcm[2]*static_cast<double>(nsuccess)+(densitypi)*x_try[2])/static_cast<double>(nsuccess+1);
-
-                  nsuccess++;
-                  alreadyChecked = true;
-            }
-	    else{
               xcm[0] = (xcm[0]*static_cast<double>(nsuccess)+x_try[0])/static_cast<double>(nsuccess+1);
               xcm[1] = (xcm[1]*static_cast<double>(nsuccess)+x_try[1])/static_cast<double>(nsuccess+1);
               xcm[2] = (xcm[2]*static_cast<double>(nsuccess)+x_try[2])/static_cast<double>(nsuccess+1);
               nsuccess++;
               alreadyChecked = true;
-	   }
           }
       }
   }
 
   // expectancy values
   volume_expect = static_cast<double>(nsuccess)/static_cast<double>(ntry)*(x_max[0]-x_min[0])*(x_max[1]-x_min[1])*(x_max[2]-x_min[2]);
-  if (atom_type_sphere){
-    mass_expect = volume_expect*(density1*(volweight1/(volweight1+volweight2))+(volweight2/(volweight1+volweight2))*density2);
-    totalmass= (density1*volweight1+volweight2*density2);
-    density_expect= mass_expect/volume_expect;
-     xcm[0]*= 1.0/(density1*(volweight1/(volweight1+volweight2))+(volweight2/(volweight1+volweight2))*density2);
-     xcm[1]*= 1.0/(density1*(volweight1/(volweight1+volweight2))+(volweight2/(volweight1+volweight2))*density2);//mass_expect;//totalmass;//mass_expect;
-     xcm[2]*= 1.0/(density1*(volweight1/(volweight1+volweight2))+(volweight2/(volweight1+volweight2))*density2);
-   }
-   else{
-     mass_expect = volume_expect*expectancy(pdf_density);
-     density_expect= expectancy(pdf_density);
-   }
-  r_equiv = pow(6.*mass_expect/(8.*density_expect*M_PI),1./3.);
+  mass_expect = volume_expect*expectancy(pdf_density);
+  r_equiv = pow(6.*mass_expect/(8.*expectancy(pdf_density)*M_PI),1./3.);
 
   // transform into a system with center of mass=0/0/0
 

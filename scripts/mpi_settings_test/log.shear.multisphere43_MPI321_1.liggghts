@@ -1,0 +1,277 @@
+atom_modify       map array
+
+processors        3 2 1
+
+# Set domain
+region            domain block 0.0 5.04000e-03 0.0 5.04000e-03 0.0 2.52000e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00504 0.00504 0.00252)
+  3 by 2 by 1 MPI processor grid
+
+# Set neighbor and list options
+neighbor          1.721e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 43 ntry 10000000 spheres file multisphere43.txt scale 1.0 type 1
+Finished calculating properties of template
+   mass = 2.693349e-08, radius of bounding sphere = 1.391000e-04, radius of equivalent sphere = 1.370108e-04
+   center of mass = 0.000000e+00, 0.000000e+00, 0.000000e+00
+   center of bounding sphere in body coords = -1.415139e-08, 1.461081e-08, 1.038796e-08
+   Principal moments of inertia_: 2.020931e-16, 2.022269e-16, 2.023082e-16
+     Eigenvector: 8.891142e-01, 2.203623e-01, -4.011439e-01
+     Eigenvector: -4.130869e-01, 7.637486e-01, -4.960316e-01
+     Eigenvector: 1.970665e-01, 6.067360e-01, 7.700885e-01
+     Inertia tensor: 2.021243e-16, -1.648835e-20, 6.007015e-20
+     Inertia tensor: -1.648835e-20, 2.022503e-16, 4.984172e-20
+     Inertia tensor: 6.007015e-20, 4.984172e-20, 2.022536e-16
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 3 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.5
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Fri Sep  8 10:30:12 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.46764 Mbytes
+    Step 
+       0 
+INFO: Particle insertion ins1: inserted 2971 particle templates (mass 8.001939e-05) at step 1
+ - a total of 2971 particle templates (mass 8.001939e-05) inserted so far.
+       1 
+Loop time of 0.544744 on 6 procs for 1 steps with 127753 atoms, finish time Fri Sep  8 10:30:16 2023
+
+
+Pair  time (%) = 0.119595 (21.9544)
+Neigh time (%) = 0.33452 (61.4087)
+Comm  time (%) = 0.00979494 (1.79808)
+Outpt time (%) = 0.0425102 (7.80369)
+Other time (%) = 0.0383234 (7.03512)
+
+Nlocal:    21292.2 ave 22514 max 20600 min
+Histogram: 3 1 0 0 0 0 0 0 0 2
+Nghost:    26630.2 ave 28004 max 25255 min
+Histogram: 2 1 0 0 0 0 0 1 0 2
+Neighs:    4.60014e+06 ave 5.04621e+06 max 4.16022e+06 min
+Histogram: 1 1 0 1 0 1 0 0 1 1
+
+Total # of neighbors = 27600830
+Ave neighs/atom = 216.048
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+127753 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 5.35e-06 reset 1000 threshold 1.00e-06 start_dt 2.616e-11 end_dt 1.570e-08
+run               100000
+Setting up run at Fri Sep  8 10:30:16 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 197.352 Mbytes
+    Step 
+       1 
+  100001 
+Loop time of 38237.7 on 6 procs for 100000 steps with 127753 atoms, finish time Fri Sep  8 21:07:34 2023
+
+
+Pair  time (%) = 7646.71 (19.9979)
+Neigh time (%) = 24368 (63.7278)
+Comm  time (%) = 318.925 (0.834059)
+Outpt time (%) = 0.0239892 (6.27371e-05)
+Other time (%) = 5903.99 (15.4402)
+
+Nlocal:    21292.2 ave 22382 max 20556 min
+Histogram: 2 1 1 0 0 0 0 0 0 2
+Nghost:    27873 ave 29835 max 26061 min
+Histogram: 1 1 1 0 0 1 0 0 0 2
+Neighs:    4.47138e+06 ave 4.92835e+06 max 4.22491e+06 min
+Histogram: 3 0 1 0 0 0 0 1 0 1
+
+Total # of neighbors = 26828302
+Ave neighs/atom = 210.001
+Neighbor list builds = 100000
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          1.5697e-09
+
+fix               leboundary all lebc 100.0 true gtemp 1.00e-06
+
+# Run desired simulation
+info time
+run 10000
+Setting up run at Fri Sep  8 21:07:34 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 200.748 Mbytes
+    Step 
+  100001 
+  110001 
+Loop time of 3969.1 on 6 procs for 10000 steps with 127753 atoms, finish time Fri Sep  8 22:13:44 2023
+
+
+Pair  time (%) = 722.197 (18.1955)
+Neigh time (%) = 2712.36 (68.337)
+Comm  time (%) = 63.6844 (1.60451)
+Outpt time (%) = 0.00541982 (0.00013655)
+Other time (%) = 470.851 (11.8629)
+
+Nlocal:    21292.2 ave 21443 max 21106 min
+Histogram: 1 0 1 0 0 0 2 1 0 1
+Nghost:    41496.2 ave 45593 max 37244 min
+Histogram: 2 0 0 0 1 1 0 0 0 2
+Neighs:    5.06967e+06 ave 5.21816e+06 max 4.9374e+06 min
+Histogram: 2 0 0 0 1 0 1 1 0 1
+
+Total # of neighbors = 30418034
+Ave neighs/atom = 238.1
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 22:13:44 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 213.007 Mbytes
+    Step 
+  110001 
+  120001 
+Loop time of 3717.13 on 6 procs for 10000 steps with 127753 atoms, finish time Fri Sep  8 23:15:41 2023
+
+
+Pair  time (%) = 703.659 (18.9302)
+Neigh time (%) = 2627.27 (70.6801)
+Comm  time (%) = 57.3294 (1.5423)
+Outpt time (%) = 0.0103986 (0.000279749)
+Other time (%) = 328.859 (8.84712)
+
+Nlocal:    21292.2 ave 21664 max 20992 min
+Histogram: 2 0 1 0 0 1 0 0 1 1
+Nghost:    41526.8 ave 45820 max 37315 min
+Histogram: 2 0 0 0 2 0 0 0 0 2
+Neighs:    5.1038e+06 ave 5.36852e+06 max 4.9191e+06 min
+Histogram: 2 0 1 1 0 0 0 0 1 1
+
+Total # of neighbors = 30622819
+Ave neighs/atom = 239.703
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Fri Sep  8 23:15:41 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 213.014 Mbytes
+    Step 
+  120001 
+  130001 
+Loop time of 3729.11 on 6 procs for 10000 steps with 127753 atoms, finish time Sat Sep  9 00:17:51 2023
+
+
+Pair  time (%) = 698.741 (18.7375)
+Neigh time (%) = 2610.43 (70.0016)
+Comm  time (%) = 57.0899 (1.53093)
+Outpt time (%) = 0.0100891 (0.00027055)
+Other time (%) = 362.83 (9.72968)
+
+Nlocal:    21292.2 ave 21663 max 21048 min
+Histogram: 2 0 1 1 0 0 0 1 0 1
+Nghost:    41623.2 ave 45879 max 37574 min
+Histogram: 2 0 0 0 2 0 0 0 0 2
+Neighs:    5.1365e+06 ave 5.39193e+06 max 4.9227e+06 min
+Histogram: 1 1 0 2 0 0 0 0 1 1
+
+Total # of neighbors = 30819000
+Ave neighs/atom = 241.239
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Sat Sep  9 00:17:51 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 213.014 Mbytes
+    Step 
+  130001 
+  140001 
+Loop time of 3728.21 on 6 procs for 10000 steps with 127753 atoms, finish time Sat Sep  9 01:19:59 2023
+
+
+Pair  time (%) = 698.552 (18.7369)
+Neigh time (%) = 2610.04 (70.0078)
+Comm  time (%) = 57.0139 (1.52926)
+Outpt time (%) = 0.0102672 (0.000275393)
+Other time (%) = 362.595 (9.72572)
+
+Nlocal:    21292.2 ave 21660 max 21044 min
+Histogram: 2 0 1 1 0 0 0 0 1 1
+Nghost:    41635.2 ave 45960 max 37561 min
+Histogram: 2 0 0 0 2 0 0 0 0 2
+Neighs:    5.14686e+06 ave 5.40026e+06 max 4.94262e+06 min
+Histogram: 2 0 0 2 0 0 0 0 1 1
+
+Total # of neighbors = 30881142
+Ave neighs/atom = 241.725
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+run 10000
+Setting up run at Sat Sep  9 01:19:59 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 213.014 Mbytes
+    Step 
+  140001 
+  150001 
+stress: 275258.974138 277547.493641 2545.674537 2365350.767554 2408911.677364 7496.320035
+Loop time of 3718.5 on 6 procs for 10000 steps with 127753 atoms, finish time Sat Sep  9 02:21:58 2023
+
+
+Pair  time (%) = 697.861 (18.7673)
+Neigh time (%) = 2608.05 (70.1373)
+Comm  time (%) = 57.1203 (1.53611)
+Outpt time (%) = 0.00994461 (0.000267437)
+Other time (%) = 355.453 (9.55906)
+
+Nlocal:    21292.2 ave 21646 max 21022 min
+Histogram: 2 0 1 0 1 0 0 1 0 1
+Nghost:    41607 ave 45959 max 37542 min
+Histogram: 2 0 0 0 2 0 0 0 0 2
+Neighs:    5.15305e+06 ave 5.41028e+06 max 4.9582e+06 min
+Histogram: 2 0 0 2 0 0 0 0 1 1
+
+Total # of neighbors = 30918300
+Ave neighs/atom = 242.016
+Neighbor list builds = 10000
+Dangerous builds = 0

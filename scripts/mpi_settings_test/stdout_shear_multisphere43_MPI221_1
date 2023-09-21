@@ -1,0 +1,235 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-06-18:40:11 by liz.suehr, git commit 20bafd84e54ba1e14cc5c444673f017ba084bbe9)
+communicate       single vel yes
+units             si
+log               log.shear.multisphere43_MPI221_1.liggghts
+atom_modify       map array
+
+processors        2 2 1
+
+# Set domain
+region            domain block 0.0 5.04000e-03 0.0 5.04000e-03 0.0 2.52000e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00504 0.00504 0.00252)
+  2 by 2 by 1 MPI processor grid
+
+# Set neighbor and list options
+neighbor          1.721e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 43 ntry 10000000 spheres file multisphere43.txt scale 1.0 type 1
+Calculating the properties of the given template.
+   Depending on ntry, this may take a while...
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=2.782000e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=2.782000e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 3 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.5
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Mon Sep 11 14:31:01 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.47437 Mbytes
+    Step 
+       0 
+insertion: proc 0 at 0 %
+insertion: proc 1 at 0 %
+insertion: proc 2 at 0 %
+insertion: proc 3 at 0 %
+insertion: proc 3 at 10 %
+insertion: proc 1 at 10 %
+insertion: proc 2 at 10 %
+insertion: proc 0 at 10 %
+insertion: proc 2 at 20 %
+insertion: proc 1 at 20 %
+insertion: proc 3 at 20 %
+insertion: proc 0 at 20 %
+insertion: proc 3 at 30 %
+insertion: proc 2 at 30 %
+insertion: proc 1 at 30 %
+insertion: proc 0 at 30 %
+insertion: proc 2 at 40 %
+insertion: proc 3 at 40 %
+insertion: proc 2 at 50 %
+insertion: proc 2 at 60 %
+insertion: proc 2 at 70 %
+insertion: proc 0 at 40 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 2 at 100 %
+insertion: proc 1 at 40 %
+insertion: proc 1 at 50 %
+insertion: proc 1 at 60 %
+insertion: proc 1 at 70 %
+insertion: proc 1 at 80 %
+insertion: proc 1 at 90 %
+insertion: proc 1 at 100 %
+insertion: proc 0 at 50 %
+insertion: proc 3 at 50 %
+insertion: proc 3 at 60 %
+insertion: proc 0 at 60 %
+insertion: proc 3 at 70 %
+insertion: proc 0 at 70 %
+insertion: proc 3 at 80 %
+insertion: proc 0 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 0 at 90 %
+insertion: proc 3 at 100 %
+insertion: proc 0 at 100 %
+INFO: Particle insertion ins1: inserted 2971 particle templates (mass 8.001939e-05) at step 1
+ - a total of 2971 particle templates (mass 8.001939e-05) inserted so far.
+       1 
+Loop time of 0.938144 on 4 procs for 1 steps with 127753 atoms, finish time Mon Sep 11 14:31:06 2023
+
+
+Pair  time (%) = 0.232418 (24.7743)
+Neigh time (%) = 0.59993 (63.9487)
+Comm  time (%) = 0.0115441 (1.23052)
+Outpt time (%) = 0.0364539 (3.88575)
+Other time (%) = 0.057797 (6.16078)
+
+Nlocal:    31938.2 ave 32040 max 31797 min
+Histogram: 1 0 0 0 0 1 0 0 1 1
+Nghost:    32988.8 ave 33213 max 32755 min
+Histogram: 2 0 0 0 0 0 0 0 0 2
+Neighs:    6.65628e+06 ave 6.7855e+06 max 6.51256e+06 min
+Histogram: 1 0 0 1 0 0 0 1 0 1
+
+Total # of neighbors = 26625100
+Ave neighs/atom = 208.411
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+127753 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 5.35e-06 reset 1000 threshold 1.00e-06 start_dt 2.616e-11 end_dt 1.570e-08
+run               100000
+Setting up run at Mon Sep 11 14:31:06 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 285.058 Mbytes
+    Step 
+       1 
+pre-run, step: 1000, ke/mass=1.465e+04, natoms=127753, overlap=9.514e-03, cor=1.047e-01, dt=6.238e-11 nbody: 2971 
+pre-run, step: 2000, ke/mass=1.367e+04, natoms=127753, overlap=5.284e-03, cor=1.047e-01, dt=1.488e-10 nbody: 2971 
+pre-run, step: 3000, ke/mass=1.270e+04, natoms=127753, overlap=1.378e-02, cor=1.047e-01, dt=3.547e-10 nbody: 2971 
+pre-run, step: 4000, ke/mass=1.177e+04, natoms=127753, overlap=7.204e-03, cor=1.047e-01, dt=8.460e-10 nbody: 2971 
+pre-run, step: 5000, ke/mass=1.091e+04, natoms=127753, overlap=9.550e-03, cor=1.047e-01, dt=2.017e-09 nbody: 2971 
+pre-run, step: 6000, ke/mass=1.009e+04, natoms=127753, overlap=6.702e-03, cor=1.047e-01, dt=4.811e-09 nbody: 2971 
+pre-run, step: 7000, ke/mass=9.312e+03, natoms=127753, overlap=1.554e-02, cor=1.047e-01, dt=1.147e-08 nbody: 2971 
+pre-run, step: 8000, ke/mass=8.592e+03, natoms=127753, overlap=1.302e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 9000, ke/mass=7.939e+03, natoms=127753, overlap=1.056e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 10000, ke/mass=7.336e+03, natoms=127753, overlap=2.920e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 11000, ke/mass=6.791e+03, natoms=127753, overlap=2.142e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 12000, ke/mass=6.299e+03, natoms=127753, overlap=4.191e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 13000, ke/mass=5.847e+03, natoms=127753, overlap=7.058e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 14000, ke/mass=5.438e+03, natoms=127753, overlap=9.557e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 15000, ke/mass=5.068e+03, natoms=127753, overlap=1.257e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 16000, ke/mass=4.727e+03, natoms=127753, overlap=1.567e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 17000, ke/mass=4.418e+03, natoms=127753, overlap=1.818e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 18000, ke/mass=4.134e+03, natoms=127753, overlap=2.066e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 19000, ke/mass=3.868e+03, natoms=127753, overlap=2.313e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 20000, ke/mass=3.620e+03, natoms=127753, overlap=2.555e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 21000, ke/mass=3.388e+03, natoms=127753, overlap=2.788e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 22000, ke/mass=3.173e+03, natoms=127753, overlap=3.013e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 23000, ke/mass=2.975e+03, natoms=127753, overlap=3.229e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 24000, ke/mass=2.791e+03, natoms=127753, overlap=3.437e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 25000, ke/mass=2.622e+03, natoms=127753, overlap=3.641e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 26000, ke/mass=2.463e+03, natoms=127753, overlap=3.838e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 27000, ke/mass=2.319e+03, natoms=127753, overlap=4.028e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 28000, ke/mass=2.184e+03, natoms=127753, overlap=4.211e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 29000, ke/mass=2.060e+03, natoms=127753, overlap=4.388e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 30000, ke/mass=1.944e+03, natoms=127753, overlap=4.558e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 31000, ke/mass=1.836e+03, natoms=127753, overlap=4.722e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 32000, ke/mass=1.735e+03, natoms=127753, overlap=4.883e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 33000, ke/mass=1.640e+03, natoms=127753, overlap=5.039e-01, cor=1.050e-01, dt=1.649e-08 nbody: 2971 
+pre-run, step: 34000, ke/mass=1.551e+03, natoms=127753, overlap=5.190e-01, cor=1.065e-01, dt=1.673e-08 nbody: 2971 
+pre-run, step: 35000, ke/mass=1.468e+03, natoms=127753, overlap=5.335e-01, cor=1.084e-01, dt=1.702e-08 nbody: 2971 
+pre-run, step: 36000, ke/mass=1.390e+03, natoms=127753, overlap=5.475e-01, cor=1.107e-01, dt=1.738e-08 nbody: 2971 
+pre-run, step: 37000, ke/mass=1.317e+03, natoms=127753, overlap=5.608e-01, cor=1.135e-01, dt=1.782e-08 nbody: 2971 
+pre-run, step: 38000, ke/mass=1.249e+03, natoms=127753, overlap=5.734e-01, cor=1.168e-01, dt=1.833e-08 nbody: 2971 
+pre-run, step: 39000, ke/mass=1.186e+03, natoms=127753, overlap=5.856e-01, cor=1.206e-01, dt=1.894e-08 nbody: 2971 
+pre-run, step: 40000, ke/mass=1.126e+03, natoms=127753, overlap=5.973e-01, cor=1.252e-01, dt=1.966e-08 nbody: 2971 
+pre-run, step: 41000, ke/mass=1.070e+03, natoms=127753, overlap=6.086e-01, cor=1.305e-01, dt=2.049e-08 nbody: 2971 
+pre-run, step: 42000, ke/mass=1.018e+03, natoms=127753, overlap=6.195e-01, cor=1.367e-01, dt=2.146e-08 nbody: 2971 
+pre-run, step: 43000, ke/mass=9.686e+02, natoms=127753, overlap=6.300e-01, cor=1.437e-01, dt=2.257e-08 nbody: 2971 
+pre-run, step: 44000, ke/mass=9.229e+02, natoms=127753, overlap=6.402e-01, cor=1.517e-01, dt=2.382e-08 nbody: 2971 
+pre-run, step: 45000, ke/mass=8.797e+02, natoms=127753, overlap=6.499e-01, cor=1.607e-01, dt=2.523e-08 nbody: 2971 
+pre-run, step: 46000, ke/mass=8.385e+02, natoms=127753, overlap=6.593e-01, cor=1.707e-01, dt=2.681e-08 nbody: 2971 
+pre-run, step: 47000, ke/mass=8.000e+02, natoms=127753, overlap=6.684e-01, cor=1.817e-01, dt=2.853e-08 nbody: 2971 
+pre-run, step: 48000, ke/mass=7.640e+02, natoms=127753, overlap=6.768e-01, cor=1.934e-01, dt=3.037e-08 nbody: 2971 
+pre-run, step: 49000, ke/mass=7.300e+02, natoms=127753, overlap=6.829e-01, cor=2.028e-01, dt=3.183e-08 nbody: 2971 
+pre-run, step: 50000, ke/mass=6.978e+02, natoms=127753, overlap=6.882e-01, cor=2.114e-01, dt=3.319e-08 nbody: 2971 
+pre-run, step: 51000, ke/mass=6.671e+02, natoms=127753, overlap=6.931e-01, cor=2.202e-01, dt=3.457e-08 nbody: 2971 
+pre-run, step: 52000, ke/mass=6.381e+02, natoms=127753, overlap=6.980e-01, cor=2.292e-01, dt=3.599e-08 nbody: 2971 
+pre-run, step: 53000, ke/mass=6.106e+02, natoms=127753, overlap=7.026e-01, cor=2.385e-01, dt=3.745e-08 nbody: 2971 
+pre-run, step: 54000, ke/mass=5.846e+02, natoms=127753, overlap=7.071e-01, cor=2.480e-01, dt=3.893e-08 nbody: 2971 
+pre-run, step: 55000, ke/mass=5.598e+02, natoms=127753, overlap=7.114e-01, cor=2.576e-01, dt=4.044e-08 nbody: 2971 
+pre-run, step: 56000, ke/mass=5.360e+02, natoms=127753, overlap=7.156e-01, cor=2.673e-01, dt=4.196e-08 nbody: 2971 
+pre-run, step: 57000, ke/mass=5.135e+02, natoms=127753, overlap=7.196e-01, cor=2.770e-01, dt=4.350e-08 nbody: 2971 
+pre-run, step: 58000, ke/mass=4.920e+02, natoms=127753, overlap=7.235e-01, cor=2.868e-01, dt=4.504e-08 nbody: 2971 
+pre-run, step: 59000, ke/mass=4.717e+02, natoms=127753, overlap=7.272e-01, cor=2.967e-01, dt=4.658e-08 nbody: 2971 
+pre-run, step: 60000, ke/mass=4.521e+02, natoms=127753, overlap=7.308e-01, cor=3.066e-01, dt=4.814e-08 nbody: 2971 
+pre-run, step: 61000, ke/mass=4.337e+02, natoms=127753, overlap=7.343e-01, cor=3.166e-01, dt=4.970e-08 nbody: 2971 
+pre-run, step: 62000, ke/mass=4.160e+02, natoms=127753, overlap=7.377e-01, cor=3.265e-01, dt=5.126e-08 nbody: 2971 
+pre-run, step: 63000, ke/mass=3.993e+02, natoms=127753, overlap=7.410e-01, cor=3.364e-01, dt=5.281e-08 nbody: 2971 
+pre-run, step: 64000, ke/mass=3.834e+02, natoms=127753, overlap=7.443e-01, cor=3.464e-01, dt=5.439e-08 nbody: 2971 
+pre-run, step: 65000, ke/mass=3.683e+02, natoms=127753, overlap=7.474e-01, cor=3.564e-01, dt=5.595e-08 nbody: 2971 
+pre-run, step: 66000, ke/mass=3.540e+02, natoms=127753, overlap=7.505e-01, cor=3.663e-01, dt=5.751e-08 nbody: 2971 
+pre-run, step: 67000, ke/mass=3.403e+02, natoms=127753, overlap=7.534e-01, cor=3.761e-01, dt=5.905e-08 nbody: 2971 
+pre-run, step: 68000, ke/mass=3.273e+02, natoms=127753, overlap=7.563e-01, cor=3.858e-01, dt=6.058e-08 nbody: 2971 
+pre-run, step: 69000, ke/mass=3.149e+02, natoms=127753, overlap=7.591e-01, cor=3.954e-01, dt=6.208e-08 nbody: 2971 
+pre-run, step: 70000, ke/mass=3.032e+02, natoms=127753, overlap=7.618e-01, cor=4.048e-01, dt=6.356e-08 nbody: 2971 
+pre-run, step: 71000, ke/mass=2.920e+02, natoms=127753, overlap=7.644e-01, cor=4.141e-01, dt=6.501e-08 nbody: 2971 
+pre-run, step: 72000, ke/mass=2.813e+02, natoms=127753, overlap=7.669e-01, cor=4.232e-01, dt=6.645e-08 nbody: 2971 
+pre-run, step: 73000, ke/mass=2.711e+02, natoms=127753, overlap=7.694e-01, cor=4.323e-01, dt=6.787e-08 nbody: 2971 
+pre-run, step: 74000, ke/mass=2.613e+02, natoms=127753, overlap=7.718e-01, cor=4.412e-01, dt=6.927e-08 nbody: 2971 
+pre-run, step: 75000, ke/mass=2.520e+02, natoms=127753, overlap=7.742e-01, cor=4.500e-01, dt=7.066e-08 nbody: 2971 
+pre-run, step: 76000, ke/mass=2.432e+02, natoms=127753, overlap=7.760e-01, cor=4.568e-01, dt=7.171e-08 nbody: 2971 
+pre-run, step: 77000, ke/mass=2.348e+02, natoms=127753, overlap=7.772e-01, cor=4.614e-01, dt=7.245e-08 nbody: 2971 
+pre-run, step: 78000, ke/mass=2.267e+02, natoms=127753, overlap=7.785e-01, cor=4.662e-01, dt=7.319e-08 nbody: 2971 
+pre-run, step: 79000, ke/mass=2.191e+02, natoms=127753, overlap=7.797e-01, cor=4.710e-01, dt=7.395e-08 nbody: 2971 
+pre-run, step: 80000, ke/mass=2.118e+02, natoms=127753, overlap=7.810e-01, cor=4.759e-01, dt=7.472e-08 nbody: 2971 
+pre-run, step: 81000, ke/mass=2.048e+02, natoms=127753, overlap=7.823e-01, cor=4.809e-01, dt=7.551e-08 nbody: 2971 
+pre-run, step: 82000, ke/mass=1.981e+02, natoms=127753, overlap=7.836e-01, cor=4.860e-01, dt=7.631e-08 nbody: 2971 
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.

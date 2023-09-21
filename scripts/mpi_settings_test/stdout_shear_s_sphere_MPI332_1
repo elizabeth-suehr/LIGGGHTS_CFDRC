@@ -1,0 +1,2504 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-06-18:40:11 by liz.suehr, git commit 20bafd84e54ba1e14cc5c444673f017ba084bbe9)
+communicate       single vel yes
+units             si
+log               log.shear.s_sphere_MPI332_1.liggghts
+atom_modify       map array
+
+processors        3 3 2
+
+# Set domain
+region            domain block 0.0 2.16000e-03 0.0 2.16000e-03 0.0 1.08000e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00216 0.00216 0.00108)
+  3 by 3 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          1.721e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/sphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 radius constant 0.000050
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=1.000000e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=1.000000e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 10000 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 10000 volumefraction_region 0.5
+# Apply integration fix
+fix               integr1 nve_group1 nve/sphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Mon Sep 11 08:48:19 2023
+
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.44365 Mbytes
+    Step 
+       0 
+insertion: proc 10 at 0 %
+insertion: proc 10 at 10 %
+insertion: proc 14 at 0 %
+insertion: proc 14 at 10 %
+insertion: proc 17 at 0 %
+insertion: proc 17 at 10 %
+insertion: proc 0 at 0 %
+insertion: proc 0 at 10 %
+insertion: proc 5 at 0 %
+insertion: proc 5 at 10 %
+insertion: proc 6 at 0 %
+insertion: proc 6 at 10 %
+insertion: proc 7 at 0 %
+insertion: proc 7 at 10 %
+insertion: proc 9 at 0 %
+insertion: proc 9 at 10 %
+insertion: proc 8 at 0 %
+insertion: proc 8 at 10 %
+insertion: proc 7 at 20 %
+insertion: proc 17 at 20 %
+insertion: proc 11 at 0 %
+insertion: proc 11 at 10 %
+insertion: proc 11 at 20 %
+insertion: proc 12 at 0 %
+insertion: proc 12 at 10 %
+insertion: proc 12 at 20 %
+insertion: proc 13 at 0 %
+insertion: proc 13 at 10 %
+insertion: proc 13 at 20 %
+insertion: proc 10 at 20 %
+insertion: proc 15 at 0 %
+insertion: proc 15 at 10 %
+insertion: proc 15 at 20 %
+insertion: proc 16 at 0 %
+insertion: proc 16 at 10 %
+insertion: proc 16 at 20 %
+insertion: proc 14 at 20 %
+insertion: proc 9 at 20 %
+insertion: proc 9 at 30 %
+insertion: proc 1 at 0 %
+insertion: proc 1 at 10 %
+insertion: proc 1 at 20 %
+insertion: proc 1 at 30 %
+insertion: proc 2 at 0 %
+insertion: proc 2 at 10 %
+insertion: proc 2 at 20 %
+insertion: proc 2 at 30 %
+insertion: proc 3 at 0 %
+insertion: proc 3 at 10 %
+insertion: proc 3 at 20 %
+insertion: proc 4 at 0 %
+insertion: proc 4 at 10 %
+insertion: proc 4 at 20 %
+insertion: proc 4 at 30 %
+insertion: proc 0 at 20 %
+insertion: proc 0 at 30 %
+insertion: proc 6 at 20 %
+insertion: proc 6 at 30 %
+insertion: proc 12 at 30 %
+insertion: proc 13 at 30 %
+insertion: proc 10 at 30 %
+insertion: proc 15 at 30 %
+insertion: proc 16 at 30 %
+insertion: proc 3 at 30 %
+insertion: proc 5 at 20 %
+insertion: proc 5 at 30 %
+insertion: proc 14 at 30 %
+insertion: proc 8 at 20 %
+insertion: proc 8 at 30 %
+insertion: proc 7 at 30 %
+insertion: proc 17 at 30 %
+insertion: proc 17 at 40 %
+insertion: proc 11 at 30 %
+insertion: proc 13 at 40 %
+insertion: proc 16 at 40 %
+insertion: proc 4 at 40 %
+insertion: proc 14 at 40 %
+insertion: proc 6 at 40 %
+insertion: proc 1 at 40 %
+insertion: proc 5 at 40 %
+insertion: proc 15 at 40 %
+insertion: proc 2 at 40 %
+insertion: proc 0 at 40 %
+insertion: proc 7 at 40 %
+insertion: proc 10 at 40 %
+insertion: proc 3 at 40 %
+insertion: proc 12 at 40 %
+insertion: proc 11 at 40 %
+insertion: proc 13 at 50 %
+insertion: proc 9 at 40 %
+insertion: proc 17 at 50 %
+insertion: proc 16 at 50 %
+insertion: proc 8 at 40 %
+insertion: proc 4 at 50 %
+insertion: proc 1 at 50 %
+insertion: proc 5 at 50 %
+insertion: proc 2 at 50 %
+insertion: proc 6 at 50 %
+insertion: proc 3 at 50 %
+insertion: proc 0 at 50 %
+insertion: proc 15 at 50 %
+insertion: proc 10 at 50 %
+insertion: proc 14 at 50 %
+insertion: proc 7 at 50 %
+insertion: proc 12 at 50 %
+insertion: proc 11 at 50 %
+insertion: proc 16 at 60 %
+insertion: proc 4 at 60 %
+insertion: proc 13 at 60 %
+insertion: proc 9 at 50 %
+insertion: proc 8 at 50 %
+insertion: proc 17 at 60 %
+insertion: proc 1 at 60 %
+insertion: proc 15 at 60 %
+insertion: proc 6 at 60 %
+insertion: proc 5 at 60 %
+insertion: proc 2 at 60 %
+insertion: proc 13 at 70 %
+insertion: proc 12 at 60 %
+insertion: proc 3 at 60 %
+insertion: proc 0 at 60 %
+insertion: proc 11 at 60 %
+insertion: proc 14 at 60 %
+insertion: proc 13 at 80 %
+insertion: proc 13 at 90 %
+insertion: proc 13 at 100 %
+insertion: proc 6 at 70 %
+insertion: proc 6 at 80 %
+insertion: proc 6 at 90 %
+insertion: proc 6 at 100 %
+insertion: proc 17 at 70 %
+insertion: proc 17 at 80 %
+insertion: proc 17 at 90 %
+insertion: proc 17 at 100 %
+insertion: proc 4 at 70 %
+insertion: proc 4 at 80 %
+insertion: proc 4 at 90 %
+insertion: proc 4 at 100 %
+insertion: proc 16 at 70 %
+insertion: proc 16 at 80 %
+insertion: proc 16 at 90 %
+insertion: proc 16 at 100 %
+insertion: proc 9 at 60 %
+insertion: proc 9 at 70 %
+insertion: proc 9 at 80 %
+insertion: proc 9 at 90 %
+insertion: proc 15 at 70 %
+insertion: proc 15 at 80 %
+insertion: proc 15 at 90 %
+insertion: proc 15 at 100 %
+insertion: proc 1 at 70 %
+insertion: proc 1 at 80 %
+insertion: proc 1 at 90 %
+insertion: proc 1 at 100 %
+insertion: proc 10 at 60 %
+insertion: proc 10 at 70 %
+insertion: proc 10 at 80 %
+insertion: proc 10 at 90 %
+insertion: proc 10 at 100 %
+insertion: proc 14 at 70 %
+insertion: proc 14 at 80 %
+insertion: proc 14 at 90 %
+insertion: proc 14 at 100 %
+insertion: proc 3 at 70 %
+insertion: proc 3 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 3 at 100 %
+insertion: proc 5 at 70 %
+insertion: proc 5 at 80 %
+insertion: proc 5 at 90 %
+insertion: proc 5 at 100 %
+insertion: proc 2 at 70 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 2 at 100 %
+insertion: proc 11 at 70 %
+insertion: proc 11 at 80 %
+insertion: proc 11 at 90 %
+insertion: proc 11 at 100 %
+insertion: proc 8 at 60 %
+insertion: proc 8 at 70 %
+insertion: proc 8 at 80 %
+insertion: proc 8 at 90 %
+insertion: proc 8 at 100 %
+insertion: proc 7 at 60 %
+insertion: proc 7 at 70 %
+insertion: proc 7 at 80 %
+insertion: proc 7 at 90 %
+insertion: proc 7 at 100 %
+insertion: proc 12 at 70 %
+insertion: proc 12 at 80 %
+insertion: proc 12 at 90 %
+insertion: proc 12 at 100 %
+insertion: proc 0 at 70 %
+insertion: proc 0 at 80 %
+insertion: proc 0 at 90 %
+insertion: proc 0 at 100 %
+INFO: Particle insertion ins1: inserted 4812 particle templates (mass 6.298893e-06) at step 1
+ - a total of 4812 particle templates (mass 6.298893e-06) inserted so far.
+       1 
+Loop time of 0.410823 on 18 procs for 1 steps with 4812 atoms, finish time Mon Sep 11 08:48:19 2023
+
+
+Pair  time (%) = 0.00040555 (0.0987166)
+Neigh time (%) = 0.00123945 (0.3017)
+Comm  time (%) = 0.000663276 (0.16145)
+Outpt time (%) = 0.000213683 (0.0520134)
+Other time (%) = 0.408301 (99.3861)
+
+Nlocal:    267.333 ave 304 max 238 min
+Histogram: 1 3 2 1 1 5 3 1 0 1
+Nghost:    1406.83 ave 1466 max 1352 min
+Histogram: 2 1 3 3 0 3 0 2 2 2
+Neighs:    16083.7 ave 19435 max 13528 min
+Histogram: 3 1 3 0 3 2 3 2 0 1
+
+Total # of neighbors = 289506
+Ave neighs/atom = 60.1633
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+4812 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 5.35e-06 reset 1000 threshold 1.00e-06 start_dt 2.616e-11 end_dt 1.570e-08
+run               100000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Mon Sep 11 08:48:19 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+       1 
+pre-run, step: 1000, ke/mass=1.802e+04, natoms=4812, overlap=4.057e-01, cor=1.047e-01, dt=6.238e-11
+pre-run, step: 2000, ke/mass=7.243e+03, natoms=4812, overlap=6.775e-01, cor=1.938e-01, dt=1.488e-10
+pre-run, step: 3000, ke/mass=1.825e+03, natoms=4812, overlap=8.458e-01, cor=7.207e-01, dt=3.547e-10
+pre-run, step: 4000, ke/mass=2.760e+02, natoms=4812, overlap=9.413e-01, cor=9.299e-01, dt=8.460e-10
+pre-run, step: 5000, ke/mass=1.423e+01, natoms=4812, overlap=9.868e-01, cor=9.670e-01, dt=2.017e-09
+pre-run, step: 6000, ke/mass=1.003e-01, natoms=4812, overlap=9.984e-01, cor=9.729e-01, dt=4.811e-09
+pre-run, step: 7000, ke/mass=2.967e-04, natoms=4812, overlap=9.998e-01, cor=9.736e-01, dt=1.147e-08
+pre-run, step: 8000, ke/mass=9.329e-08, natoms=4812, overlap=1.000e+00, cor=9.736e-01, dt=2.736e-08
+Loop time of 12.3538 on 18 procs for 100000 steps with 4812 atoms, finish time Mon Sep 11 08:48:32 2023
+
+
+Pair  time (%) = 2.10943 (17.0751)
+Neigh time (%) = 6.74262 (54.5794)
+Comm  time (%) = 1.54586 (12.5132)
+Outpt time (%) = 0 (0)
+Other time (%) = 1.95588 (15.8322)
+
+Nlocal:    267.333 ave 288 max 243 min
+Histogram: 1 1 2 2 2 1 2 4 1 2
+Nghost:    1413.28 ave 1469 max 1370 min
+Histogram: 3 2 2 1 3 1 2 2 1 1
+Neighs:    16644 ave 18909 max 14486 min
+Histogram: 2 3 1 1 2 1 1 4 2 1
+
+Total # of neighbors = 299592
+Ave neighs/atom = 62.2594
+Neighbor list builds = 7999
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          1.5697e-09
+
+fix               leboundary all lebc 100.0 true gtemp 1.00e-06
+
+# Run desired simulation
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:48:32 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:00:12
+ Wall time:    0:00:13
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:48:32 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+    8000 
+10500 2500 atom_count: 4812 5.542e-04 4.022e-04 -3.158e-04 4.383e+00 4.170e+00 -3.334e+00
+13000 5000 atom_count: 4812 1.035e-03 8.627e-04 -6.263e-04 4.073e+00 3.757e+00 -2.941e+00
+15500 7500 atom_count: 4812 1.395e-03 1.210e-03 -8.315e-04 3.598e+00 3.324e+00 -2.541e+00
+   18000 
+18000 10000 atom_count: 4812 1.696e-03 1.502e-03 -9.843e-04 3.334e+00 3.090e+00 -2.311e+00
+Loop time of 15.9738 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:48:48 2023
+
+
+Pair  time (%) = 2.45493 (15.3686)
+Neigh time (%) = 8.73191 (54.6641)
+Comm  time (%) = 2.42332 (15.1706)
+Outpt time (%) = 0.000108734 (0.000680704)
+Other time (%) = 2.36348 (14.796)
+
+Nlocal:    267.333 ave 288 max 243 min
+Histogram: 1 1 2 2 2 1 2 4 1 2
+Nghost:    1674.94 ave 2015 max 1438 min
+Histogram: 6 0 3 1 0 3 1 0 0 4
+Neighs:    17209.4 ave 19470 max 14537 min
+Histogram: 2 1 1 3 0 1 5 2 1 2
+
+Total # of neighbors = 309769
+Ave neighs/atom = 64.3743
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:48:48 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:00:28
+ Wall time:    0:00:29
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:48:48 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+   18000 
+20500 12500 atom_count: 4812 1.477e-03 1.294e-03 -8.621e-04 3.535e+00 3.335e+00 -2.546e+00
+23000 15000 atom_count: 4812 1.531e-03 1.341e-03 -9.046e-04 3.952e+00 3.781e+00 -2.871e+00
+25500 17500 atom_count: 4812 1.740e-03 1.549e-03 -1.023e-03 4.324e+00 4.057e+00 -3.066e+00
+   28000 
+28000 20000 atom_count: 4812 2.038e-03 1.824e-03 -1.169e-03 4.308e+00 4.082e+00 -3.015e+00
+Loop time of 16.0005 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:49:04 2023
+
+
+Pair  time (%) = 2.46043 (15.3773)
+Neigh time (%) = 8.73924 (54.6187)
+Comm  time (%) = 2.44329 (15.2701)
+Outpt time (%) = 0.000107291 (0.000670549)
+Other time (%) = 2.35739 (14.7333)
+
+Nlocal:    267.333 ave 288 max 243 min
+Histogram: 1 1 2 2 2 1 2 4 0 3
+Nghost:    1675.06 ave 2014 max 1440 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17212 ave 19532 max 14540 min
+Histogram: 1 2 1 3 0 1 5 2 1 2
+
+Total # of neighbors = 309816
+Ave neighs/atom = 64.384
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:49:04 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:00:44
+ Wall time:    0:00:45
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:49:04 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+   28000 
+30500 22500 atom_count: 4812 1.905e-03 1.692e-03 -1.093e-03 4.630e+00 4.400e+00 -3.292e+00
+33000 25000 atom_count: 4812 1.994e-03 1.779e-03 -1.145e-03 5.262e+00 4.955e+00 -3.735e+00
+35500 27500 atom_count: 4812 2.230e-03 2.005e-03 -1.243e-03 5.441e+00 5.108e+00 -3.793e+00
+   38000 
+38000 30000 atom_count: 4812 2.512e-03 2.258e-03 -1.352e-03 5.364e+00 5.009e+00 -3.670e+00
+Loop time of 16.0035 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:49:20 2023
+
+
+Pair  time (%) = 2.46656 (15.4126)
+Neigh time (%) = 8.74126 (54.6209)
+Comm  time (%) = 2.44811 (15.2973)
+Outpt time (%) = 0.000113128 (0.000706894)
+Other time (%) = 2.34746 (14.6684)
+
+Nlocal:    267.333 ave 288 max 243 min
+Histogram: 1 1 2 2 2 1 2 4 0 3
+Nghost:    1676.22 ave 2013 max 1441 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17211.5 ave 19528 max 14544 min
+Histogram: 1 2 1 3 0 1 5 2 1 2
+
+Total # of neighbors = 309807
+Ave neighs/atom = 64.3822
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:49:20 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:01:00
+ Wall time:    0:01:01
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:49:20 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+   38000 
+40500 32500 atom_count: 4812 2.385e-03 2.140e-03 -1.291e-03 5.526e+00 5.125e+00 -3.811e+00
+43000 35000 atom_count: 4812 2.425e-03 2.172e-03 -1.320e-03 6.033e+00 5.610e+00 -4.189e+00
+45500 37500 atom_count: 4812 2.602e-03 2.352e-03 -1.400e-03 6.329e+00 5.887e+00 -4.328e+00
+   48000 
+48000 40000 atom_count: 4812 2.843e-03 2.587e-03 -1.491e-03 6.276e+00 5.814e+00 -4.239e+00
+Loop time of 15.9853 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:49:36 2023
+
+
+Pair  time (%) = 2.47156 (15.4614)
+Neigh time (%) = 8.74795 (54.7248)
+Comm  time (%) = 2.44112 (15.271)
+Outpt time (%) = 0.000112919 (0.00070639)
+Other time (%) = 2.3246 (14.542)
+
+Nlocal:    267.333 ave 288 max 243 min
+Histogram: 1 1 2 2 2 1 2 4 0 3
+Nghost:    1677.11 ave 2013 max 1443 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17213.2 ave 19543 max 14502 min
+Histogram: 1 2 1 3 0 1 5 2 1 2
+
+Total # of neighbors = 309837
+Ave neighs/atom = 64.3884
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:49:36 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:01:16
+ Wall time:    0:01:17
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:49:36 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+   48000 
+50500 42500 atom_count: 4812 2.735e-03 2.481e-03 -1.442e-03 6.477e+00 5.971e+00 -4.420e+00
+53000 45000 atom_count: 4812 2.783e-03 2.527e-03 -1.475e-03 6.972e+00 6.496e+00 -4.794e+00
+55500 47500 atom_count: 4812 2.967e-03 2.697e-03 -1.544e-03 7.243e+00 6.711e+00 -4.899e+00
+   58000 
+58000 50000 atom_count: 4812 3.201e-03 2.917e-03 -1.616e-03 7.182e+00 6.650e+00 -4.817e+00
+58000 3.201e-03 2.917e-03 -1.616e-03 7.182e+00 6.650e+00 -4.817e+00
+Loop time of 15.9695 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:49:52 2023
+
+
+Pair  time (%) = 2.47612 (15.5053)
+Neigh time (%) = 8.73893 (54.7226)
+Comm  time (%) = 2.4433 (15.2998)
+Outpt time (%) = 0.00010705 (0.000670338)
+Other time (%) = 2.31106 (14.4717)
+
+Nlocal:    267.333 ave 288 max 243 min
+Histogram: 1 1 2 3 0 1 3 4 1 2
+Nghost:    1676.78 ave 2017 max 1443 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17214.9 ave 19488 max 14557 min
+Histogram: 1 2 1 2 1 2 4 2 1 2
+
+Total # of neighbors = 309869
+Ave neighs/atom = 64.3951
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:49:52 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:01:32
+ Wall time:    0:01:33
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:49:52 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+   58000 
+60500 2500 atom_count: 4812 1.145e-03 9.715e-04 -7.314e-04 1.079e+01 1.001e+01 -8.178e+00
+63000 5000 atom_count: 4812 2.557e-03 2.374e-03 -1.422e-03 1.487e+01 1.387e+01 -1.071e+01
+65500 7500 atom_count: 4812 4.059e-03 3.842e-03 -1.927e-03 1.440e+01 1.364e+01 -9.693e+00
+   68000 
+68000 10000 atom_count: 4812 5.187e-03 4.921e-03 -2.201e-03 1.235e+01 1.159e+01 -8.060e+00
+Loop time of 15.9754 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:50:08 2023
+
+
+Pair  time (%) = 2.48129 (15.5319)
+Neigh time (%) = 8.73922 (54.7043)
+Comm  time (%) = 2.44403 (15.2987)
+Outpt time (%) = 0.000112727 (0.000705631)
+Other time (%) = 2.31073 (14.4643)
+
+Nlocal:    267.333 ave 289 max 242 min
+Histogram: 1 2 1 2 1 2 2 4 2 1
+Nghost:    1676.22 ave 2018 max 1442 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17217.9 ave 19493 max 14574 min
+Histogram: 1 2 0 3 1 3 3 2 1 2
+
+Total # of neighbors = 309922
+Ave neighs/atom = 64.4061
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:50:08 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:01:48
+ Wall time:    0:01:49
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:50:08 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+   68000 
+70500 12500 atom_count: 4812 4.385e-03 4.130e-03 -1.916e-03 1.221e+01 1.139e+01 -8.197e+00
+73000 15000 atom_count: 4812 4.380e-03 4.098e-03 -1.980e-03 1.372e+01 1.290e+01 -9.320e+00
+75500 17500 atom_count: 4812 4.850e-03 4.594e-03 -2.121e-03 1.395e+01 1.323e+01 -9.273e+00
+   78000 
+78000 20000 atom_count: 4812 5.411e-03 5.183e-03 -2.252e-03 1.301e+01 1.240e+01 -8.526e+00
+Loop time of 15.9909 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:50:24 2023
+
+
+Pair  time (%) = 2.48518 (15.5413)
+Neigh time (%) = 8.75192 (54.7308)
+Comm  time (%) = 2.45045 (15.3241)
+Outpt time (%) = 0.000110809 (0.000692954)
+Other time (%) = 2.3032 (14.4032)
+
+Nlocal:    267.333 ave 289 max 242 min
+Histogram: 1 2 1 2 1 2 2 4 2 1
+Nghost:    1676.44 ave 2020 max 1442 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17221.2 ave 19499 max 14576 min
+Histogram: 1 2 0 4 0 3 3 1 2 2
+
+Total # of neighbors = 309981
+Ave neighs/atom = 64.4183
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:50:24 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:02:04
+ Wall time:    0:02:05
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:50:24 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+   78000 
+80500 22500 atom_count: 4812 4.945e-03 4.729e-03 -2.092e-03 1.300e+01 1.243e+01 -8.701e+00
+83000 25000 atom_count: 4812 4.931e-03 4.716e-03 -2.126e-03 1.404e+01 1.343e+01 -9.417e+00
+85500 27500 atom_count: 4812 5.231e-03 5.041e-03 -2.200e-03 1.437e+01 1.381e+01 -9.508e+00
+   88000 
+88000 30000 atom_count: 4812 5.639e-03 5.467e-03 -2.263e-03 1.379e+01 1.326e+01 -9.032e+00
+Loop time of 15.991 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:50:40 2023
+
+
+Pair  time (%) = 2.49316 (15.591)
+Neigh time (%) = 8.76185 (54.7924)
+Comm  time (%) = 2.44407 (15.284)
+Outpt time (%) = 0.000110132 (0.000688715)
+Other time (%) = 2.29181 (14.3319)
+
+Nlocal:    267.333 ave 289 max 241 min
+Histogram: 1 2 1 2 1 2 2 4 2 1
+Nghost:    1677.17 ave 2024 max 1443 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17222.6 ave 19503 max 14585 min
+Histogram: 1 2 0 3 1 3 3 2 1 2
+
+Total # of neighbors = 310006
+Ave neighs/atom = 64.4235
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:50:40 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:02:20
+ Wall time:    0:02:21
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:50:40 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+   88000 
+90500 32500 atom_count: 4812 5.310e-03 5.139e-03 -2.158e-03 1.387e+01 1.335e+01 -9.232e+00
+93000 35000 atom_count: 4812 5.319e-03 5.140e-03 -2.182e-03 1.476e+01 1.425e+01 -9.877e+00
+95500 37500 atom_count: 4812 5.580e-03 5.407e-03 -2.240e-03 1.488e+01 1.441e+01 -9.829e+00
+   98000 
+98000 40000 atom_count: 4812 5.909e-03 5.749e-03 -2.296e-03 1.444e+01 1.395e+01 -9.440e+00
+Loop time of 15.9893 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:50:56 2023
+
+
+Pair  time (%) = 2.49394 (15.5975)
+Neigh time (%) = 8.75568 (54.7595)
+Comm  time (%) = 2.44202 (15.2728)
+Outpt time (%) = 0.000110409 (0.000690517)
+Other time (%) = 2.29759 (14.3695)
+
+Nlocal:    267.333 ave 289 max 241 min
+Histogram: 1 2 1 2 1 2 2 4 2 1
+Nghost:    1676.67 ave 2020 max 1443 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17225.3 ave 19585 max 14586 min
+Histogram: 1 2 1 2 1 3 3 2 2 1
+
+Total # of neighbors = 310055
+Ave neighs/atom = 64.4337
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:50:56 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:02:36
+ Wall time:    0:02:37
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:50:56 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+   98000 
+100500 42500 atom_count: 4812 5.640e-03 5.479e-03 -2.210e-03 1.452e+01 1.398e+01 -9.582e+00
+103000 45000 atom_count: 4812 5.629e-03 5.464e-03 -2.232e-03 1.519e+01 1.469e+01 -1.006e+01
+105500 47500 atom_count: 4812 5.819e-03 5.675e-03 -2.278e-03 1.541e+01 1.495e+01 -1.011e+01
+  108000 
+108000 50000 atom_count: 4812 6.101e-03 5.960e-03 -2.324e-03 1.506e+01 1.461e+01 -9.806e+00
+108000 6.101e-03 5.960e-03 -2.324e-03 1.506e+01 1.461e+01 -9.806e+00
+Loop time of 15.9899 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:51:12 2023
+
+
+Pair  time (%) = 2.49574 (15.6083)
+Neigh time (%) = 8.75247 (54.7376)
+Comm  time (%) = 2.44089 (15.2652)
+Outpt time (%) = 0.000114436 (0.000715678)
+Other time (%) = 2.30065 (14.3882)
+
+Nlocal:    267.333 ave 289 max 241 min
+Histogram: 1 2 1 2 1 2 2 4 2 1
+Nghost:    1677.22 ave 2021 max 1442 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17227.1 ave 19586 max 14586 min
+Histogram: 1 2 1 2 1 3 3 2 2 1
+
+Total # of neighbors = 310087
+Ave neighs/atom = 64.4404
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:51:12 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:02:52
+ Wall time:    0:02:53
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:51:12 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  108000 
+110500 2500 atom_count: 4812 1.487e-03 1.363e-03 -9.680e-04 1.721e+01 1.620e+01 -1.322e+01
+113000 5000 atom_count: 4812 3.797e-03 3.525e-03 -1.802e-03 2.303e+01 2.252e+01 -1.650e+01
+115500 7500 atom_count: 4812 5.928e-03 5.643e-03 -2.215e-03 2.216e+01 2.166e+01 -1.454e+01
+  118000 
+118000 10000 atom_count: 4812 7.498e-03 7.201e-03 -2.441e-03 1.877e+01 1.836e+01 -1.192e+01
+Loop time of 16.0503 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:51:28 2023
+
+
+Pair  time (%) = 2.49943 (15.5725)
+Neigh time (%) = 8.75161 (54.5261)
+Comm  time (%) = 2.44403 (15.2273)
+Outpt time (%) = 0.000108369 (0.000675182)
+Other time (%) = 2.35513 (14.6734)
+
+Nlocal:    267.333 ave 289 max 240 min
+Histogram: 1 2 0 2 2 2 2 4 2 1
+Nghost:    1676.06 ave 2015 max 1440 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17231.4 ave 19577 max 14593 min
+Histogram: 1 2 1 2 1 3 3 2 2 1
+
+Total # of neighbors = 310165
+Ave neighs/atom = 64.4566
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:51:28 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:03:08
+ Wall time:    0:03:09
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:51:28 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  118000 
+120500 12500 atom_count: 4812 6.320e-03 6.046e-03 -2.154e-03 1.849e+01 1.816e+01 -1.226e+01
+123000 15000 atom_count: 4812 6.281e-03 6.014e-03 -2.253e-03 2.050e+01 2.010e+01 -1.363e+01
+125500 17500 atom_count: 4812 6.892e-03 6.618e-03 -2.415e-03 2.077e+01 2.033e+01 -1.336e+01
+  128000 
+128000 20000 atom_count: 4812 7.634e-03 7.389e-03 -2.531e-03 1.937e+01 1.893e+01 -1.227e+01
+Loop time of 16.0044 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:51:44 2023
+
+
+Pair  time (%) = 2.50362 (15.6433)
+Neigh time (%) = 8.75742 (54.7189)
+Comm  time (%) = 2.45119 (15.3157)
+Outpt time (%) = 0.000105098 (0.000656682)
+Other time (%) = 2.29203 (14.3213)
+
+Nlocal:    267.333 ave 289 max 240 min
+Histogram: 1 1 1 2 1 3 2 4 2 1
+Nghost:    1678.17 ave 2017 max 1444 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17232.3 ave 19542 max 14646 min
+Histogram: 1 2 1 2 1 3 3 2 2 1
+
+Total # of neighbors = 310181
+Ave neighs/atom = 64.4599
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:51:44 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:03:24
+ Wall time:    0:03:25
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:51:44 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  128000 
+130500 22500 atom_count: 4812 6.972e-03 6.729e-03 -2.361e-03 1.938e+01 1.883e+01 -1.253e+01
+133000 25000 atom_count: 4812 6.926e-03 6.689e-03 -2.393e-03 2.068e+01 2.031e+01 -1.351e+01
+135500 27500 atom_count: 4812 7.306e-03 7.090e-03 -2.474e-03 2.090e+01 2.048e+01 -1.335e+01
+  138000 
+138000 30000 atom_count: 4812 7.808e-03 7.627e-03 -2.546e-03 1.992e+01 1.958e+01 -1.261e+01
+Loop time of 16.0448 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:52:00 2023
+
+
+Pair  time (%) = 2.5042 (15.6076)
+Neigh time (%) = 8.74723 (54.5175)
+Comm  time (%) = 2.44572 (15.243)
+Outpt time (%) = 0.000116248 (0.000724524)
+Other time (%) = 2.34755 (14.6312)
+
+Nlocal:    267.333 ave 289 max 240 min
+Histogram: 1 1 1 2 1 4 1 4 2 1
+Nghost:    1679.06 ave 2018 max 1446 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17235.9 ave 19595 max 14704 min
+Histogram: 1 2 2 2 0 3 3 2 2 1
+
+Total # of neighbors = 310246
+Ave neighs/atom = 64.4734
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:52:00 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:03:40
+ Wall time:    0:03:41
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:52:00 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  138000 
+140500 32500 atom_count: 4812 7.336e-03 7.156e-03 -2.427e-03 1.999e+01 1.960e+01 -1.287e+01
+143000 35000 atom_count: 4812 7.305e-03 7.125e-03 -2.462e-03 2.098e+01 2.058e+01 -1.355e+01
+145500 37500 atom_count: 4812 7.584e-03 7.411e-03 -2.522e-03 2.118e+01 2.072e+01 -1.345e+01
+  148000 
+148000 40000 atom_count: 4812 7.969e-03 7.822e-03 -2.584e-03 2.049e+01 2.006e+01 -1.289e+01
+Loop time of 16.04 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:52:16 2023
+
+
+Pair  time (%) = 2.50675 (15.6281)
+Neigh time (%) = 8.74813 (54.5395)
+Comm  time (%) = 2.44492 (15.2427)
+Outpt time (%) = 0.000113652 (0.000708552)
+Other time (%) = 2.34007 (14.5889)
+
+Nlocal:    267.333 ave 289 max 240 min
+Histogram: 1 1 1 2 1 4 1 4 2 1
+Nghost:    1679.61 ave 2020 max 1446 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17235.6 ave 19531 max 14767 min
+Histogram: 1 2 2 2 0 3 3 2 2 1
+
+Total # of neighbors = 310241
+Ave neighs/atom = 64.4724
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:52:16 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:03:56
+ Wall time:    0:03:57
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:52:16 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  148000 
+150500 42500 atom_count: 4812 7.606e-03 7.453e-03 -2.497e-03 2.051e+01 2.007e+01 -1.308e+01
+153000 45000 atom_count: 4812 7.574e-03 7.415e-03 -2.515e-03 2.134e+01 2.095e+01 -1.365e+01
+155500 47500 atom_count: 4812 7.804e-03 7.645e-03 -2.557e-03 2.163e+01 2.110e+01 -1.361e+01
+  158000 
+158000 50000 atom_count: 4812 8.136e-03 7.984e-03 -2.596e-03 2.106e+01 2.054e+01 -1.317e+01
+158000 8.136e-03 7.984e-03 -2.596e-03 2.106e+01 2.054e+01 -1.317e+01
+Loop time of 16.1031 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:52:32 2023
+
+
+Pair  time (%) = 2.51035 (15.5892)
+Neigh time (%) = 8.74947 (54.3341)
+Comm  time (%) = 2.45152 (15.2239)
+Outpt time (%) = 0.000119795 (0.000743923)
+Other time (%) = 2.39164 (14.852)
+
+Nlocal:    267.333 ave 289 max 240 min
+Histogram: 1 1 2 1 1 4 1 4 1 2
+Nghost:    1678.72 ave 2021 max 1446 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17236.7 ave 19645 max 14767 min
+Histogram: 1 2 2 2 0 5 1 2 2 1
+
+Total # of neighbors = 310260
+Ave neighs/atom = 64.4763
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:52:32 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:04:12
+ Wall time:    0:04:13
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:52:32 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  158000 
+160500 2500 atom_count: 4812 1.814e-03 1.662e-03 -1.118e-03 2.192e+01 2.166e+01 -1.686e+01
+163000 5000 atom_count: 4812 4.517e-03 4.305e-03 -1.980e-03 2.899e+01 2.852e+01 -2.002e+01
+165500 7500 atom_count: 4812 6.960e-03 6.917e-03 -2.389e-03 2.856e+01 2.776e+01 -1.788e+01
+  168000 
+168000 10000 atom_count: 4812 8.833e-03 8.982e-03 -2.599e-03 2.406e+01 2.352e+01 -1.472e+01
+Loop time of 16.1176 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:52:48 2023
+
+
+Pair  time (%) = 2.51223 (15.5869)
+Neigh time (%) = 8.74663 (54.2674)
+Comm  time (%) = 2.45541 (15.2343)
+Outpt time (%) = 0.000117096 (0.000726506)
+Other time (%) = 2.40326 (14.9107)
+
+Nlocal:    267.333 ave 289 max 240 min
+Histogram: 1 0 3 1 1 4 1 4 2 1
+Nghost:    1679.28 ave 2022 max 1446 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17236.8 ave 19575 max 14795 min
+Histogram: 1 2 2 2 0 3 3 2 2 1
+
+Total # of neighbors = 310262
+Ave neighs/atom = 64.4767
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:52:48 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:04:28
+ Wall time:    0:04:29
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:52:48 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  168000 
+170500 12500 atom_count: 4812 7.461e-03 7.540e-03 -2.316e-03 2.408e+01 2.346e+01 -1.549e+01
+173000 15000 atom_count: 4812 7.517e-03 7.534e-03 -2.446e-03 2.656e+01 2.604e+01 -1.702e+01
+175500 17500 atom_count: 4812 8.276e-03 8.323e-03 -2.593e-03 2.659e+01 2.603e+01 -1.646e+01
+  178000 
+178000 20000 atom_count: 4812 9.157e-03 9.222e-03 -2.695e-03 2.464e+01 2.402e+01 -1.497e+01
+Loop time of 16.0711 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:53:04 2023
+
+
+Pair  time (%) = 2.5142 (15.6442)
+Neigh time (%) = 8.7501 (54.446)
+Comm  time (%) = 2.4535 (15.2665)
+Outpt time (%) = 0.000106483 (0.000662573)
+Other time (%) = 2.35324 (14.6427)
+
+Nlocal:    267.333 ave 289 max 240 min
+Histogram: 1 0 3 1 1 4 1 4 2 1
+Nghost:    1679.72 ave 2022 max 1446 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17237.2 ave 19579 max 14798 min
+Histogram: 1 2 2 2 0 3 3 2 2 1
+
+Total # of neighbors = 310269
+Ave neighs/atom = 64.4782
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:53:04 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:04:44
+ Wall time:    0:04:45
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:53:04 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  178000 
+180500 22500 atom_count: 4812 8.358e-03 8.385e-03 -2.521e-03 2.454e+01 2.392e+01 -1.531e+01
+183000 25000 atom_count: 4812 8.284e-03 8.281e-03 -2.555e-03 2.596e+01 2.533e+01 -1.624e+01
+185500 27500 atom_count: 4812 8.678e-03 8.677e-03 -2.617e-03 2.615e+01 2.553e+01 -1.600e+01
+  188000 
+188000 30000 atom_count: 4812 9.255e-03 9.245e-03 -2.656e-03 2.499e+01 2.441e+01 -1.511e+01
+Loop time of 16.0905 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:53:20 2023
+
+
+Pair  time (%) = 2.51651 (15.6397)
+Neigh time (%) = 8.75797 (54.4294)
+Comm  time (%) = 2.4573 (15.2717)
+Outpt time (%) = 0.0001071 (0.000665612)
+Other time (%) = 2.35863 (14.6585)
+
+Nlocal:    267.333 ave 289 max 240 min
+Histogram: 1 1 2 1 1 3 2 4 2 1
+Nghost:    1680.72 ave 2025 max 1448 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17238.1 ave 19577 max 14794 min
+Histogram: 1 2 2 2 0 3 3 2 2 1
+
+Total # of neighbors = 310285
+Ave neighs/atom = 64.4815
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:53:20 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:05:00
+ Wall time:    0:05:01
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:53:20 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  188000 
+190500 32500 atom_count: 4812 8.705e-03 8.677e-03 -2.546e-03 2.504e+01 2.443e+01 -1.546e+01
+193000 35000 atom_count: 4812 8.652e-03 8.616e-03 -2.587e-03 2.613e+01 2.553e+01 -1.615e+01
+195500 37500 atom_count: 4812 8.944e-03 8.932e-03 -2.636e-03 2.628e+01 2.575e+01 -1.598e+01
+  198000 
+198000 40000 atom_count: 4812 9.371e-03 9.383e-03 -2.670e-03 2.539e+01 2.489e+01 -1.531e+01
+Loop time of 16.0825 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:53:36 2023
+
+
+Pair  time (%) = 2.51834 (15.6589)
+Neigh time (%) = 8.76329 (54.4896)
+Comm  time (%) = 2.46371 (15.3192)
+Outpt time (%) = 0.000113425 (0.000705272)
+Other time (%) = 2.33703 (14.5315)
+
+Nlocal:    267.333 ave 289 max 239 min
+Histogram: 1 0 2 2 1 3 2 4 1 2
+Nghost:    1680.39 ave 2025 max 1446 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17239.1 ave 19567 max 14820 min
+Histogram: 1 2 2 2 0 4 2 2 2 1
+
+Total # of neighbors = 310303
+Ave neighs/atom = 64.4852
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:53:36 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:05:16
+ Wall time:    0:05:17
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:53:36 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  198000 
+200500 42500 atom_count: 4812 8.944e-03 8.945e-03 -2.585e-03 2.543e+01 2.489e+01 -1.556e+01
+203000 45000 atom_count: 4812 8.904e-03 8.885e-03 -2.606e-03 2.634e+01 2.579e+01 -1.613e+01
+205500 47500 atom_count: 4812 9.146e-03 9.135e-03 -2.640e-03 2.646e+01 2.599e+01 -1.602e+01
+  208000 
+208000 50000 atom_count: 4812 9.498e-03 9.497e-03 -2.673e-03 2.577e+01 2.534e+01 -1.550e+01
+208000 9.498e-03 9.497e-03 -2.673e-03 2.577e+01 2.534e+01 -1.550e+01
+Loop time of 16.0655 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:53:52 2023
+
+
+Pair  time (%) = 2.5189 (15.6789)
+Neigh time (%) = 8.74944 (54.461)
+Comm  time (%) = 2.45533 (15.2832)
+Outpt time (%) = 0.000110869 (0.000690105)
+Other time (%) = 2.34173 (14.5761)
+
+Nlocal:    267.333 ave 289 max 239 min
+Histogram: 1 1 1 2 1 3 2 4 1 2
+Nghost:    1681 ave 2023 max 1447 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17239.1 ave 19575 max 14822 min
+Histogram: 1 2 2 2 0 4 2 2 2 1
+
+Total # of neighbors = 310303
+Ave neighs/atom = 64.4852
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:53:52 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:05:32
+ Wall time:    0:05:33
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:53:52 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  208000 
+210500 2500 atom_count: 4812 2.122e-03 1.952e-03 -1.208e-03 2.743e+01 2.659e+01 -2.067e+01
+213000 5000 atom_count: 4812 5.267e-03 5.132e-03 -2.184e-03 3.502e+01 3.479e+01 -2.359e+01
+215500 7500 atom_count: 4812 8.201e-03 8.057e-03 -2.598e-03 3.367e+01 3.345e+01 -2.058e+01
+  218000 
+218000 10000 atom_count: 4812 1.041e-02 1.028e-02 -2.702e-03 2.856e+01 2.826e+01 -1.694e+01
+Loop time of 16.0542 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:54:08 2023
+
+
+Pair  time (%) = 2.52276 (15.714)
+Neigh time (%) = 8.74448 (54.4684)
+Comm  time (%) = 2.45209 (15.2738)
+Outpt time (%) = 0.000112565 (0.000701153)
+Other time (%) = 2.33477 (14.543)
+
+Nlocal:    267.333 ave 289 max 239 min
+Histogram: 1 1 1 2 1 3 2 4 1 2
+Nghost:    1680.89 ave 2021 max 1447 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17239.4 ave 19576 max 14827 min
+Histogram: 2 1 2 2 1 2 3 2 2 1
+
+Total # of neighbors = 310310
+Ave neighs/atom = 64.4867
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:54:08 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:05:48
+ Wall time:    0:05:49
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:54:08 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  218000 
+220500 12500 atom_count: 4812 8.763e-03 8.627e-03 -2.416e-03 2.869e+01 2.815e+01 -1.791e+01
+223000 15000 atom_count: 4812 8.750e-03 8.626e-03 -2.548e-03 3.105e+01 3.068e+01 -1.941e+01
+225500 17500 atom_count: 4812 9.549e-03 9.432e-03 -2.629e-03 3.114e+01 3.077e+01 -1.874e+01
+  228000 
+228000 20000 atom_count: 4812 1.048e-02 1.041e-02 -2.680e-03 2.885e+01 2.864e+01 -1.704e+01
+Loop time of 16.0664 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:54:24 2023
+
+
+Pair  time (%) = 2.52441 (15.7124)
+Neigh time (%) = 8.76264 (54.5401)
+Comm  time (%) = 2.4539 (15.2735)
+Outpt time (%) = 0.00010958 (0.000682046)
+Other time (%) = 2.32535 (14.4734)
+
+Nlocal:    267.333 ave 288 max 239 min
+Histogram: 1 1 2 1 1 3 2 4 1 2
+Nghost:    1679.61 ave 2020 max 1446 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17237.1 ave 19616 max 14829 min
+Histogram: 2 1 2 2 2 2 2 2 2 1
+
+Total # of neighbors = 310268
+Ave neighs/atom = 64.478
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:54:24 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:06:04
+ Wall time:    0:06:05
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:54:24 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  228000 
+230500 22500 atom_count: 4812 9.572e-03 9.488e-03 -2.530e-03 2.883e+01 2.855e+01 -1.753e+01
+233000 25000 atom_count: 4812 9.508e-03 9.387e-03 -2.592e-03 3.051e+01 3.025e+01 -1.859e+01
+235500 27500 atom_count: 4812 9.975e-03 9.863e-03 -2.657e-03 3.048e+01 3.037e+01 -1.818e+01
+  238000 
+238000 30000 atom_count: 4812 1.057e-02 1.048e-02 -2.674e-03 2.900e+01 2.889e+01 -1.708e+01
+Loop time of 16.1795 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:54:41 2023
+
+
+Pair  time (%) = 2.52577 (15.611)
+Neigh time (%) = 8.76923 (54.1998)
+Comm  time (%) = 2.45826 (15.1937)
+Outpt time (%) = 0.000118999 (0.000735493)
+Other time (%) = 2.42608 (14.9948)
+
+Nlocal:    267.333 ave 288 max 239 min
+Histogram: 1 1 2 0 2 2 3 3 2 2
+Nghost:    1680 ave 2020 max 1446 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17241.1 ave 19708 max 14886 min
+Histogram: 2 1 2 2 2 3 1 2 2 1
+
+Total # of neighbors = 310339
+Ave neighs/atom = 64.4927
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:54:41 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:06:20
+ Wall time:    0:06:22
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:54:41 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  238000 
+240500 32500 atom_count: 4812 9.928e-03 9.836e-03 -2.568e-03 2.896e+01 2.883e+01 -1.742e+01
+243000 35000 atom_count: 4812 9.838e-03 9.759e-03 -2.608e-03 3.017e+01 3.005e+01 -1.821e+01
+245500 37500 atom_count: 4812 1.016e-02 1.007e-02 -2.637e-03 3.031e+01 3.020e+01 -1.796e+01
+  248000 
+248000 40000 atom_count: 4812 1.062e-02 1.054e-02 -2.652e-03 2.925e+01 2.920e+01 -1.718e+01
+Loop time of 16.2312 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:54:57 2023
+
+
+Pair  time (%) = 2.52567 (15.5606)
+Neigh time (%) = 8.76466 (53.9989)
+Comm  time (%) = 2.46566 (15.1909)
+Outpt time (%) = 0.000120043 (0.000739583)
+Other time (%) = 2.47507 (15.2488)
+
+Nlocal:    267.333 ave 288 max 240 min
+Histogram: 1 1 2 2 0 2 3 4 1 2
+Nghost:    1679.83 ave 2020 max 1445 min
+Histogram: 6 0 4 0 0 3 1 0 0 4
+Neighs:    17239.2 ave 19763 max 14892 min
+Histogram: 2 3 0 1 3 3 1 2 2 1
+
+Total # of neighbors = 310305
+Ave neighs/atom = 64.4857
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:54:57 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:06:36
+ Wall time:    0:06:38
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:54:57 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  248000 
+250500 42500 atom_count: 4812 1.013e-02 1.004e-02 -2.573e-03 2.922e+01 2.912e+01 -1.743e+01
+253000 45000 atom_count: 4812 1.007e-02 9.972e-03 -2.611e-03 3.021e+01 3.019e+01 -1.811e+01
+255500 47500 atom_count: 4812 1.034e-02 1.023e-02 -2.655e-03 3.037e+01 3.036e+01 -1.795e+01
+  258000 
+258000 50000 atom_count: 4812 1.071e-02 1.061e-02 -2.676e-03 2.954e+01 2.953e+01 -1.732e+01
+258000 1.071e-02 1.061e-02 -2.676e-03 2.954e+01 2.953e+01 -1.732e+01
+Loop time of 16.279 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:55:13 2023
+
+
+Pair  time (%) = 2.52865 (15.5332)
+Neigh time (%) = 8.76036 (53.8138)
+Comm  time (%) = 2.45708 (15.0935)
+Outpt time (%) = 0.000124758 (0.000766373)
+Other time (%) = 2.53281 (15.5587)
+
+Nlocal:    267.333 ave 288 max 238 min
+Histogram: 1 1 1 1 2 1 4 2 3 2
+Nghost:    1679.72 ave 2018 max 1443 min
+Histogram: 6 0 3 1 0 3 1 0 0 4
+Neighs:    17243.7 ave 19846 max 14899 min
+Histogram: 2 3 0 1 3 4 1 1 2 1
+
+Total # of neighbors = 310387
+Ave neighs/atom = 64.5027
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:55:13 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:06:53
+ Wall time:    0:06:54
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:55:13 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  258000 
+260500 2500 atom_count: 4812 2.293e-03 2.121e-03 -1.314e-03 2.926e+01 2.907e+01 -2.226e+01
+263000 5000 atom_count: 4812 5.643e-03 5.497e-03 -2.185e-03 3.839e+01 3.925e+01 -2.576e+01
+265500 7500 atom_count: 4812 8.876e-03 8.685e-03 -2.415e-03 3.699e+01 3.781e+01 -2.239e+01
+  268000 
+268000 10000 atom_count: 4812 1.120e-02 1.108e-02 -2.495e-03 3.139e+01 3.193e+01 -1.820e+01
+Loop time of 16.3016 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:55:29 2023
+
+
+Pair  time (%) = 2.5322 (15.5334)
+Neigh time (%) = 8.75973 (53.7353)
+Comm  time (%) = 2.45538 (15.0622)
+Outpt time (%) = 0.000128277 (0.000786895)
+Other time (%) = 2.55418 (15.6683)
+
+Nlocal:    267.333 ave 288 max 237 min
+Histogram: 1 0 2 1 2 1 4 2 2 3
+Nghost:    1679.17 ave 2020 max 1440 min
+Histogram: 6 0 3 1 0 3 1 0 0 4
+Neighs:    17244.3 ave 19841 max 14903 min
+Histogram: 2 2 1 1 3 4 1 2 1 1
+
+Total # of neighbors = 310398
+Ave neighs/atom = 64.505
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:55:29 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:07:09
+ Wall time:    0:07:10
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:55:29 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  268000 
+270500 12500 atom_count: 4812 9.435e-03 9.296e-03 -2.268e-03 3.154e+01 3.156e+01 -1.929e+01
+273000 15000 atom_count: 4812 9.474e-03 9.322e-03 -2.420e-03 3.450e+01 3.494e+01 -2.115e+01
+275500 17500 atom_count: 4812 1.037e-02 1.021e-02 -2.557e-03 3.437e+01 3.478e+01 -2.026e+01
+  278000 
+278000 20000 atom_count: 4812 1.142e-02 1.125e-02 -2.629e-03 3.190e+01 3.236e+01 -1.851e+01
+Loop time of 16.2982 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:55:46 2023
+
+
+Pair  time (%) = 2.53376 (15.5463)
+Neigh time (%) = 8.75251 (53.7024)
+Comm  time (%) = 2.45507 (15.0635)
+Outpt time (%) = 0.000121605 (0.000746126)
+Other time (%) = 2.55669 (15.687)
+
+Nlocal:    267.333 ave 288 max 239 min
+Histogram: 1 0 3 1 1 3 2 3 2 2
+Nghost:    1678.94 ave 2017 max 1440 min
+Histogram: 6 0 2 2 0 3 1 0 0 4
+Neighs:    17241.6 ave 19832 max 14901 min
+Histogram: 2 2 1 2 2 4 1 2 1 1
+
+Total # of neighbors = 310348
+Ave neighs/atom = 64.4946
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:55:46 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:07:25
+ Wall time:    0:07:27
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:55:46 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  278000 
+280500 22500 atom_count: 4812 1.042e-02 1.025e-02 -2.490e-03 3.174e+01 3.213e+01 -1.900e+01
+283000 25000 atom_count: 4812 1.029e-02 1.013e-02 -2.551e-03 3.353e+01 3.399e+01 -2.012e+01
+285500 27500 atom_count: 4812 1.079e-02 1.059e-02 -2.601e-03 3.382e+01 3.422e+01 -1.978e+01
+  288000 
+288000 30000 atom_count: 4812 1.146e-02 1.127e-02 -2.618e-03 3.222e+01 3.263e+01 -1.863e+01
+Loop time of 16.2791 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:56:02 2023
+
+
+Pair  time (%) = 2.53514 (15.5729)
+Neigh time (%) = 8.75298 (53.7681)
+Comm  time (%) = 2.45077 (15.0547)
+Outpt time (%) = 0.000132346 (0.000812977)
+Other time (%) = 2.54012 (15.6035)
+
+Nlocal:    267.333 ave 288 max 238 min
+Histogram: 1 0 2 2 1 2 3 3 1 3
+Nghost:    1678.72 ave 2018 max 1440 min
+Histogram: 6 0 2 2 0 3 1 0 0 4
+Neighs:    17242.2 ave 19834 max 14900 min
+Histogram: 2 2 1 2 2 4 1 2 1 1
+
+Total # of neighbors = 310360
+Ave neighs/atom = 64.4971
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:56:02 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:07:41
+ Wall time:    0:07:43
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:56:02 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  288000 
+290500 32500 atom_count: 4812 1.077e-02 1.057e-02 -2.524e-03 3.226e+01 3.262e+01 -1.910e+01
+293000 35000 atom_count: 4812 1.069e-02 1.051e-02 -2.573e-03 3.363e+01 3.393e+01 -1.993e+01
+295500 37500 atom_count: 4812 1.102e-02 1.086e-02 -2.610e-03 3.371e+01 3.403e+01 -1.957e+01
+  298000 
+298000 40000 atom_count: 4812 1.152e-02 1.135e-02 -2.635e-03 3.252e+01 3.281e+01 -1.873e+01
+Loop time of 16.2835 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:56:18 2023
+
+
+Pair  time (%) = 2.53559 (15.5715)
+Neigh time (%) = 8.76153 (53.8061)
+Comm  time (%) = 2.45406 (15.0708)
+Outpt time (%) = 0.00012222 (0.000750571)
+Other time (%) = 2.53223 (15.5509)
+
+Nlocal:    267.333 ave 288 max 239 min
+Histogram: 1 0 3 1 1 2 3 3 1 3
+Nghost:    1678.83 ave 2018 max 1440 min
+Histogram: 6 0 2 2 0 4 0 0 0 4
+Neighs:    17246 ave 19836 max 14901 min
+Histogram: 2 2 1 2 2 4 0 3 1 1
+
+Total # of neighbors = 310428
+Ave neighs/atom = 64.5112
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:56:18 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:07:58
+ Wall time:    0:07:59
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:56:18 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  298000 
+300500 42500 atom_count: 4812 1.099e-02 1.082e-02 -2.565e-03 3.253e+01 3.282e+01 -1.908e+01
+303000 45000 atom_count: 4812 1.092e-02 1.076e-02 -2.597e-03 3.354e+01 3.386e+01 -1.971e+01
+305500 47500 atom_count: 4812 1.119e-02 1.101e-02 -2.634e-03 3.370e+01 3.396e+01 -1.950e+01
+  308000 
+308000 50000 atom_count: 4812 1.159e-02 1.140e-02 -2.651e-03 3.280e+01 3.305e+01 -1.884e+01
+308000 1.159e-02 1.140e-02 -2.651e-03 3.280e+01 3.305e+01 -1.884e+01
+Loop time of 16.2924 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:56:35 2023
+
+
+Pair  time (%) = 2.53752 (15.5749)
+Neigh time (%) = 8.75693 (53.7486)
+Comm  time (%) = 2.45636 (15.0767)
+Outpt time (%) = 0.000120113 (0.000737236)
+Other time (%) = 2.54145 (15.599)
+
+Nlocal:    267.333 ave 287 max 240 min
+Histogram: 1 0 3 1 1 2 3 3 1 3
+Nghost:    1678.72 ave 2021 max 1438 min
+Histogram: 6 0 2 2 0 4 0 0 0 4
+Neighs:    17245.8 ave 19744 max 14935 min
+Histogram: 2 2 1 2 2 4 0 2 2 1
+
+Total # of neighbors = 310424
+Ave neighs/atom = 64.5104
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:56:35 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:08:14
+ Wall time:    0:08:16
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:56:35 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  308000 
+310500 2500 atom_count: 4812 2.388e-03 2.223e-03 -1.359e-03 3.308e+01 3.201e+01 -2.440e+01
+313000 5000 atom_count: 4812 6.149e-03 5.928e-03 -2.366e-03 4.259e+01 4.233e+01 -2.801e+01
+315500 7500 atom_count: 4812 9.439e-03 9.297e-03 -2.650e-03 4.062e+01 4.073e+01 -2.386e+01
+  318000 
+318000 10000 atom_count: 4812 1.189e-02 1.182e-02 -2.739e-03 3.437e+01 3.442e+01 -1.937e+01
+Loop time of 16.2723 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:56:51 2023
+
+
+Pair  time (%) = 2.537 (15.5909)
+Neigh time (%) = 8.75206 (53.7849)
+Comm  time (%) = 2.4639 (15.1417)
+Outpt time (%) = 0.00012843 (0.000789252)
+Other time (%) = 2.51925 (15.4818)
+
+Nlocal:    267.333 ave 289 max 241 min
+Histogram: 1 2 1 2 0 4 1 4 1 2
+Nghost:    1678.17 ave 2020 max 1437 min
+Histogram: 6 0 2 2 0 4 0 0 0 4
+Neighs:    17247.7 ave 19844 max 14894 min
+Histogram: 2 2 1 2 2 4 0 4 0 1
+
+Total # of neighbors = 310459
+Ave neighs/atom = 64.5177
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:56:51 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:08:30
+ Wall time:    0:08:32
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:56:51 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  318000 
+320500 12500 atom_count: 4812 1.002e-02 9.917e-03 -2.466e-03 3.433e+01 3.416e+01 -2.055e+01
+323000 15000 atom_count: 4812 1.001e-02 9.908e-03 -2.587e-03 3.748e+01 3.738e+01 -2.230e+01
+325500 17500 atom_count: 4812 1.091e-02 1.078e-02 -2.684e-03 3.741e+01 3.736e+01 -2.140e+01
+  328000 
+328000 20000 atom_count: 4812 1.199e-02 1.186e-02 -2.701e-03 3.462e+01 3.471e+01 -1.951e+01
+Loop time of 16.3317 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:57:07 2023
+
+
+Pair  time (%) = 2.53893 (15.546)
+Neigh time (%) = 8.7629 (53.6557)
+Comm  time (%) = 2.45503 (15.0323)
+Outpt time (%) = 0.000123117 (0.000753852)
+Other time (%) = 2.57474 (15.7653)
+
+Nlocal:    267.333 ave 289 max 242 min
+Histogram: 1 2 2 1 0 4 2 2 2 2
+Nghost:    1677.94 ave 2018 max 1437 min
+Histogram: 6 0 2 2 0 4 0 0 0 4
+Neighs:    17247.8 ave 19841 max 14894 min
+Histogram: 1 3 1 2 2 4 0 4 0 1
+
+Total # of neighbors = 310461
+Ave neighs/atom = 64.5181
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:57:07 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:08:46
+ Wall time:    0:08:48
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:57:07 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  328000 
+330500 22500 atom_count: 4812 1.095e-02 1.082e-02 -2.566e-03 3.466e+01 3.477e+01 -2.028e+01
+333000 25000 atom_count: 4812 1.088e-02 1.073e-02 -2.641e-03 3.640e+01 3.651e+01 -2.127e+01
+335500 27500 atom_count: 4812 1.137e-02 1.123e-02 -2.690e-03 3.652e+01 3.664e+01 -2.079e+01
+  338000 
+338000 30000 atom_count: 4812 1.207e-02 1.190e-02 -2.719e-03 3.481e+01 3.493e+01 -1.958e+01
+Loop time of 16.2944 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:57:23 2023
+
+
+Pair  time (%) = 2.54071 (15.5925)
+Neigh time (%) = 8.7828 (53.9008)
+Comm  time (%) = 2.46055 (15.1006)
+Outpt time (%) = 0.0001123 (0.000689195)
+Other time (%) = 2.51021 (15.4054)
+
+Nlocal:    267.333 ave 287 max 242 min
+Histogram: 1 2 2 1 0 3 3 2 2 2
+Nghost:    1677.83 ave 2019 max 1439 min
+Histogram: 6 0 2 2 0 4 0 0 0 4
+Neighs:    17248.1 ave 19722 max 14968 min
+Histogram: 3 1 1 2 1 5 0 3 1 1
+
+Total # of neighbors = 310465
+Ave neighs/atom = 64.5189
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:57:23 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:09:03
+ Wall time:    0:09:04
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:57:23 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  338000 
+340500 32500 atom_count: 4812 1.134e-02 1.117e-02 -2.617e-03 3.479e+01 3.488e+01 -2.004e+01
+343000 35000 atom_count: 4812 1.125e-02 1.107e-02 -2.652e-03 3.618e+01 3.627e+01 -2.086e+01
+345500 37500 atom_count: 4812 1.159e-02 1.142e-02 -2.687e-03 3.625e+01 3.638e+01 -2.057e+01
+  348000 
+348000 40000 atom_count: 4812 1.211e-02 1.194e-02 -2.704e-03 3.495e+01 3.511e+01 -1.964e+01
+Loop time of 16.2815 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:57:40 2023
+
+
+Pair  time (%) = 2.54229 (15.6146)
+Neigh time (%) = 8.79788 (54.0359)
+Comm  time (%) = 2.4599 (15.1085)
+Outpt time (%) = 0.00012534 (0.000769826)
+Other time (%) = 2.48134 (15.2402)
+
+Nlocal:    267.333 ave 287 max 242 min
+Histogram: 1 1 2 2 0 2 4 2 2 2
+Nghost:    1677.5 ave 2017 max 1438 min
+Histogram: 6 0 2 2 0 4 0 0 0 4
+Neighs:    17249.3 ave 19720 max 14873 min
+Histogram: 1 2 2 1 1 6 0 2 2 1
+
+Total # of neighbors = 310488
+Ave neighs/atom = 64.5237
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:57:40 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:09:19
+ Wall time:    0:09:21
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:57:40 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  348000 
+350500 42500 atom_count: 4812 1.155e-02 1.138e-02 -2.631e-03 3.494e+01 3.508e+01 -2.002e+01
+353000 45000 atom_count: 4812 1.149e-02 1.130e-02 -2.667e-03 3.597e+01 3.619e+01 -2.066e+01
+355500 47500 atom_count: 4812 1.176e-02 1.156e-02 -2.710e-03 3.609e+01 3.633e+01 -2.043e+01
+  358000 
+358000 50000 atom_count: 4812 1.218e-02 1.197e-02 -2.731e-03 3.514e+01 3.536e+01 -1.972e+01
+358000 1.218e-02 1.197e-02 -2.731e-03 3.514e+01 3.536e+01 -1.972e+01
+Loop time of 16.209 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:57:56 2023
+
+
+Pair  time (%) = 2.54256 (15.6862)
+Neigh time (%) = 8.78843 (54.2196)
+Comm  time (%) = 2.46078 (15.1816)
+Outpt time (%) = 0.000107435 (0.000662814)
+Other time (%) = 2.41708 (14.912)
+
+Nlocal:    267.333 ave 286 max 242 min
+Histogram: 1 1 2 2 0 2 2 4 2 2
+Nghost:    1677.44 ave 2016 max 1437 min
+Histogram: 6 0 2 2 0 4 0 0 0 4
+Neighs:    17252.2 ave 19575 max 15010 min
+Histogram: 2 3 0 1 1 5 1 2 2 1
+
+Total # of neighbors = 310539
+Ave neighs/atom = 64.5343
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:57:56 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:09:35
+ Wall time:    0:09:37
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:57:56 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  358000 
+360500 2500 atom_count: 4812 2.651e-03 2.427e-03 -1.435e-03 3.550e+01 3.511e+01 -2.642e+01
+363000 5000 atom_count: 4812 6.471e-03 6.429e-03 -2.409e-03 4.474e+01 4.544e+01 -2.919e+01
+365500 7500 atom_count: 4812 9.909e-03 9.815e-03 -2.725e-03 4.269e+01 4.345e+01 -2.474e+01
+  368000 
+368000 10000 atom_count: 4812 1.252e-02 1.228e-02 -2.883e-03 3.621e+01 3.667e+01 -2.015e+01
+Loop time of 16.2053 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:58:12 2023
+
+
+Pair  time (%) = 2.5444 (15.7011)
+Neigh time (%) = 8.7989 (54.2964)
+Comm  time (%) = 2.46065 (15.1842)
+Outpt time (%) = 0.000116941 (0.000721625)
+Other time (%) = 2.40123 (14.8176)
+
+Nlocal:    267.333 ave 286 max 242 min
+Histogram: 1 1 2 2 0 2 2 4 2 2
+Nghost:    1677.11 ave 2016 max 1436 min
+Histogram: 6 0 2 2 0 4 0 0 0 4
+Neighs:    17253.8 ave 19518 max 15028 min
+Histogram: 2 2 1 1 1 5 1 2 2 1
+
+Total # of neighbors = 310568
+Ave neighs/atom = 64.5403
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:58:12 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:09:51
+ Wall time:    0:09:53
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:58:12 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  368000 
+370500 12500 atom_count: 4812 1.054e-02 1.031e-02 -2.583e-03 3.607e+01 3.644e+01 -2.148e+01
+373000 15000 atom_count: 4812 1.054e-02 1.032e-02 -2.712e-03 3.904e+01 3.971e+01 -2.311e+01
+375500 17500 atom_count: 4812 1.145e-02 1.120e-02 -2.814e-03 3.912e+01 3.972e+01 -2.218e+01
+  378000 
+378000 20000 atom_count: 4812 1.257e-02 1.230e-02 -2.894e-03 3.636e+01 3.689e+01 -2.025e+01
+Loop time of 16.1704 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:58:28 2023
+
+
+Pair  time (%) = 2.5447 (15.7368)
+Neigh time (%) = 8.80283 (54.4381)
+Comm  time (%) = 2.45544 (15.1848)
+Outpt time (%) = 0.000106329 (0.000657557)
+Other time (%) = 2.36728 (14.6396)
+
+Nlocal:    267.333 ave 286 max 243 min
+Histogram: 1 1 2 2 1 1 4 2 2 2
+Nghost:    1677.83 ave 2019 max 1436 min
+Histogram: 6 0 2 2 0 4 0 0 0 4
+Neighs:    17258.1 ave 19516 max 15044 min
+Histogram: 2 2 1 1 1 5 1 2 2 1
+
+Total # of neighbors = 310645
+Ave neighs/atom = 64.5563
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:58:28 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:10:07
+ Wall time:    0:10:09
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:58:28 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  378000 
+380500 22500 atom_count: 4812 1.148e-02 1.121e-02 -2.740e-03 3.636e+01 3.679e+01 -2.098e+01
+383000 25000 atom_count: 4812 1.138e-02 1.111e-02 -2.798e-03 3.826e+01 3.883e+01 -2.214e+01
+385500 27500 atom_count: 4812 1.190e-02 1.163e-02 -2.853e-03 3.823e+01 3.899e+01 -2.156e+01
+  388000 
+388000 30000 atom_count: 4812 1.260e-02 1.233e-02 -2.883e-03 3.644e+01 3.714e+01 -2.029e+01
+Loop time of 16.187 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:58:45 2023
+
+
+Pair  time (%) = 2.54748 (15.7378)
+Neigh time (%) = 8.81804 (54.4759)
+Comm  time (%) = 2.46074 (15.2019)
+Outpt time (%) = 0.000114824 (0.000709355)
+Other time (%) = 2.36068 (14.5838)
+
+Nlocal:    267.333 ave 287 max 243 min
+Histogram: 1 1 3 1 1 2 3 2 2 2
+Nghost:    1679.61 ave 2019 max 1438 min
+Histogram: 6 0 2 2 0 4 0 0 0 4
+Neighs:    17263.4 ave 19582 max 15055 min
+Histogram: 2 2 1 1 1 6 1 1 2 1
+
+Total # of neighbors = 310742
+Ave neighs/atom = 64.5765
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:58:45 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:10:24
+ Wall time:    0:10:26
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:58:45 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  388000 
+390500 32500 atom_count: 4812 1.185e-02 1.158e-02 -2.772e-03 3.648e+01 3.712e+01 -2.086e+01
+393000 35000 atom_count: 4812 1.176e-02 1.149e-02 -2.798e-03 3.776e+01 3.845e+01 -2.158e+01
+395500 37500 atom_count: 4812 1.211e-02 1.184e-02 -2.834e-03 3.782e+01 3.858e+01 -2.125e+01
+  398000 
+398000 40000 atom_count: 4812 1.264e-02 1.235e-02 -2.859e-03 3.649e+01 3.727e+01 -2.031e+01
+Loop time of 16.2411 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:59:01 2023
+
+
+Pair  time (%) = 2.54829 (15.6903)
+Neigh time (%) = 8.82823 (54.3572)
+Comm  time (%) = 2.45926 (15.1422)
+Outpt time (%) = 0.00011386 (0.000701057)
+Other time (%) = 2.40526 (14.8096)
+
+Nlocal:    267.333 ave 287 max 243 min
+Histogram: 1 1 2 1 3 2 2 2 2 2
+Nghost:    1680.22 ave 2019 max 1438 min
+Histogram: 6 0 1 3 0 4 0 0 0 4
+Neighs:    17262.5 ave 19584 max 15009 min
+Histogram: 1 3 1 1 1 6 1 1 2 1
+
+Total # of neighbors = 310725
+Ave neighs/atom = 64.5729
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:59:01 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:10:40
+ Wall time:    0:10:42
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:59:01 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  398000 
+400500 42500 atom_count: 4812 1.206e-02 1.178e-02 -2.779e-03 3.646e+01 3.724e+01 -2.071e+01
+403000 45000 atom_count: 4812 1.196e-02 1.171e-02 -2.810e-03 3.753e+01 3.839e+01 -2.135e+01
+405500 47500 atom_count: 4812 1.225e-02 1.197e-02 -2.833e-03 3.769e+01 3.847e+01 -2.110e+01
+  408000 
+408000 50000 atom_count: 4812 1.269e-02 1.238e-02 -2.840e-03 3.665e+01 3.737e+01 -2.035e+01
+408000 1.269e-02 1.238e-02 -2.840e-03 3.665e+01 3.737e+01 -2.035e+01
+Loop time of 16.2173 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:59:17 2023
+
+
+Pair  time (%) = 2.55027 (15.7256)
+Neigh time (%) = 8.82759 (54.4333)
+Comm  time (%) = 2.463 (15.1875)
+Outpt time (%) = 0.00011773 (0.000725952)
+Other time (%) = 2.3763 (14.6529)
+
+Nlocal:    267.333 ave 287 max 243 min
+Histogram: 1 2 1 1 2 3 1 3 2 2
+Nghost:    1680.78 ave 2020 max 1438 min
+Histogram: 6 0 1 3 0 4 0 0 0 4
+Neighs:    17264.1 ave 19654 max 14919 min
+Histogram: 1 2 2 1 1 6 1 1 2 1
+
+Total # of neighbors = 310754
+Ave neighs/atom = 64.579
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:59:17 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:10:56
+ Wall time:    0:10:58
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:59:17 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  408000 
+410500 2500 atom_count: 4812 2.591e-03 2.462e-03 -1.427e-03 3.568e+01 3.632e+01 -2.680e+01
+413000 5000 atom_count: 4812 6.646e-03 6.440e-03 -2.379e-03 4.647e+01 4.735e+01 -2.996e+01
+415500 7500 atom_count: 4812 1.027e-02 9.926e-03 -2.777e-03 4.434e+01 4.484e+01 -2.542e+01
+  418000 
+418000 10000 atom_count: 4812 1.297e-02 1.246e-02 -2.924e-03 3.753e+01 3.825e+01 -2.074e+01
+Loop time of 16.2107 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:59:33 2023
+
+
+Pair  time (%) = 2.55009 (15.7309)
+Neigh time (%) = 8.82921 (54.4653)
+Comm  time (%) = 2.46122 (15.1827)
+Outpt time (%) = 0.000111016 (0.00068483)
+Other time (%) = 2.37006 (14.6204)
+
+Nlocal:    267.333 ave 287 max 243 min
+Histogram: 1 1 2 2 1 3 1 3 2 2
+Nghost:    1680.33 ave 2021 max 1438 min
+Histogram: 6 0 1 3 0 4 0 0 0 4
+Neighs:    17267.1 ave 19548 max 15046 min
+Histogram: 2 1 2 1 1 6 0 2 2 1
+
+Total # of neighbors = 310808
+Ave neighs/atom = 64.5902
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:59:33 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:11:12
+ Wall time:    0:11:14
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:59:33 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  418000 
+420500 12500 atom_count: 4812 1.090e-02 1.048e-02 -2.624e-03 3.713e+01 3.785e+01 -2.196e+01
+423000 15000 atom_count: 4812 1.082e-02 1.047e-02 -2.743e-03 4.041e+01 4.146e+01 -2.383e+01
+425500 17500 atom_count: 4812 1.172e-02 1.141e-02 -2.828e-03 4.041e+01 4.141e+01 -2.281e+01
+  428000 
+428000 20000 atom_count: 4812 1.285e-02 1.253e-02 -2.887e-03 3.749e+01 3.847e+01 -2.074e+01
+Loop time of 16.2058 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 08:59:49 2023
+
+
+Pair  time (%) = 2.55164 (15.7452)
+Neigh time (%) = 8.82241 (54.4398)
+Comm  time (%) = 2.46162 (15.1897)
+Outpt time (%) = 0.000115382 (0.000711978)
+Other time (%) = 2.37004 (14.6246)
+
+Nlocal:    267.333 ave 287 max 244 min
+Histogram: 1 2 1 2 2 2 3 1 2 2
+Nghost:    1679.44 ave 2017 max 1438 min
+Histogram: 6 0 1 3 0 4 0 0 0 4
+Neighs:    17266.9 ave 19556 max 15051 min
+Histogram: 1 3 1 1 1 6 0 2 2 1
+
+Total # of neighbors = 310804
+Ave neighs/atom = 64.5894
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 08:59:49 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:11:28
+ Wall time:    0:11:30
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 08:59:49 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  428000 
+430500 22500 atom_count: 4812 1.172e-02 1.142e-02 -2.724e-03 3.756e+01 3.841e+01 -2.157e+01
+433000 25000 atom_count: 4812 1.166e-02 1.134e-02 -2.775e-03 3.952e+01 4.038e+01 -2.267e+01
+435500 27500 atom_count: 4812 1.221e-02 1.186e-02 -2.824e-03 3.950e+01 4.040e+01 -2.204e+01
+  438000 
+438000 30000 atom_count: 4812 1.295e-02 1.257e-02 -2.853e-03 3.765e+01 3.856e+01 -2.075e+01
+Loop time of 16.2253 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 09:00:06 2023
+
+
+Pair  time (%) = 2.55516 (15.748)
+Neigh time (%) = 8.82073 (54.3641)
+Comm  time (%) = 2.46796 (15.2106)
+Outpt time (%) = 0.000117403 (0.00072358)
+Other time (%) = 2.38131 (14.6766)
+
+Nlocal:    267.333 ave 287 max 243 min
+Histogram: 1 0 3 2 2 2 1 3 2 2
+Nghost:    1679.33 ave 2018 max 1437 min
+Histogram: 6 0 1 3 0 4 0 0 0 4
+Neighs:    17269.5 ave 19602 max 15060 min
+Histogram: 2 2 1 1 2 5 1 1 2 1
+
+Total # of neighbors = 310851
+Ave neighs/atom = 64.5991
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 09:00:06 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:11:44
+ Wall time:    0:11:47
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 09:00:06 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  438000 
+440500 32500 atom_count: 4812 1.216e-02 1.180e-02 -2.745e-03 3.755e+01 3.854e+01 -2.129e+01
+443000 35000 atom_count: 4812 1.204e-02 1.169e-02 -2.785e-03 3.889e+01 3.985e+01 -2.206e+01
+445500 37500 atom_count: 4812 1.238e-02 1.202e-02 -2.834e-03 3.896e+01 3.993e+01 -2.169e+01
+  448000 
+448000 40000 atom_count: 4812 1.291e-02 1.254e-02 -2.859e-03 3.770e+01 3.860e+01 -2.078e+01
+Loop time of 16.2156 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 09:00:22 2023
+
+
+Pair  time (%) = 2.55313 (15.7449)
+Neigh time (%) = 8.81546 (54.364)
+Comm  time (%) = 2.45803 (15.1584)
+Outpt time (%) = 0.000118938 (0.000733476)
+Other time (%) = 2.3889 (14.7321)
+
+Nlocal:    267.333 ave 287 max 242 min
+Histogram: 1 0 3 2 2 1 2 3 2 2
+Nghost:    1679.56 ave 2019 max 1435 min
+Histogram: 6 0 1 3 0 4 0 0 0 4
+Neighs:    17269.8 ave 19528 max 15080 min
+Histogram: 2 2 1 1 2 4 2 1 2 1
+
+Total # of neighbors = 310856
+Ave neighs/atom = 64.6002
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 09:00:22 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:12:01
+ Wall time:    0:12:03
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 09:00:22 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  448000 
+450500 42500 atom_count: 4812 1.233e-02 1.196e-02 -2.782e-03 3.779e+01 3.870e+01 -2.129e+01
+453000 45000 atom_count: 4812 1.228e-02 1.190e-02 -2.803e-03 3.892e+01 3.977e+01 -2.193e+01
+455500 47500 atom_count: 4812 1.260e-02 1.219e-02 -2.830e-03 3.899e+01 3.985e+01 -2.164e+01
+  458000 
+458000 50000 atom_count: 4812 1.305e-02 1.263e-02 -2.853e-03 3.786e+01 3.879e+01 -2.086e+01
+458000 1.305e-02 1.263e-02 -2.853e-03 3.786e+01 3.879e+01 -2.086e+01
+Loop time of 16.175 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 09:00:38 2023
+
+
+Pair  time (%) = 2.55442 (15.7925)
+Neigh time (%) = 8.80788 (54.4538)
+Comm  time (%) = 2.46062 (15.2125)
+Outpt time (%) = 0.000124183 (0.000767746)
+Other time (%) = 2.35192 (14.5405)
+
+Nlocal:    267.333 ave 287 max 242 min
+Histogram: 1 0 3 2 2 1 2 3 2 2
+Nghost:    1679 ave 2022 max 1433 min
+Histogram: 6 0 1 3 0 4 0 0 0 4
+Neighs:    17270.1 ave 19655 max 15193 min
+Histogram: 2 2 2 0 3 4 1 1 2 1
+
+Total # of neighbors = 310862
+Ave neighs/atom = 64.6014
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 09:00:38 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:12:17
+ Wall time:    0:12:19
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 09:00:38 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  458000 
+460500 2500 atom_count: 4812 2.705e-03 2.554e-03 -1.447e-03 3.638e+01 3.791e+01 -2.747e+01
+463000 5000 atom_count: 4812 6.751e-03 6.520e-03 -2.322e-03 4.651e+01 4.844e+01 -3.035e+01
+465500 7500 atom_count: 4812 1.032e-02 1.007e-02 -2.680e-03 4.507e+01 4.643e+01 -2.587e+01
+  468000 
+468000 10000 atom_count: 4812 1.296e-02 1.269e-02 -2.801e-03 3.828e+01 3.942e+01 -2.104e+01
+Loop time of 16.204 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 09:00:54 2023
+
+
+Pair  time (%) = 2.55502 (15.7679)
+Neigh time (%) = 8.80499 (54.3384)
+Comm  time (%) = 2.46137 (15.1899)
+Outpt time (%) = 0.000112462 (0.00069404)
+Other time (%) = 2.38249 (14.7031)
+
+Nlocal:    267.333 ave 286 max 242 min
+Histogram: 1 0 3 2 0 3 1 4 1 3
+Nghost:    1678 ave 2023 max 1433 min
+Histogram: 6 0 1 3 1 3 0 0 0 4
+Neighs:    17272.9 ave 19589 max 15209 min
+Histogram: 2 2 2 0 2 5 1 1 2 1
+
+Total # of neighbors = 310913
+Ave neighs/atom = 64.612
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 09:00:54 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:12:33
+ Wall time:    0:12:35
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 09:00:54 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  468000 
+470500 12500 atom_count: 4812 1.095e-02 1.069e-02 -2.549e-03 3.856e+01 3.944e+01 -2.267e+01
+473000 15000 atom_count: 4812 1.102e-02 1.074e-02 -2.686e-03 4.183e+01 4.289e+01 -2.436e+01
+475500 17500 atom_count: 4812 1.199e-02 1.169e-02 -2.767e-03 4.153e+01 4.264e+01 -2.322e+01
+  478000 
+478000 20000 atom_count: 4812 1.318e-02 1.285e-02 -2.824e-03 3.854e+01 3.961e+01 -2.116e+01
+Loop time of 16.1589 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 09:01:10 2023
+
+
+Pair  time (%) = 2.55615 (15.8189)
+Neigh time (%) = 8.80668 (54.5006)
+Comm  time (%) = 2.45742 (15.2078)
+Outpt time (%) = 0.0001109 (0.000686308)
+Other time (%) = 2.33851 (14.472)
+
+Nlocal:    267.333 ave 286 max 242 min
+Histogram: 1 0 3 2 0 3 1 4 1 3
+Nghost:    1678 ave 2022 max 1433 min
+Histogram: 6 0 1 3 0 4 0 0 0 4
+Neighs:    17274.9 ave 19536 max 15259 min
+Histogram: 3 2 1 0 2 5 1 1 2 1
+
+Total # of neighbors = 310948
+Ave neighs/atom = 64.6193
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 09:01:10 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:12:49
+ Wall time:    0:12:51
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 09:01:10 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  478000 
+480500 22500 atom_count: 4812 1.203e-02 1.171e-02 -2.676e-03 3.865e+01 3.955e+01 -2.204e+01
+483000 25000 atom_count: 4812 1.194e-02 1.165e-02 -2.745e-03 4.050e+01 4.152e+01 -2.315e+01
+485500 27500 atom_count: 4812 1.249e-02 1.220e-02 -2.806e-03 4.050e+01 4.159e+01 -2.248e+01
+  488000 
+488000 30000 atom_count: 4812 1.324e-02 1.294e-02 -2.838e-03 3.875e+01 3.980e+01 -2.120e+01
+Loop time of 16.1187 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 09:01:27 2023
+
+
+Pair  time (%) = 2.55705 (15.8639)
+Neigh time (%) = 8.80152 (54.6043)
+Comm  time (%) = 2.45663 (15.2408)
+Outpt time (%) = 0.000100775 (0.000625203)
+Other time (%) = 2.30341 (14.2903)
+
+Nlocal:    267.333 ave 286 max 244 min
+Histogram: 1 2 2 1 1 2 2 3 2 2
+Nghost:    1676.5 ave 2020 max 1433 min
+Histogram: 6 0 1 3 0 4 0 0 0 4
+Neighs:    17275.3 ave 19542 max 15261 min
+Histogram: 3 2 1 0 2 5 0 2 2 1
+
+Total # of neighbors = 310955
+Ave neighs/atom = 64.6207
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 09:01:27 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:13:05
+ Wall time:    0:13:07
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 09:01:27 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  488000 
+490500 32500 atom_count: 4812 1.244e-02 1.214e-02 -2.729e-03 3.876e+01 3.977e+01 -2.177e+01
+493000 35000 atom_count: 4812 1.235e-02 1.207e-02 -2.776e-03 4.022e+01 4.141e+01 -2.266e+01
+495500 37500 atom_count: 4812 1.273e-02 1.244e-02 -2.815e-03 4.036e+01 4.142e+01 -2.226e+01
+  498000 
+498000 40000 atom_count: 4812 1.330e-02 1.300e-02 -2.848e-03 3.900e+01 4.005e+01 -2.130e+01
+Loop time of 16.0988 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 09:01:43 2023
+
+
+Pair  time (%) = 2.55845 (15.8922)
+Neigh time (%) = 8.80144 (54.6714)
+Comm  time (%) = 2.45338 (15.2396)
+Outpt time (%) = 0.00010648 (0.000661418)
+Other time (%) = 2.28541 (14.1961)
+
+Nlocal:    267.333 ave 285 max 243 min
+Histogram: 1 0 3 2 1 2 1 3 2 3
+Nghost:    1677.06 ave 2019 max 1434 min
+Histogram: 6 0 0 4 0 4 0 0 0 4
+Neighs:    17275.9 ave 19530 max 15279 min
+Histogram: 3 2 1 0 2 5 0 2 2 1
+
+Total # of neighbors = 310966
+Ave neighs/atom = 64.623
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 09:01:43 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:13:21
+ Wall time:    0:13:24
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Mon Sep 11 09:01:43 2023
+
+Memory usage per processor = 11.2021 Mbytes
+    Step 
+  498000 
+500500 42500 atom_count: 4812 1.268e-02 1.239e-02 -2.767e-03 3.901e+01 4.000e+01 -2.174e+01
+503000 45000 atom_count: 4812 1.260e-02 1.232e-02 -2.798e-03 4.019e+01 4.114e+01 -2.241e+01
+505500 47500 atom_count: 4812 1.290e-02 1.260e-02 -2.836e-03 4.025e+01 4.139e+01 -2.212e+01
+  508000 
+508000 50000 atom_count: 4812 1.334e-02 1.304e-02 -2.856e-03 3.920e+01 4.030e+01 -2.138e+01
+508000 1.334e-02 1.304e-02 -2.856e-03 3.920e+01 4.030e+01 -2.138e+01
+Loop time of 16.1624 on 18 procs for 10000 steps with 4812 atoms, finish time Mon Sep 11 09:01:59 2023
+
+
+Pair  time (%) = 2.55954 (15.8364)
+Neigh time (%) = 8.80732 (54.4927)
+Comm  time (%) = 2.45573 (15.1941)
+Outpt time (%) = 0.000111094 (0.000687362)
+Other time (%) = 2.3397 (14.4762)
+
+Nlocal:    267.333 ave 285 max 245 min
+Histogram: 1 2 1 2 1 2 1 3 2 3
+Nghost:    1677.83 ave 2020 max 1435 min
+Histogram: 6 0 0 4 0 4 0 0 0 4
+Neighs:    17271.9 ave 19590 max 15281 min
+Histogram: 2 3 1 0 2 5 1 2 1 1
+
+Total # of neighbors = 310895
+Ave neighs/atom = 64.6083
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Mon Sep 11 09:01:59 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:    0:13:37
+ Wall time:    0:13:40
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+

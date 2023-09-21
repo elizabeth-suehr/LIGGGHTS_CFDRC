@@ -1,0 +1,11 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-06-18:40:11 by liz.suehr, git commit 20bafd84e54ba1e14cc5c444673f017ba084bbe9)
+# LIGGGHTS shear simulation input file
+
+# General simulation options
+atom_style        granular
+boundary          p p p
+newton            off
+echo              both
+communicate       single vel yes
+units             si
+log               log.shear.rod3_7.liggghts

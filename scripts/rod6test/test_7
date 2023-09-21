@@ -1,0 +1,807 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-14-17:07:09 by liz.suehr, git commit 357ff034cff53320eeedb4a37627805705ae7ff9)
+communicate       single vel yes
+units             si
+log               log.shear.rod6_7.liggghts
+atom_modify       map array
+
+processors        3 3 2
+
+# Set domain
+region            domain block 0.0 5.72238e-04 0.0 5.72238e-04 0.0 2.86119e-04 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.000572238 0.000572238 0.000286119)
+  3 by 3 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          2.010e-05 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 6 ntry 10000000 spheres file particle_data.txt scale 1.0 type 1
+Note: Skipping empty line or comment line in clump file
+Calculating the properties of the given template.
+   Depending on ntry, this may take a while...
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=1.200000e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=1.200000e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 3 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.55
+# Apply integration fix
+fix               ms nve_group1 multisphere
+fix               integr1 nve_group1 nve/sphere
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Thu Sep 14 17:21:29 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1531)
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.49154 Mbytes
+    Step 
+       0 
+insertion: proc 0 at 0 %
+insertion: proc 16 at 0 %
+insertion: proc 13 at 0 %
+insertion: proc 17 at 0 %
+insertion: proc 2 at 0 %
+insertion: proc 3 at 0 %
+insertion: proc 7 at 0 %
+insertion: proc 12 at 0 %
+insertion: proc 12 at 10 %
+insertion: proc 12 at 20 %
+insertion: proc 12 at 30 %
+insertion: proc 12 at 40 %
+insertion: proc 1 at 0 %
+insertion: proc 4 at 0 %
+insertion: proc 5 at 0 %
+insertion: proc 6 at 0 %
+insertion: proc 8 at 0 %
+insertion: proc 9 at 0 %
+insertion: proc 10 at 0 %
+insertion: proc 11 at 0 %
+insertion: proc 14 at 0 %
+insertion: proc 15 at 0 %
+insertion: proc 0 at 10 %
+insertion: proc 0 at 20 %
+insertion: proc 0 at 30 %
+insertion: proc 0 at 40 %
+insertion: proc 0 at 50 %
+insertion: proc 0 at 60 %
+insertion: proc 0 at 70 %
+insertion: proc 0 at 80 %
+insertion: proc 0 at 90 %
+insertion: proc 0 at 100 %
+insertion: proc 7 at 10 %
+insertion: proc 7 at 20 %
+insertion: proc 7 at 30 %
+insertion: proc 7 at 40 %
+insertion: proc 7 at 50 %
+insertion: proc 7 at 60 %
+insertion: proc 7 at 70 %
+insertion: proc 16 at 10 %
+insertion: proc 16 at 20 %
+insertion: proc 16 at 30 %
+insertion: proc 16 at 40 %
+insertion: proc 16 at 50 %
+insertion: proc 16 at 60 %
+insertion: proc 16 at 70 %
+insertion: proc 16 at 80 %
+insertion: proc 16 at 90 %
+insertion: proc 16 at 100 %
+insertion: proc 11 at 10 %
+insertion: proc 11 at 20 %
+insertion: proc 11 at 30 %
+insertion: proc 11 at 40 %
+insertion: proc 11 at 50 %
+insertion: proc 11 at 60 %
+insertion: proc 15 at 10 %
+insertion: proc 15 at 20 %
+insertion: proc 15 at 30 %
+insertion: proc 15 at 40 %
+insertion: proc 13 at 10 %
+insertion: proc 13 at 20 %
+insertion: proc 13 at 30 %
+insertion: proc 13 at 40 %
+insertion: proc 13 at 50 %
+insertion: proc 13 at 60 %
+insertion: proc 12 at 50 %
+insertion: proc 12 at 60 %
+insertion: proc 12 at 70 %
+insertion: proc 12 at 80 %
+insertion: proc 12 at 90 %
+insertion: proc 12 at 100 %
+insertion: proc 17 at 10 %
+insertion: proc 17 at 20 %
+insertion: proc 17 at 30 %
+insertion: proc 17 at 40 %
+insertion: proc 17 at 50 %
+insertion: proc 17 at 60 %
+insertion: proc 17 at 70 %
+insertion: proc 17 at 80 %
+insertion: proc 17 at 90 %
+insertion: proc 17 at 100 %
+insertion: proc 2 at 10 %
+insertion: proc 2 at 20 %
+insertion: proc 2 at 30 %
+insertion: proc 2 at 40 %
+insertion: proc 2 at 50 %
+insertion: proc 2 at 60 %
+insertion: proc 2 at 70 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 2 at 100 %
+insertion: proc 3 at 10 %
+insertion: proc 3 at 20 %
+insertion: proc 3 at 30 %
+insertion: proc 3 at 40 %
+insertion: proc 3 at 50 %
+insertion: proc 3 at 60 %
+insertion: proc 3 at 70 %
+insertion: proc 3 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 3 at 100 %
+insertion: proc 6 at 10 %
+insertion: proc 6 at 20 %
+insertion: proc 6 at 30 %
+insertion: proc 6 at 40 %
+insertion: proc 6 at 50 %
+insertion: proc 6 at 60 %
+insertion: proc 6 at 70 %
+insertion: proc 6 at 80 %
+insertion: proc 6 at 90 %
+insertion: proc 6 at 100 %
+insertion: proc 8 at 10 %
+insertion: proc 8 at 20 %
+insertion: proc 8 at 30 %
+insertion: proc 8 at 40 %
+insertion: proc 8 at 50 %
+insertion: proc 8 at 60 %
+insertion: proc 8 at 70 %
+insertion: proc 8 at 80 %
+insertion: proc 8 at 90 %
+insertion: proc 8 at 100 %
+insertion: proc 9 at 10 %
+insertion: proc 9 at 20 %
+insertion: proc 9 at 30 %
+insertion: proc 9 at 40 %
+insertion: proc 9 at 50 %
+insertion: proc 9 at 60 %
+insertion: proc 9 at 70 %
+insertion: proc 9 at 80 %
+insertion: proc 9 at 90 %
+insertion: proc 9 at 100 %
+insertion: proc 10 at 10 %
+insertion: proc 10 at 20 %
+insertion: proc 10 at 30 %
+insertion: proc 10 at 40 %
+insertion: proc 10 at 50 %
+insertion: proc 10 at 60 %
+insertion: proc 10 at 70 %
+insertion: proc 10 at 80 %
+insertion: proc 10 at 90 %
+insertion: proc 10 at 100 %
+insertion: proc 7 at 80 %
+insertion: proc 7 at 90 %
+insertion: proc 7 at 100 %
+insertion: proc 14 at 10 %
+insertion: proc 14 at 20 %
+insertion: proc 14 at 30 %
+insertion: proc 14 at 40 %
+insertion: proc 14 at 50 %
+insertion: proc 14 at 60 %
+insertion: proc 14 at 70 %
+insertion: proc 14 at 80 %
+insertion: proc 14 at 90 %
+insertion: proc 14 at 100 %
+insertion: proc 11 at 70 %
+insertion: proc 11 at 80 %
+insertion: proc 11 at 90 %
+insertion: proc 11 at 100 %
+insertion: proc 15 at 50 %
+insertion: proc 15 at 60 %
+insertion: proc 15 at 70 %
+insertion: proc 15 at 80 %
+insertion: proc 15 at 90 %
+insertion: proc 15 at 100 %
+insertion: proc 13 at 70 %
+insertion: proc 13 at 80 %
+insertion: proc 13 at 90 %
+insertion: proc 13 at 100 %
+insertion: proc 1 at 10 %
+insertion: proc 1 at 20 %
+insertion: proc 1 at 30 %
+insertion: proc 1 at 40 %
+insertion: proc 1 at 50 %
+insertion: proc 1 at 60 %
+insertion: proc 1 at 70 %
+insertion: proc 1 at 80 %
+insertion: proc 1 at 90 %
+insertion: proc 1 at 100 %
+insertion: proc 4 at 10 %
+insertion: proc 4 at 20 %
+insertion: proc 4 at 30 %
+insertion: proc 4 at 40 %
+insertion: proc 4 at 50 %
+insertion: proc 4 at 60 %
+insertion: proc 4 at 70 %
+insertion: proc 4 at 80 %
+insertion: proc 4 at 90 %
+insertion: proc 4 at 100 %
+insertion: proc 5 at 10 %
+insertion: proc 5 at 20 %
+insertion: proc 5 at 30 %
+insertion: proc 5 at 40 %
+insertion: proc 5 at 50 %
+insertion: proc 5 at 60 %
+insertion: proc 5 at 70 %
+insertion: proc 5 at 80 %
+insertion: proc 5 at 90 %
+insertion: proc 5 at 100 %
+INFO: Particle insertion ins1: inserted 2051 particle templates (mass 1.288266e-07) at step 1
+ - a total of 2051 particle templates (mass 1.288266e-07) inserted so far.
+       1 
+Loop time of 0.0141039 on 18 procs for 1 steps with 12306 atoms, finish time Thu Sep 14 17:21:33 2023
+
+
+Pair  time (%) = 0.000970851 (6.88355)
+Neigh time (%) = 0.00310818 (22.0377)
+Comm  time (%) = 0.00222555 (15.7797)
+Outpt time (%) = 0.00339345 (24.0604)
+Other time (%) = 0.00440588 (31.2387)
+
+Nlocal:    683.667 ave 1087 max 499 min
+Histogram: 8 0 0 1 7 0 0 0 0 2
+Nghost:    5404.67 ave 8500 max 4059 min
+Histogram: 8 0 0 4 4 0 0 0 0 2
+Neighs:    36515.7 ave 69479 max 22221 min
+Histogram: 7 1 1 4 2 1 0 0 0 2
+
+Total # of neighbors = 657282
+Ave neighs/atom = 53.4115
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+12306 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 1.00e-06 reset 1000 threshold 1.00e-09 start_dt 5.868e-12 end_dt 5.868e-10
+run               100000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Thu Sep 14 17:21:33 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1531)
+Memory usage per processor = 12.3873 Mbytes
+    Step 
+       1 
+pre-run, step: 1000, ke/mass=7.883e+03, natoms=12306, overlap=8.538e-02, cor=1.047e-01, dt=8.285e-12 nbody: 2051 
+pre-run, step: 2000, ke/mass=7.850e+03, natoms=12306, overlap=1.419e-01, cor=1.047e-01, dt=1.170e-11 nbody: 2051 
+pre-run, step: 3000, ke/mass=7.776e+03, natoms=12306, overlap=1.905e-01, cor=1.047e-01, dt=1.651e-11 nbody: 2051 
+pre-run, step: 4000, ke/mass=8.400e+03, natoms=12306, overlap=2.552e-01, cor=1.047e-01, dt=2.332e-11 nbody: 2051 
+pre-run, step: 5000, ke/mass=9.998e+03, natoms=12306, overlap=2.910e-01, cor=1.047e-01, dt=3.292e-11 nbody: 2051 
+pre-run, step: 6000, ke/mass=1.225e+04, natoms=12306, overlap=3.204e-01, cor=1.047e-01, dt=4.648e-11 nbody: 2051 
+pre-run, step: 7000, ke/mass=1.387e+04, natoms=12306, overlap=3.096e-01, cor=1.047e-01, dt=6.562e-11 nbody: 2051 
+pre-run, step: 8000, ke/mass=1.331e+04, natoms=12306, overlap=3.247e-01, cor=1.047e-01, dt=9.264e-11 nbody: 2051 
+pre-run, step: 9000, ke/mass=8.823e+03, natoms=12306, overlap=5.242e-01, cor=1.071e-01, dt=1.308e-10 nbody: 2051 
+pre-run, step: 10000, ke/mass=3.216e+03, natoms=12306, overlap=5.903e-01, cor=1.224e-01, dt=1.847e-10 nbody: 2051 
+pre-run, step: 11000, ke/mass=1.546e+03, natoms=12306, overlap=6.954e-01, cor=2.243e-01, dt=2.607e-10 nbody: 2051 
+pre-run, step: 12000, ke/mass=6.318e+02, natoms=12306, overlap=7.465e-01, cor=3.532e-01, dt=3.681e-10 nbody: 2051 
+pre-run, step: 13000, ke/mass=2.214e+02, natoms=12306, overlap=8.009e-01, cor=5.536e-01, dt=5.197e-10 nbody: 2051 
+pre-run, step: 14000, ke/mass=8.838e+01, natoms=12306, overlap=8.241e-01, cor=6.435e-01, dt=7.337e-10 nbody: 2051 
+pre-run, step: 15000, ke/mass=4.495e+01, natoms=12306, overlap=8.453e-01, cor=7.170e-01, dt=1.036e-09 nbody: 2051 
+pre-run, step: 16000, ke/mass=1.465e+01, natoms=12306, overlap=8.653e-01, cor=7.826e-01, dt=1.463e-09 nbody: 2051 
+pre-run, step: 17000, ke/mass=8.989e+00, natoms=12306, overlap=8.857e-01, cor=8.386e-01, dt=2.065e-09 nbody: 2051 
+pre-run, step: 18000, ke/mass=3.991e+00, natoms=12306, overlap=9.054e-01, cor=8.860e-01, dt=2.915e-09 nbody: 2051 
+pre-run, step: 19000, ke/mass=1.059e+00, natoms=12306, overlap=9.011e-01, cor=8.860e-01, dt=4.116e-09 nbody: 2051 
+pre-run, step: 20000, ke/mass=3.874e-01, natoms=12306, overlap=9.084e-01, cor=8.860e-01, dt=5.199e-09 nbody: 2051 
+pre-run, step: 21000, ke/mass=3.174e-01, natoms=12306, overlap=9.104e-01, cor=8.889e-01, dt=5.216e-09 nbody: 2051 
+pre-run, step: 22000, ke/mass=2.391e-01, natoms=12306, overlap=9.177e-01, cor=8.983e-01, dt=5.271e-09 nbody: 2051 
+pre-run, step: 23000, ke/mass=2.573e-01, natoms=12306, overlap=9.169e-01, cor=8.983e-01, dt=5.271e-09 nbody: 2051 
+pre-run, step: 24000, ke/mass=2.598e-01, natoms=12306, overlap=9.202e-01, cor=9.087e-01, dt=5.332e-09 nbody: 2051 
+pre-run, step: 25000, ke/mass=1.408e-01, natoms=12306, overlap=9.201e-01, cor=9.087e-01, dt=5.332e-09 nbody: 2051 
+pre-run, step: 26000, ke/mass=1.333e-01, natoms=12306, overlap=9.204e-01, cor=9.087e-01, dt=5.332e-09 nbody: 2051 
+pre-run, step: 27000, ke/mass=9.671e-02, natoms=12306, overlap=9.158e-01, cor=9.087e-01, dt=5.332e-09 nbody: 2051 
+pre-run, step: 28000, ke/mass=6.794e-02, natoms=12306, overlap=9.146e-01, cor=9.087e-01, dt=5.332e-09 nbody: 2051 
+pre-run, step: 29000, ke/mass=1.817e-01, natoms=12306, overlap=9.137e-01, cor=9.087e-01, dt=5.332e-09 nbody: 2051 
+pre-run, step: 30000, ke/mass=1.591e-01, natoms=12306, overlap=9.169e-01, cor=9.087e-01, dt=5.332e-09 nbody: 2051 
+pre-run, step: 31000, ke/mass=4.441e-02, natoms=12306, overlap=9.185e-01, cor=9.087e-01, dt=5.332e-09 nbody: 2051 
+pre-run, step: 32000, ke/mass=8.547e-02, natoms=12306, overlap=9.206e-01, cor=9.087e-01, dt=5.332e-09 nbody: 2051 
+pre-run, step: 33000, ke/mass=8.969e-02, natoms=12306, overlap=9.209e-01, cor=9.087e-01, dt=5.332e-09 nbody: 2051 
+pre-run, step: 34000, ke/mass=1.504e-02, natoms=12306, overlap=9.225e-01, cor=9.087e-01, dt=5.332e-09 nbody: 2051 
+pre-run, step: 35000, ke/mass=9.947e-02, natoms=12306, overlap=9.247e-01, cor=9.088e-01, dt=5.333e-09 nbody: 2051 
+pre-run, step: 36000, ke/mass=1.022e-01, natoms=12306, overlap=9.242e-01, cor=9.090e-01, dt=5.334e-09 nbody: 2051 
+pre-run, step: 37000, ke/mass=5.954e-02, natoms=12306, overlap=9.275e-01, cor=9.134e-01, dt=5.360e-09 nbody: 2051 
+pre-run, step: 38000, ke/mass=5.631e-02, natoms=12306, overlap=9.264e-01, cor=9.163e-01, dt=5.377e-09 nbody: 2051 
+pre-run, step: 39000, ke/mass=4.457e-02, natoms=12306, overlap=9.264e-01, cor=9.163e-01, dt=5.377e-09 nbody: 2051 
+pre-run, step: 40000, ke/mass=3.027e-02, natoms=12306, overlap=9.273e-01, cor=9.163e-01, dt=5.377e-09 nbody: 2051 
+pre-run, step: 41000, ke/mass=1.456e-02, natoms=12306, overlap=9.252e-01, cor=9.163e-01, dt=5.377e-09 nbody: 2051 
+pre-run, step: 42000, ke/mass=5.074e-03, natoms=12306, overlap=9.265e-01, cor=9.163e-01, dt=5.377e-09 nbody: 2051 
+pre-run, step: 43000, ke/mass=2.968e-02, natoms=12306, overlap=9.278e-01, cor=9.163e-01, dt=5.377e-09 nbody: 2051 
+pre-run, step: 44000, ke/mass=7.244e-02, natoms=12306, overlap=9.290e-01, cor=9.172e-01, dt=5.382e-09 nbody: 2051 
+pre-run, step: 45000, ke/mass=6.956e-02, natoms=12306, overlap=9.290e-01, cor=9.185e-01, dt=5.390e-09 nbody: 2051 
+pre-run, step: 46000, ke/mass=8.710e-02, natoms=12306, overlap=9.310e-01, cor=9.185e-01, dt=5.390e-09 nbody: 2051 
+pre-run, step: 47000, ke/mass=4.769e-02, natoms=12306, overlap=9.332e-01, cor=9.203e-01, dt=5.400e-09 nbody: 2051 
+pre-run, step: 48000, ke/mass=2.830e-02, natoms=12306, overlap=9.309e-01, cor=9.203e-01, dt=5.400e-09 nbody: 2051 
+pre-run, step: 49000, ke/mass=1.143e-01, natoms=12306, overlap=9.256e-01, cor=9.203e-01, dt=5.400e-09 nbody: 2051 
+pre-run, step: 50000, ke/mass=2.518e-02, natoms=12306, overlap=9.299e-01, cor=9.203e-01, dt=5.400e-09 nbody: 2051 
+pre-run, step: 51000, ke/mass=1.663e-02, natoms=12306, overlap=9.302e-01, cor=9.203e-01, dt=5.400e-09 nbody: 2051 
+pre-run, step: 52000, ke/mass=2.208e-02, natoms=12306, overlap=9.314e-01, cor=9.203e-01, dt=5.400e-09 nbody: 2051 
+pre-run, step: 53000, ke/mass=8.475e-03, natoms=12306, overlap=9.326e-01, cor=9.203e-01, dt=5.400e-09 nbody: 2051 
+pre-run, step: 54000, ke/mass=2.526e-02, natoms=12306, overlap=9.332e-01, cor=9.207e-01, dt=5.403e-09 nbody: 2051 
+pre-run, step: 55000, ke/mass=3.581e-02, natoms=12306, overlap=9.328e-01, cor=9.207e-01, dt=5.403e-09 nbody: 2051 
+pre-run, step: 56000, ke/mass=2.799e-02, natoms=12306, overlap=9.368e-01, cor=9.246e-01, dt=5.426e-09 nbody: 2051 
+pre-run, step: 57000, ke/mass=5.388e-03, natoms=12306, overlap=9.367e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 58000, ke/mass=8.890e-04, natoms=12306, overlap=9.368e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 59000, ke/mass=5.194e-04, natoms=12306, overlap=9.369e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 60000, ke/mass=2.453e-03, natoms=12306, overlap=9.366e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 61000, ke/mass=7.936e-03, natoms=12306, overlap=9.364e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 62000, ke/mass=3.529e-04, natoms=12306, overlap=9.362e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 63000, ke/mass=4.538e-03, natoms=12306, overlap=9.357e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 64000, ke/mass=5.653e-03, natoms=12306, overlap=9.350e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 65000, ke/mass=1.106e-02, natoms=12306, overlap=9.345e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 66000, ke/mass=1.687e-04, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 67000, ke/mass=3.281e-06, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 68000, ke/mass=2.692e-07, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 69000, ke/mass=1.816e-07, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 70000, ke/mass=1.085e-07, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 71000, ke/mass=1.749e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 72000, ke/mass=4.075e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 73000, ke/mass=3.139e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 74000, ke/mass=3.392e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 75000, ke/mass=3.342e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 76000, ke/mass=3.200e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 77000, ke/mass=2.022e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 78000, ke/mass=3.154e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 79000, ke/mass=3.133e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 80000, ke/mass=1.771e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 81000, ke/mass=3.914e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 82000, ke/mass=2.697e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 83000, ke/mass=3.223e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 84000, ke/mass=1.801e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 85000, ke/mass=3.598e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 86000, ke/mass=3.607e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 87000, ke/mass=2.789e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 88000, ke/mass=3.523e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 89000, ke/mass=3.874e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 90000, ke/mass=3.822e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 91000, ke/mass=3.112e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 92000, ke/mass=3.598e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 93000, ke/mass=3.571e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 94000, ke/mass=3.577e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 95000, ke/mass=2.770e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 96000, ke/mass=3.075e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 97000, ke/mass=3.252e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 98000, ke/mass=3.172e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 99000, ke/mass=3.387e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+pre-run, step: 100000, ke/mass=3.168e-08, natoms=12306, overlap=9.343e-01, cor=9.256e-01, dt=5.432e-09 nbody: 2051 
+  100001 
+Loop time of 477.738 on 18 procs for 100000 steps with 12306 atoms, finish time Thu Sep 14 17:29:31 2023
+
+
+Pair  time (%) = 34.4632 (7.21383)
+Neigh time (%) = 157.53 (32.9741)
+Comm  time (%) = 60.5262 (12.6693)
+Outpt time (%) = 0.000254736 (5.33213e-05)
+Other time (%) = 225.219 (47.1427)
+
+Nlocal:    683.667 ave 705 max 663 min
+Histogram: 1 0 1 5 3 4 0 1 1 2
+Nghost:    5142.11 ave 5246 max 5077 min
+Histogram: 4 5 1 1 1 0 2 0 2 2
+Neighs:    16745.1 ave 17653 max 16236 min
+Histogram: 5 2 2 3 2 0 1 0 1 2
+
+Total # of neighbors = 301411
+Ave neighs/atom = 24.493
+Neighbor list builds = 100000
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          1.1736e-08
+
+fix               leboundary all lebc 100.0 true gtemp 1.00e-06
+
+# Run desired simulation
+run               15000000
+Setting up run at Thu Sep 14 17:29:31 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1531)
+Memory usage per processor = 12.4121 Mbytes
+    Step 
+  100001 
+102501 2500 body_count: 2051 atom_count: 12306 1.103e+03 9.360e+02 -1.145e+01 3.353e+06 4.419e+06 -2.617e+04
+105001 5000 body_count: 2051 atom_count: 12306 8.891e+02 7.329e+02 -2.963e+00 3.226e+06 4.214e+06 -3.343e+04
+107501 7500 body_count: 2051 atom_count: 12306 8.786e+02 7.192e+02 3.804e+00 3.129e+06 4.068e+06 -3.494e+04
+110001 10000 body_count: 2051 atom_count: 12306 9.363e+02 7.561e+02 3.825e+00 3.051e+06 3.915e+06 -2.959e+04
+112501 12500 body_count: 2051 atom_count: 12306 9.238e+02 7.482e+02 3.696e+00 2.957e+06 3.749e+06 -2.984e+04
+115001 15000 body_count: 2051 atom_count: 12306 8.680e+02 7.036e+02 3.219e+00 2.870e+06 3.607e+06 -3.061e+04
+117501 17500 body_count: 2051 atom_count: 12306 8.020e+02 6.523e+02 5.011e+00 2.783e+06 3.490e+06 -3.672e+04
+120001 20000 body_count: 2051 atom_count: 12306 7.407e+02 6.005e+02 4.982e+00 2.718e+06 3.389e+06 -3.924e+04
+122501 22500 body_count: 2051 atom_count: 12306 6.837e+02 5.533e+02 4.901e+00 2.653e+06 3.303e+06 -4.195e+04
+125001 25000 body_count: 2051 atom_count: 12306 6.558e+02 5.282e+02 4.548e+00 2.590e+06 3.225e+06 -4.147e+04
+127501 27500 body_count: 2051 atom_count: 12306 6.365e+02 5.127e+02 4.240e+00 2.532e+06 3.148e+06 -3.909e+04
+130001 30000 body_count: 2051 atom_count: 12306 6.191e+02 4.990e+02 4.420e+00 2.474e+06 3.075e+06 -3.694e+04
+132501 32500 body_count: 2051 atom_count: 12306 5.977e+02 4.822e+02 3.832e+00 2.417e+06 3.004e+06 -3.397e+04
+135001 35000 body_count: 2051 atom_count: 12306 5.805e+02 4.668e+02 4.030e+00 2.372e+06 2.942e+06 -3.303e+04
+137501 37500 body_count: 2051 atom_count: 12306 5.589e+02 4.510e+02 3.980e+00 2.330e+06 2.881e+06 -3.272e+04
+140001 40000 body_count: 2051 atom_count: 12306 5.380e+02 4.346e+02 3.714e+00 2.293e+06 2.826e+06 -3.288e+04
+142501 42500 body_count: 2051 atom_count: 12306 5.221e+02 4.221e+02 3.739e+00 2.258e+06 2.774e+06 -3.265e+04
+145001 45000 body_count: 2051 atom_count: 12306 5.063e+02 4.090e+02 3.706e+00 2.222e+06 2.724e+06 -3.106e+04
+147501 47500 body_count: 2051 atom_count: 12306 4.884e+02 3.949e+02 3.518e+00 2.186e+06 2.676e+06 -2.943e+04
+150001 50000 body_count: 2051 atom_count: 12306 4.695e+02 3.798e+02 3.481e+00 2.154e+06 2.633e+06 -2.850e+04
+150001 4.695e+02 3.798e+02 3.481e+00 2.154e+06 2.633e+06 -2.850e+04
+152501 2500 body_count: 2051 atom_count: 12306 1.331e+02 1.109e+02 3.927e+00 1.558e+06 1.804e+06 -2.926e+04
+155001 5000 body_count: 2051 atom_count: 12306 1.333e+02 1.111e+02 3.176e+00 1.540e+06 1.801e+06 -3.084e+04
+157501 7500 body_count: 2051 atom_count: 12306 4.526e+02 6.521e+02 -4.443e+01 1.545e+06 1.820e+06 -3.256e+04
+160001 10000 body_count: 2051 atom_count: 12306 6.373e+02 1.029e+03 -1.448e+01 1.567e+06 1.848e+06 -3.281e+04
+162501 12500 body_count: 2051 atom_count: 12306 5.394e+02 8.463e+02 -1.131e+01 1.545e+06 1.824e+06 -3.132e+04
+165001 15000 body_count: 2051 atom_count: 12306 4.734e+02 7.242e+02 -8.995e+00 1.528e+06 1.807e+06 -3.147e+04
+167501 17500 body_count: 2051 atom_count: 12306 4.213e+02 6.347e+02 -7.736e+00 1.520e+06 1.793e+06 -3.166e+04
+170001 20000 body_count: 2051 atom_count: 12306 3.747e+02 5.605e+02 -6.668e+00 1.518e+06 1.783e+06 -3.317e+04
+172501 22500 body_count: 2051 atom_count: 12306 3.437e+02 5.062e+02 -5.748e+00 1.516e+06 1.774e+06 -3.613e+04
+175001 25000 body_count: 2051 atom_count: 12306 3.199e+02 4.639e+02 -4.874e+00 1.513e+06 1.763e+06 -3.921e+04
+177501 27500 body_count: 2051 atom_count: 12306 3.005e+02 4.289e+02 -4.110e+00 1.512e+06 1.756e+06 -4.177e+04
+180001 30000 body_count: 2051 atom_count: 12306 2.907e+02 4.162e+02 -4.845e+00 1.510e+06 1.750e+06 -4.415e+04
+182501 32500 body_count: 2051 atom_count: 12306 3.771e+02 5.976e+02 -6.919e+00 1.521e+06 1.757e+06 -4.429e+04
+185001 35000 body_count: 2051 atom_count: 12306 3.591e+02 5.622e+02 -6.206e+00 1.517e+06 1.751e+06 -4.423e+04
+187501 37500 body_count: 2051 atom_count: 12306 3.412e+02 5.294e+02 -5.589e+00 1.515e+06 1.743e+06 -4.510e+04
+190001 40000 body_count: 2051 atom_count: 12306 3.253e+02 5.008e+02 -5.111e+00 1.512e+06 1.735e+06 -4.608e+04
+192501 42500 body_count: 2051 atom_count: 12306 3.162e+02 4.790e+02 -4.724e+00 1.507e+06 1.726e+06 -4.613e+04
+195001 45000 body_count: 2051 atom_count: 12306 3.146e+02 4.686e+02 -3.558e+00 1.501e+06 1.718e+06 -4.707e+04
+197501 47500 body_count: 2051 atom_count: 12306 3.073e+02 4.516e+02 -2.934e+00 1.493e+06 1.709e+06 -4.747e+04
+200001 50000 body_count: 2051 atom_count: 12306 2.984e+02 4.344e+02 -2.646e+00 1.486e+06 1.699e+06 -4.792e+04
+200001 2.984e+02 4.344e+02 -2.646e+00 1.486e+06 1.699e+06 -4.792e+04
+202501 2500 body_count: 2051 atom_count: 12306 1.104e+02 8.951e+01 1.453e+00 1.304e+06 1.470e+06 -4.859e+04
+205001 5000 body_count: 2051 atom_count: 12306 1.221e+02 9.594e+01 2.109e+00 1.287e+06 1.467e+06 -4.614e+04
+207501 7500 body_count: 2051 atom_count: 12306 1.200e+02 9.580e+01 2.451e+00 1.282e+06 1.459e+06 -4.404e+04
+210001 10000 body_count: 2051 atom_count: 12306 1.113e+02 8.746e+01 2.418e+00 1.280e+06 1.450e+06 -4.607e+04
+212501 12500 body_count: 2051 atom_count: 12306 1.028e+02 8.117e+01 2.557e+00 1.275e+06 1.446e+06 -4.910e+04
+215001 15000 body_count: 2051 atom_count: 12306 1.073e+02 8.499e+01 2.812e+00 1.271e+06 1.442e+06 -5.121e+04
+217501 17500 body_count: 2051 atom_count: 12306 1.070e+02 8.590e+01 3.033e+00 1.273e+06 1.436e+06 -5.402e+04
+220001 20000 body_count: 2051 atom_count: 12306 1.056e+02 8.529e+01 3.036e+00 1.276e+06 1.430e+06 -5.639e+04
+222501 22500 body_count: 2051 atom_count: 12306 1.088e+02 8.863e+01 3.152e+00 1.273e+06 1.429e+06 -5.878e+04
+225001 25000 body_count: 2051 atom_count: 12306 1.141e+02 9.302e+01 3.353e+00 1.270e+06 1.425e+06 -6.070e+04
+227501 27500 body_count: 2051 atom_count: 12306 1.137e+02 9.294e+01 3.386e+00 1.267e+06 1.419e+06 -6.215e+04
+230001 30000 body_count: 2051 atom_count: 12306 1.165e+02 9.553e+01 3.413e+00 1.258e+06 1.414e+06 -6.218e+04
+232501 32500 body_count: 2051 atom_count: 12306 1.136e+02 9.336e+01 3.297e+00 1.248e+06 1.407e+06 -6.280e+04
+235001 35000 body_count: 2051 atom_count: 12306 1.147e+02 9.381e+01 3.317e+00 1.242e+06 1.401e+06 -6.347e+04
+237501 37500 body_count: 2051 atom_count: 12306 1.139e+02 9.280e+01 3.292e+00 1.233e+06 1.395e+06 -6.372e+04
+240001 40000 body_count: 2051 atom_count: 12306 1.114e+02 9.073e+01 3.208e+00 1.225e+06 1.390e+06 -6.421e+04
+242501 42500 body_count: 2051 atom_count: 12306 1.106e+02 9.011e+01 3.241e+00 1.219e+06 1.386e+06 -6.510e+04
+245001 45000 body_count: 2051 atom_count: 12306 1.085e+02 8.847e+01 3.241e+00 1.212e+06 1.383e+06 -6.562e+04
+247501 47500 body_count: 2051 atom_count: 12306 1.063e+02 8.674e+01 3.235e+00 1.208e+06 1.380e+06 -6.662e+04
+250001 50000 body_count: 2051 atom_count: 12306 1.052e+02 8.596e+01 3.274e+00 1.206e+06 1.379e+06 -6.793e+04
+250001 1.052e+02 8.596e+01 3.274e+00 1.206e+06 1.379e+06 -6.793e+04
+252501 2500 body_count: 2051 atom_count: 12306 7.552e+01 6.253e+01 3.251e+00 1.115e+06 1.353e+06 -1.030e+05
+255001 5000 body_count: 2051 atom_count: 12306 9.063e+01 7.240e+01 3.862e+00 1.135e+06 1.364e+06 -9.655e+04
+257501 7500 body_count: 2051 atom_count: 12306 1.012e+02 7.954e+01 3.927e+00 1.136e+06 1.368e+06 -9.063e+04
+260001 10000 body_count: 2051 atom_count: 12306 9.911e+01 7.817e+01 4.024e+00 1.137e+06 1.365e+06 -8.792e+04
+262501 12500 body_count: 2051 atom_count: 12306 9.661e+01 7.689e+01 4.055e+00 1.140e+06 1.363e+06 -8.532e+04
+265001 15000 body_count: 2051 atom_count: 12306 9.653e+01 7.711e+01 4.251e+00 1.141e+06 1.364e+06 -8.564e+04
+267501 17500 body_count: 2051 atom_count: 12306 9.607e+01 7.699e+01 4.335e+00 1.142e+06 1.364e+06 -8.678e+04
+270001 20000 body_count: 2051 atom_count: 12306 9.179e+01 7.368e+01 4.063e+00 1.141e+06 1.365e+06 -8.759e+04
+272501 22500 body_count: 2051 atom_count: 12306 3.440e+02 5.213e+02 -5.119e-01 1.168e+06 1.398e+06 -8.784e+04
+275001 25000 body_count: 2051 atom_count: 12306 3.272e+02 4.836e+02 -6.260e-02 1.169e+06 1.399e+06 -8.536e+04
+277501 27500 body_count: 2051 atom_count: 12306 3.083e+02 4.485e+02 3.519e-01 1.167e+06 1.394e+06 -8.330e+04
+280001 30000 body_count: 2051 atom_count: 12306 2.915e+02 4.186e+02 7.703e-01 1.165e+06 1.387e+06 -8.077e+04
+282501 32500 body_count: 2051 atom_count: 12306 2.777e+02 3.940e+02 1.055e+00 1.163e+06 1.380e+06 -7.929e+04
+285001 35000 body_count: 2051 atom_count: 12306 2.655e+02 3.725e+02 1.148e+00 1.159e+06 1.374e+06 -7.797e+04
+287501 37500 body_count: 2051 atom_count: 12306 2.547e+02 3.534e+02 1.283e+00 1.155e+06 1.368e+06 -7.711e+04
+290001 40000 body_count: 2051 atom_count: 12306 2.434e+02 3.352e+02 1.331e+00 1.151e+06 1.363e+06 -7.695e+04
+292501 42500 body_count: 2051 atom_count: 12306 2.336e+02 3.193e+02 1.368e+00 1.146e+06 1.359e+06 -7.702e+04
+295001 45000 body_count: 2051 atom_count: 12306 2.254e+02 3.056e+02 1.438e+00 1.143e+06 1.355e+06 -7.713e+04
+297501 47500 body_count: 2051 atom_count: 12306 2.176e+02 2.929e+02 1.499e+00 1.140e+06 1.352e+06 -7.703e+04
+300001 50000 body_count: 2051 atom_count: 12306 2.101e+02 2.812e+02 1.557e+00 1.138e+06 1.349e+06 -7.726e+04
+300001 2.101e+02 2.812e+02 1.557e+00 1.138e+06 1.349e+06 -7.726e+04
+302501 2500 body_count: 2051 atom_count: 12306 7.112e+01 6.227e+01 3.237e+00 1.106e+06 1.294e+06 -8.529e+04
+305001 5000 body_count: 2051 atom_count: 12306 7.342e+01 6.499e+01 3.562e+00 1.110e+06 1.301e+06 -8.651e+04
+307501 7500 body_count: 2051 atom_count: 12306 7.383e+01 6.489e+01 3.703e+00 1.112e+06 1.307e+06 -9.331e+04
+310001 10000 body_count: 2051 atom_count: 12306 8.015e+01 7.050e+01 3.925e+00 1.124e+06 1.316e+06 -9.773e+04
+312501 12500 body_count: 2051 atom_count: 12306 8.251e+01 7.122e+01 4.170e+00 1.133e+06 1.322e+06 -1.002e+05
+315001 15000 body_count: 2051 atom_count: 12306 9.178e+01 7.889e+01 4.800e+00 1.141e+06 1.329e+06 -1.016e+05
+317501 17500 body_count: 2051 atom_count: 12306 9.208e+01 7.878e+01 5.030e+00 1.149e+06 1.335e+06 -1.034e+05
+320001 20000 body_count: 2051 atom_count: 12306 9.748e+01 8.160e+01 5.268e+00 1.154e+06 1.337e+06 -1.026e+05
+322501 22500 body_count: 2051 atom_count: 12306 9.544e+01 7.963e+01 5.189e+00 1.156e+06 1.336e+06 -1.011e+05
+325001 25000 body_count: 2051 atom_count: 12306 9.285e+01 7.722e+01 5.163e+00 1.157e+06 1.335e+06 -1.010e+05
+327501 27500 body_count: 2051 atom_count: 12306 8.990e+01 7.470e+01 5.138e+00 1.158e+06 1.336e+06 -1.019e+05
+330001 30000 body_count: 2051 atom_count: 12306 9.052e+01 7.506e+01 5.148e+00 1.160e+06 1.338e+06 -1.032e+05
+332501 32500 body_count: 2051 atom_count: 12306 9.028e+01 7.480e+01 5.121e+00 1.161e+06 1.338e+06 -1.045e+05
+335001 35000 body_count: 2051 atom_count: 12306 8.848e+01 7.323e+01 5.054e+00 1.161e+06 1.340e+06 -1.057e+05
+337501 37500 body_count: 2051 atom_count: 12306 8.899e+01 7.341e+01 5.134e+00 1.163e+06 1.343e+06 -1.073e+05
+340001 40000 body_count: 2051 atom_count: 12306 8.929e+01 7.364e+01 5.153e+00 1.165e+06 1.346e+06 -1.091e+05
+342501 42500 body_count: 2051 atom_count: 12306 8.926e+01 7.347e+01 5.241e+00 1.166e+06 1.350e+06 -1.105e+05
+345001 45000 body_count: 2051 atom_count: 12306 9.010e+01 7.414e+01 5.340e+00 1.168e+06 1.353e+06 -1.114e+05
+347501 47500 body_count: 2051 atom_count: 12306 9.295e+01 7.595e+01 5.379e+00 1.169e+06 1.354e+06 -1.118e+05
+350001 50000 body_count: 2051 atom_count: 12306 9.331e+01 7.591e+01 5.312e+00 1.170e+06 1.355e+06 -1.121e+05
+350001 9.331e+01 7.591e+01 5.312e+00 1.170e+06 1.355e+06 -1.121e+05
+352501 2500 body_count: 2051 atom_count: 12306 6.860e+01 5.516e+01 4.274e+00 1.196e+06 1.381e+06 -1.254e+05
+355001 5000 body_count: 2051 atom_count: 12306 8.896e+01 6.913e+01 5.647e+00 1.202e+06 1.386e+06 -1.210e+05
+357501 7500 body_count: 2051 atom_count: 12306 8.241e+01 6.653e+01 5.157e+00 1.202e+06 1.382e+06 -1.171e+05
+360001 10000 body_count: 2051 atom_count: 12306 7.489e+01 6.210e+01 4.564e+00 1.206e+06 1.384e+06 -1.180e+05
+362501 12500 body_count: 2051 atom_count: 12306 7.269e+01 6.117e+01 4.374e+00 1.212e+06 1.388e+06 -1.192e+05
+365001 15000 body_count: 2051 atom_count: 12306 7.045e+01 5.949e+01 4.164e+00 1.218e+06 1.393e+06 -1.206e+05
+367501 17500 body_count: 2051 atom_count: 12306 7.286e+01 6.067e+01 4.411e+00 1.224e+06 1.396e+06 -1.191e+05
+370001 20000 body_count: 2051 atom_count: 12306 7.136e+01 5.910e+01 4.373e+00 1.227e+06 1.398e+06 -1.175e+05
+372501 22500 body_count: 2051 atom_count: 12306 7.181e+01 5.905e+01 4.442e+00 1.228e+06 1.398e+06 -1.154e+05
+375001 25000 body_count: 2051 atom_count: 12306 7.290e+01 5.943e+01 4.483e+00 1.226e+06 1.394e+06 -1.132e+05
+377501 27500 body_count: 2051 atom_count: 12306 7.076e+01 5.774e+01 4.394e+00 1.225e+06 1.390e+06 -1.115e+05
+380001 30000 body_count: 2051 atom_count: 12306 6.836e+01 5.574e+01 4.291e+00 1.225e+06 1.388e+06 -1.114e+05
+382501 32500 body_count: 2051 atom_count: 12306 6.684e+01 5.440e+01 4.195e+00 1.227e+06 1.387e+06 -1.124e+05
+385001 35000 body_count: 2051 atom_count: 12306 7.479e+01 6.075e+01 4.806e+00 1.229e+06 1.390e+06 -1.131e+05
+387501 37500 body_count: 2051 atom_count: 12306 8.966e+01 7.088e+01 5.341e+00 1.226e+06 1.390e+06 -1.111e+05
+390001 40000 body_count: 2051 atom_count: 12306 1.043e+02 8.395e+01 5.600e+00 1.217e+06 1.382e+06 -1.075e+05
+392501 42500 body_count: 2051 atom_count: 12306 1.092e+02 8.824e+01 5.741e+00 1.205e+06 1.369e+06 -1.042e+05
+395001 45000 body_count: 2051 atom_count: 12306 1.187e+02 9.937e+01 6.149e+00 1.195e+06 1.357e+06 -1.010e+05
+397501 47500 body_count: 2051 atom_count: 12306 1.217e+02 1.034e+02 6.268e+00 1.185e+06 1.345e+06 -9.844e+04
+400001 50000 body_count: 2051 atom_count: 12306 1.231e+02 1.041e+02 6.203e+00 1.173e+06 1.332e+06 -9.642e+04
+400001 1.231e+02 1.041e+02 6.203e+00 1.173e+06 1.332e+06 -9.642e+04
+402501 2500 body_count: 2051 atom_count: 12306 1.280e+02 1.116e+02 3.366e+00 9.547e+05 1.077e+06 -5.248e+04
+405001 5000 body_count: 2051 atom_count: 12306 1.540e+02 1.350e+02 3.308e+00 9.494e+05 1.070e+06 -5.241e+04
+407501 7500 body_count: 2051 atom_count: 12306 1.510e+02 1.326e+02 3.967e+00 9.531e+05 1.068e+06 -5.314e+04
+410001 10000 body_count: 2051 atom_count: 12306 1.630e+02 1.408e+02 3.860e+00 9.447e+05 1.064e+06 -5.347e+04
+412501 12500 body_count: 2051 atom_count: 12306 1.619e+02 1.403e+02 3.966e+00 9.389e+05 1.056e+06 -5.057e+04
+415001 15000 body_count: 2051 atom_count: 12306 1.609e+02 1.398e+02 3.906e+00 9.319e+05 1.043e+06 -4.906e+04
+417501 17500 body_count: 2051 atom_count: 12306 1.563e+02 1.352e+02 4.021e+00 9.157e+05 1.027e+06 -4.849e+04
+420001 20000 body_count: 2051 atom_count: 12306 4.712e+02 7.031e+02 6.920e+00 9.430e+05 1.063e+06 -4.770e+04
+422501 22500 body_count: 2051 atom_count: 12306 4.389e+02 6.412e+02 6.391e+00 9.374e+05 1.058e+06 -4.615e+04
+425001 25000 body_count: 2051 atom_count: 12306 4.085e+02 5.888e+02 5.801e+00 9.261e+05 1.049e+06 -4.519e+04
+427501 27500 body_count: 2051 atom_count: 12306 3.855e+02 5.465e+02 5.448e+00 9.179e+05 1.038e+06 -4.419e+04
+430001 30000 body_count: 2051 atom_count: 12306 3.663e+02 5.113e+02 5.131e+00 9.112e+05 1.030e+06 -4.341e+04
+432501 32500 body_count: 2051 atom_count: 12306 3.509e+02 4.832e+02 4.976e+00 9.049e+05 1.023e+06 -4.325e+04
+435001 35000 body_count: 2051 atom_count: 12306 3.354e+02 4.572e+02 4.872e+00 8.986e+05 1.016e+06 -4.293e+04
+437501 37500 body_count: 2051 atom_count: 12306 3.215e+02 4.342e+02 4.690e+00 8.959e+05 1.010e+06 -4.308e+04
+440001 40000 body_count: 2051 atom_count: 12306 3.105e+02 4.147e+02 4.769e+00 8.931e+05 1.005e+06 -4.337e+04
+442501 42500 body_count: 2051 atom_count: 12306 3.015e+02 3.978e+02 4.942e+00 8.920e+05 1.001e+06 -4.366e+04
+445001 45000 body_count: 2051 atom_count: 12306 2.926e+02 3.823e+02 4.982e+00 8.897e+05 9.970e+05 -4.424e+04
+447501 47500 body_count: 2051 atom_count: 12306 2.937e+02 3.826e+02 4.780e+00 8.878e+05 9.935e+05 -4.422e+04
+450001 50000 body_count: 2051 atom_count: 12306 2.861e+02 3.696e+02 4.774e+00 8.853e+05 9.884e+05 -4.437e+04
+450001 2.861e+02 3.696e+02 4.774e+00 8.853e+05 9.884e+05 -4.437e+04
+452501 2500 body_count: 2051 atom_count: 12306 1.293e+02 1.140e+02 4.562e+00 8.296e+05 8.843e+05 -4.982e+04
+455001 5000 body_count: 2051 atom_count: 12306 1.354e+02 1.184e+02 4.537e+00 8.251e+05 8.857e+05 -4.937e+04
+457501 7500 body_count: 2051 atom_count: 12306 1.397e+02 1.220e+02 4.354e+00 8.269e+05 8.877e+05 -4.915e+04
+460001 10000 body_count: 2051 atom_count: 12306 1.433e+02 1.229e+02 4.422e+00 8.264e+05 8.881e+05 -4.817e+04
+462501 12500 body_count: 2051 atom_count: 12306 1.417e+02 1.208e+02 4.338e+00 8.183e+05 8.815e+05 -4.867e+04
+465001 15000 body_count: 2051 atom_count: 12306 1.394e+02 1.200e+02 4.384e+00 8.129e+05 8.802e+05 -4.754e+04
+467501 17500 body_count: 2051 atom_count: 12306 1.401e+02 1.208e+02 4.435e+00 8.063e+05 8.798e+05 -4.668e+04
+470001 20000 body_count: 2051 atom_count: 12306 1.492e+02 1.342e+02 5.016e+00 8.003e+05 8.766e+05 -4.676e+04
+472501 22500 body_count: 2051 atom_count: 12306 1.477e+02 1.326e+02 4.681e+00 7.933e+05 8.730e+05 -4.635e+04
+475001 25000 body_count: 2051 atom_count: 12306 1.483e+02 1.329e+02 4.854e+00 7.891e+05 8.706e+05 -4.652e+04
+477501 27500 body_count: 2051 atom_count: 12306 1.475e+02 1.324e+02 4.959e+00 7.851e+05 8.674e+05 -4.650e+04
+480001 30000 body_count: 2051 atom_count: 12306 1.466e+02 1.315e+02 4.843e+00 7.821e+05 8.647e+05 -4.656e+04
+482501 32500 body_count: 2051 atom_count: 12306 1.442e+02 1.294e+02 4.787e+00 7.792e+05 8.621e+05 -4.660e+04
+485001 35000 body_count: 2051 atom_count: 12306 1.430e+02 1.282e+02 4.723e+00 7.770e+05 8.603e+05 -4.670e+04
+487501 37500 body_count: 2051 atom_count: 12306 1.427e+02 1.277e+02 4.734e+00 7.754e+05 8.595e+05 -4.702e+04
+490001 40000 body_count: 2051 atom_count: 12306 1.412e+02 1.263e+02 4.720e+00 7.730e+05 8.579e+05 -4.753e+04
+492501 42500 body_count: 2051 atom_count: 12306 1.396e+02 1.252e+02 4.628e+00 7.725e+05 8.567e+05 -4.802e+04
+495001 45000 body_count: 2051 atom_count: 12306 1.399e+02 1.262e+02 4.622e+00 7.728e+05 8.567e+05 -4.888e+04
+497501 47500 body_count: 2051 atom_count: 12306 1.405e+02 1.271e+02 4.665e+00 7.725e+05 8.580e+05 -4.968e+04
+500001 50000 body_count: 2051 atom_count: 12306 1.410e+02 1.278e+02 4.623e+00 7.728e+05 8.583e+05 -4.985e+04
+500001 1.410e+02 1.278e+02 4.623e+00 7.728e+05 8.583e+05 -4.985e+04
+502501 2500 body_count: 2051 atom_count: 12306 1.503e+02 1.399e+02 4.501e+00 7.719e+05 8.731e+05 -5.420e+04
+505001 5000 body_count: 2051 atom_count: 12306 1.488e+02 1.377e+02 4.944e+00 7.677e+05 8.756e+05 -5.429e+04
+507501 7500 body_count: 2051 atom_count: 12306 1.483e+02 1.385e+02 5.629e+00 7.737e+05 8.773e+05 -5.530e+04
+510001 10000 body_count: 2051 atom_count: 12306 1.480e+02 1.383e+02 5.106e+00 7.732e+05 8.774e+05 -5.594e+04
+512501 12500 body_count: 2051 atom_count: 12306 1.486e+02 1.394e+02 5.215e+00 7.726e+05 8.785e+05 -5.684e+04
+515001 15000 body_count: 2051 atom_count: 12306 1.596e+02 1.471e+02 5.735e+00 7.739e+05 8.786e+05 -5.600e+04
+517501 17500 body_count: 2051 atom_count: 12306 1.608e+02 1.482e+02 5.749e+00 7.714e+05 8.749e+05 -5.536e+04
+520001 20000 body_count: 2051 atom_count: 12306 1.609e+02 1.492e+02 5.294e+00 7.678e+05 8.718e+05 -5.474e+04
+522501 22500 body_count: 2051 atom_count: 12306 1.629e+02 1.507e+02 5.191e+00 7.639e+05 8.665e+05 -5.424e+04
+525001 25000 body_count: 2051 atom_count: 12306 1.638e+02 1.514e+02 5.362e+00 7.597e+05 8.612e+05 -5.350e+04
+527501 27500 body_count: 2051 atom_count: 12306 1.660e+02 1.537e+02 5.518e+00 7.566e+05 8.556e+05 -5.266e+04
+530001 30000 body_count: 2051 atom_count: 12306 1.651e+02 1.537e+02 5.331e+00 7.526e+05 8.484e+05 -5.193e+04
+532501 32500 body_count: 2051 atom_count: 12306 1.637e+02 1.530e+02 5.007e+00 7.494e+05 8.421e+05 -5.124e+04
+535001 35000 body_count: 2051 atom_count: 12306 1.648e+02 1.556e+02 4.695e+00 7.465e+05 8.368e+05 -5.075e+04
+537501 37500 body_count: 2051 atom_count: 12306 1.631e+02 1.540e+02 4.576e+00 7.430e+05 8.316e+05 -5.039e+04
+540001 40000 body_count: 2051 atom_count: 12306 1.616e+02 1.532e+02 4.535e+00 7.412e+05 8.280e+05 -5.035e+04
+542501 42500 body_count: 2051 atom_count: 12306 1.607e+02 1.526e+02 4.419e+00 7.407e+05 8.254e+05 -5.020e+04
+545001 45000 body_count: 2051 atom_count: 12306 1.599e+02 1.528e+02 4.366e+00 7.411e+05 8.237e+05 -5.009e+04
+547501 47500 body_count: 2051 atom_count: 12306 1.619e+02 1.539e+02 4.413e+00 7.410e+05 8.225e+05 -4.977e+04
+550001 50000 body_count: 2051 atom_count: 12306 1.615e+02 1.535e+02 4.329e+00 7.386e+05 8.192e+05 -4.981e+04
+550001 1.615e+02 1.535e+02 4.329e+00 7.386e+05 8.192e+05 -4.981e+04
+552501 2500 body_count: 2051 atom_count: 12306 1.372e+02 1.355e+02 2.648e+00 6.976e+05 7.489e+05 -4.691e+04
+555001 5000 body_count: 2051 atom_count: 12306 1.398e+02 1.369e+02 1.970e+00 6.852e+05 7.465e+05 -4.637e+04
+557501 7500 body_count: 2051 atom_count: 12306 1.390e+02 1.384e+02 2.194e+00 6.870e+05 7.467e+05 -4.812e+04
+560001 10000 body_count: 2051 atom_count: 12306 1.396e+02 1.392e+02 1.956e+00 6.874e+05 7.457e+05 -4.774e+04
+562501 12500 body_count: 2051 atom_count: 12306 1.459e+02 1.436e+02 1.958e+00 6.920e+05 7.476e+05 -4.721e+04
+565001 15000 body_count: 2051 atom_count: 12306 1.500e+02 1.466e+02 1.793e+00 6.942e+05 7.500e+05 -4.699e+04
+567501 17500 body_count: 2051 atom_count: 12306 1.502e+02 1.466e+02 1.959e+00 6.941e+05 7.488e+05 -4.719e+04
+570001 20000 body_count: 2051 atom_count: 12306 1.453e+02 1.433e+02 1.982e+00 6.941e+05 7.478e+05 -4.765e+04
+572501 22500 body_count: 2051 atom_count: 12306 1.482e+02 1.456e+02 2.208e+00 6.964e+05 7.499e+05 -4.859e+04
+575001 25000 body_count: 2051 atom_count: 12306 1.505e+02 1.482e+02 2.235e+00 6.989e+05 7.526e+05 -4.910e+04
+577501 27500 body_count: 2051 atom_count: 12306 1.538e+02 1.511e+02 2.518e+00 6.999e+05 7.538e+05 -4.965e+04
+580001 30000 body_count: 2051 atom_count: 12306 1.535e+02 1.517e+02 2.705e+00 6.985e+05 7.532e+05 -4.989e+04
+582501 32500 body_count: 2051 atom_count: 12306 1.536e+02 1.514e+02 2.684e+00 6.976e+05 7.523e+05 -4.961e+04
+585001 35000 body_count: 2051 atom_count: 12306 1.546e+02 1.527e+02 2.622e+00 6.960e+05 7.514e+05 -4.949e+04
+587501 37500 body_count: 2051 atom_count: 12306 1.080e+03 2.353e+03 -4.953e+01 7.670e+05 8.318e+05 -4.966e+04
+590001 40000 body_count: 2051 atom_count: 12306 1.043e+03 2.233e+03 -4.705e+01 7.780e+05 8.455e+05 -4.709e+04
+592501 42500 body_count: 2051 atom_count: 12306 1.001e+03 2.119e+03 -4.443e+01 7.815e+05 8.510e+05 -4.537e+04
+595001 45000 body_count: 2051 atom_count: 12306 9.587e+02 2.014e+03 -4.219e+01 7.832e+05 8.535e+05 -4.404e+04
+597501 47500 body_count: 2051 atom_count: 12306 9.198e+02 1.920e+03 -4.007e+01 7.828e+05 8.542e+05 -4.317e+04
+600001 50000 body_count: 2051 atom_count: 12306 8.843e+02 1.834e+03 -3.792e+01 7.814e+05 8.527e+05 -4.246e+04
+600001 8.843e+02 1.834e+03 -3.792e+01 7.814e+05 8.527e+05 -4.246e+04
+602501 2500 body_count: 2051 atom_count: 12306 2.405e+02 2.369e+02 1.240e+00 7.161e+05 8.091e+05 -3.111e+04
+605001 5000 body_count: 2051 atom_count: 12306 2.261e+02 2.211e+02 -2.379e-01 6.905e+05 7.910e+05 -3.121e+04
+607501 7500 body_count: 2051 atom_count: 12306 2.261e+02 2.210e+02 7.279e-02 6.823e+05 7.787e+05 -3.001e+04
+610001 10000 body_count: 2051 atom_count: 12306 2.136e+02 2.093e+02 -3.801e-01 6.776e+05 7.699e+05 -2.922e+04
+612501 12500 body_count: 2051 atom_count: 12306 2.074e+02 2.045e+02 -4.931e-01 6.773e+05 7.654e+05 -2.792e+04
+615001 15000 body_count: 2051 atom_count: 12306 2.042e+02 2.018e+02 -3.219e-02 6.769e+05 7.620e+05 -2.795e+04
+617501 17500 body_count: 2051 atom_count: 12306 2.024e+02 2.008e+02 1.948e-02 6.762e+05 7.586e+05 -2.829e+04
+620001 20000 body_count: 2051 atom_count: 12306 2.041e+02 2.027e+02 4.697e-02 6.724e+05 7.529e+05 -2.760e+04
+622501 22500 body_count: 2051 atom_count: 12306 2.019e+02 1.996e+02 5.001e-02 6.664e+05 7.456e+05 -2.752e+04
+625001 25000 body_count: 2051 atom_count: 12306 1.983e+02 1.968e+02 9.888e-02 6.595e+05 7.387e+05 -2.691e+04
+627501 27500 body_count: 2051 atom_count: 12306 1.965e+02 1.946e+02 8.326e-03 6.514e+05 7.300e+05 -2.645e+04
+630001 30000 body_count: 2051 atom_count: 12306 1.941e+02 1.927e+02 5.325e-02 6.436e+05 7.218e+05 -2.593e+04
+632501 32500 body_count: 2051 atom_count: 12306 1.918e+02 1.911e+02 -2.512e-02 6.371e+05 7.149e+05 -2.549e+04
+635001 35000 body_count: 2051 atom_count: 12306 1.897e+02 1.887e+02 -6.304e-02 6.302e+05 7.075e+05 -2.511e+04
+637501 37500 body_count: 2051 atom_count: 12306 1.869e+02 1.864e+02 -3.555e-02 6.233e+05 7.003e+05 -2.496e+04
+640001 40000 body_count: 2051 atom_count: 12306 1.840e+02 1.837e+02 -6.842e-02 6.170e+05 6.943e+05 -2.479e+04
+642501 42500 body_count: 2051 atom_count: 12306 1.814e+02 1.812e+02 -1.094e-01 6.121e+05 6.888e+05 -2.498e+04
+645001 45000 body_count: 2051 atom_count: 12306 1.798e+02 1.799e+02 -5.590e-02 6.083e+05 6.843e+05 -2.528e+04
+647501 47500 body_count: 2051 atom_count: 12306 1.781e+02 1.787e+02 -4.976e-02 6.051e+05 6.809e+05 -2.573e+04
+650001 50000 body_count: 2051 atom_count: 12306 1.770e+02 1.781e+02 8.422e-02 6.026e+05 6.782e+05 -2.636e+04
+650001 1.770e+02 1.781e+02 8.422e-02 6.026e+05 6.782e+05 -2.636e+04
+652501 2500 body_count: 2051 atom_count: 12306 1.802e+02 1.878e+02 3.724e+00 5.572e+05 6.284e+05 -3.298e+04
+655001 5000 body_count: 2051 atom_count: 12306 1.862e+02 1.895e+02 2.990e+00 5.595e+05 6.218e+05 -3.288e+04
+657501 7500 body_count: 2051 atom_count: 12306 1.828e+02 1.854e+02 2.961e+00 5.547e+05 6.192e+05 -3.292e+04
+660001 10000 body_count: 2051 atom_count: 12306 1.801e+02 1.814e+02 3.171e+00 5.508e+05 6.166e+05 -3.236e+04
+662501 12500 body_count: 2051 atom_count: 12306 1.779e+02 1.785e+02 2.517e+00 5.467e+05 6.137e+05 -3.229e+04
+665001 15000 body_count: 2051 atom_count: 12306 1.779e+02 1.769e+02 2.049e+00 5.438e+05 6.092e+05 -3.124e+04
+667501 17500 body_count: 2051 atom_count: 12306 1.745e+02 1.731e+02 2.093e+00 5.380e+05 6.016e+05 -3.037e+04
+670001 20000 body_count: 2051 atom_count: 12306 1.633e+02 1.628e+02 1.712e+00 5.275e+05 5.897e+05 -3.000e+04
+672501 22500 body_count: 2051 atom_count: 12306 1.474e+02 1.470e+02 1.370e+00 5.184e+05 5.787e+05 -3.040e+04
+675001 25000 body_count: 2051 atom_count: 12306 1.345e+02 1.344e+02 1.132e+00 5.113e+05 5.708e+05 -3.116e+04
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=1232, x/L=0.681171, y/L=-0.0808912, z/L=0.246466, bt=856, me=12
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5135 atom_map=1281, x/L=0.675006, y/L=-0.0531439, z/L=0.320401, bt=856, me=12
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5134 atom_map=1359, x/L=0.667551, y/L=-0.0218064, z/L=0.395194, bt=856, me=12
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5133 atom_map=2423, x/L=0.660678, y/L=0.00787217, z/L=0.469665, bt=856, me=12
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=1232, x/L=0.681171, y/L=-0.0808912, z/L=0.246466, bt=856, me=12
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5135 atom_map=1281, x/L=0.675006, y/L=-0.0531439, z/L=0.320401, bt=856, me=12
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5134 atom_map=1359, x/L=0.667551, y/L=-0.0218064, z/L=0.395194, bt=856, me=12
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5131 atom_map=4630, x/L=0.64638, y/L=0.17112, z/L=0.634478, bt=856, me=12
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5132 atom_map=4634, x/L=0.653751, y/L=0.100477, z/L=0.551515, bt=856, me=12
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5131 atom_map=2301, x/L=0.64638, y/L=0.17112, z/L=0.634478, bt=856, me=13
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5132 atom_map=2307, x/L=0.653751, y/L=0.100477, z/L=0.551515, bt=856, me=13
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=3983, x/L=0.681171, y/L=-0.0808912, z/L=1.24647, bt=856, me=13
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=3983, x/L=0.681171, y/L=-0.0808912, z/L=1.24647, bt=856, me=13
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=3983, x/L=0.681171, y/L=-0.0808912, z/L=0.246466, bt=856, me=13
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5135 atom_map=5994, x/L=0.675006, y/L=-0.0531439, z/L=0.320401, bt=856, me=13
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5134 atom_map=6058, x/L=0.667551, y/L=-0.0218064, z/L=0.395194, bt=856, me=13
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5133 atom_map=6707, x/L=0.660678, y/L=0.00787217, z/L=0.469665, bt=856, me=13
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=3983, x/L=0.681171, y/L=-0.0808912, z/L=0.246466, bt=856, me=13
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5135 atom_map=5994, x/L=0.675006, y/L=-0.0531439, z/L=0.320401, bt=856, me=13
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5134 atom_map=6058, x/L=0.667551, y/L=-0.0218064, z/L=0.395194, bt=856, me=13
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5133 atom_map=745, x/L=0.336776, y/L=1.00787, z/L=0.469665, bt=856, me=4
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=1784, x/L=0.357269, y/L=0.919109, z/L=0.246466, bt=856, me=4
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5135 atom_map=1856, x/L=0.351104, y/L=0.946856, z/L=0.320401, bt=856, me=4
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5134 atom_map=1922, x/L=0.343649, y/L=0.978194, z/L=0.395194, bt=856, me=4
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5133 atom_map=745, x/L=0.336776, y/L=1.00787, z/L=0.469665, bt=856, me=4
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5132 atom_map=3524, x/L=0.329849, y/L=1.10048, z/L=0.551515, bt=856, me=4
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5132 atom_map=3524, x/L=0.329849, y/L=1.10048, z/L=0.551515, bt=856, me=4
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+676090 FixMultisphere::pre_neighbor(): r atom_tag=5133 atom_map=213, x/L=0.660678, y/L=0.00787217, z/L=0.469665, bt=856, me=6
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=1401, x/L=0.681171, y/L=-0.0808912, z/L=0.246466, bt=856, me=6
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5135 atom_map=1450, x/L=0.675006, y/L=-0.0531439, z/L=0.320401, bt=856, me=6
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5134 atom_map=1528, x/L=0.667551, y/L=-0.0218064, z/L=0.395194, bt=856, me=6
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=1401, x/L=0.681171, y/L=-0.0808912, z/L=0.246466, bt=856, me=6
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5135 atom_map=1450, x/L=0.675006, y/L=-0.0531439, z/L=0.320401, bt=856, me=6
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5134 atom_map=1528, x/L=0.667551, y/L=-0.0218064, z/L=0.395194, bt=856, me=6
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5131 atom_map=3366, x/L=0.64638, y/L=0.17112, z/L=0.634478, bt=856, me=6
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5132 atom_map=3376, x/L=0.653751, y/L=0.100477, z/L=0.551515, bt=856, me=6
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5132 atom_map=673, x/L=0.329849, y/L=1.10048, z/L=0.551515, bt=856, me=5
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5132 atom_map=673, x/L=0.329849, y/L=1.10048, z/L=0.551515, bt=856, me=5
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=4281, x/L=0.357269, y/L=0.919109, z/L=1.24647, bt=856, me=5
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5133 atom_map=5507, x/L=0.336776, y/L=1.00787, z/L=0.469665, bt=856, me=5
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=4281, x/L=0.357269, y/L=0.919109, z/L=0.246466, bt=856, me=5
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5135 atom_map=6239, x/L=0.351104, y/L=0.946856, z/L=0.320401, bt=856, me=5
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5134 atom_map=6290, x/L=0.343649, y/L=0.978194, z/L=0.395194, bt=856, me=5
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5133 atom_map=5507, x/L=0.336776, y/L=1.00787, z/L=0.469665, bt=856, me=5
+12306 total atoms
+WARNING: Internal error in multisphere method less atoms then body needs (../multisphere.cpp:837)
+856 missing atoms real: 3 ghost: 2 not_first: 2
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+676090 FixMultisphere::pre_neighbor(): r atom_tag=5136 atom_map=435, x/L=0.357269, y/L=0.919109, z/L=0.246466, bt=856, me=10
+676090 FixMultisphere::pre_neighbor(): r atom_tag=5135 atom_map=589, x/L=0.351104, y/L=0.946856, z/L=0.320401, bt=856, me=10
+676090 FixMultisphere::pre_neighbor(): r atom_tag=5134 atom_map=727, x/L=0.343649, y/L=0.978194, z/L=0.395194, bt=856, me=10
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5133 atom_map=1130, x/L=0.336776, y/L=1.00787, z/L=0.469665, bt=856, me=10
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5133 atom_map=1130, x/L=0.336776, y/L=1.00787, z/L=0.469665, bt=856, me=10
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5132 atom_map=4168, x/L=0.329849, y/L=1.10048, z/L=0.551515, bt=856, me=10
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5132 atom_map=4168, x/L=0.329849, y/L=1.10048, z/L=0.551515, bt=856, me=10
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+676090 FixMultisphere::pre_neighbor(): r atom_tag=5131 atom_map=34, x/L=0.64638, y/L=0.17112, z/L=0.634478, bt=856, me=7
+676090 FixMultisphere::pre_neighbor(): r atom_tag=5132 atom_map=47, x/L=0.653751, y/L=0.100477, z/L=0.551515, bt=856, me=7
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=4323, x/L=0.681171, y/L=-0.0808912, z/L=1.24647, bt=856, me=7
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=4323, x/L=0.681171, y/L=-0.0808912, z/L=1.24647, bt=856, me=7
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5133 atom_map=5554, x/L=0.660678, y/L=0.00787217, z/L=0.469665, bt=856, me=7
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=4323, x/L=0.681171, y/L=-0.0808912, z/L=0.246466, bt=856, me=7
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5135 atom_map=6411, x/L=0.675006, y/L=-0.0531439, z/L=0.320401, bt=856, me=7
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5134 atom_map=6475, x/L=0.667551, y/L=-0.0218064, z/L=0.395194, bt=856, me=7
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=4323, x/L=0.681171, y/L=-0.0808912, z/L=0.246466, bt=856, me=7
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5135 atom_map=6411, x/L=0.675006, y/L=-0.0531439, z/L=0.320401, bt=856, me=7
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5134 atom_map=6475, x/L=0.667551, y/L=-0.0218064, z/L=0.395194, bt=856, me=7
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5132 atom_map=1038, x/L=0.329849, y/L=1.10048, z/L=0.551515, bt=856, me=11
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5132 atom_map=1038, x/L=0.329849, y/L=1.10048, z/L=0.551515, bt=856, me=11
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=3882, x/L=0.357269, y/L=0.919109, z/L=1.24647, bt=856, me=11
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5136 atom_map=3882, x/L=0.357269, y/L=0.919109, z/L=0.246466, bt=856, me=11
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5135 atom_map=6080, x/L=0.351104, y/L=0.946856, z/L=0.320401, bt=856, me=11
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5134 atom_map=6188, x/L=0.343649, y/L=0.978194, z/L=0.395194, bt=856, me=11
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5133 atom_map=6428, x/L=0.336776, y/L=1.00787, z/L=0.469665, bt=856, me=11
+676090 FixMultisphere::pre_neighbor(): g atom_tag=5133 atom_map=6428, x/L=0.336776, y/L=1.00787, z/L=0.469665, bt=856, me=11
+12306 total atoms
+676090 FixMultisphere::pre_neighbor(), lost_body_tag=856
+12306 total atoms
+12306 total atoms
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+at end bodies changed from: 2051 to: 2050
+--------------------------------------------------------------------------
+mpiexec noticed that process rank 12 with PID 135939 on node EMS-RHEL-P3660 exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------

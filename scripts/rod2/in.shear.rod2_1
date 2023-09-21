@@ -68,4 +68,4 @@ timestep          1.1736e-08
 fix               leboundary all lebc 100.0 true gtemp 0.1
 
 # Run desired simulation
-run               18000000
+run               30000000

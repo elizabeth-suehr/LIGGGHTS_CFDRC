@@ -63,7 +63,7 @@ using namespace LAMMPS_NS;
 using namespace FixConst;
 static const char * COEFFICIENT_RESTITUTION = "coefficientRestitution";
 /* ---------------------------------------------------------------------- */
-#define maxNsteps 10000
+#define maxNsteps 20000
 #define MIN_OVERLAP 0.6
 
 
@@ -581,12 +581,19 @@ void FixELimit::end_of_step() {
   {
     double temp = dtii[update->ntimestep];
     update->dt = std::min(temp, end_dt *(10.0*variableCOR(global_minOverlap)));
-    update->timestep_set = true;
+    if (fix_ms)
+    {
+      fix_ms->update_dt();
+    }
   }
   else
   {
     update->dt = end_dt *(10.0*variableCOR(global_minOverlap));
-    update->timestep_set = true;
+
+     if (fix_ms)
+    {
+      fix_ms->update_dt();
+    }
   }
     
   reset_dt();

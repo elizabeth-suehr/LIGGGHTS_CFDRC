@@ -71,7 +71,6 @@ ParticleToInsert::ParticleToInsert(LAMMPS* lmp, int ns, FixPropertyAtom * const 
 
     memory->create(x_ins,nparticles,3,"x_ins");
     radius_ins = new double[nparticles];
-    ndensity_ins = new double[nparticles];
 
     atom_type_vector = new int[nparticles];
     atom_type_vector_flag = false;
@@ -87,7 +86,6 @@ ParticleToInsert::~ParticleToInsert()
         memory->destroy(x_ins);
         delete []radius_ins;
         delete []atom_type_vector;
-	delete []ndensity_ins;
         if (fix_property_value)
         {
             for (int i = 0; i < n_fix_property; i++)

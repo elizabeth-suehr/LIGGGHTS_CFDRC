@@ -1,0 +1,345 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-14-12:09:13 by liz.suehr, git commit 357ff034cff53320eeedb4a37627805705ae7ff9)
+communicate       single vel yes
+units             si
+log               log.shear.bp1_0.liggghts
+atom_modify       map array
+
+processors        3 2 1
+#processors        1 1 1
+
+# Set domain
+# region            domain block 0.0 8.0e-3 0.0 8.0e-3 0.0 4.0e-3 units box volume_limit 1e-64
+region            domain block 0.0 1.6e-2 0.0 1.6e-2 0.0 8.0e-3 units box volume_limit 1e-64
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.016 0.016 0.008)
+  3 by 2 by 1 MPI processor grid
+
+# Set neighbor and list options
+neighbor          4e-03 nsq
+neigh_modify      every 1000 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+07 8.70000e+07
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history surface superquadric
+WARNING: 
+	The contact model you specified is not located in any whitelist.
+	Because of this the model will be run in an unoptimized version (increasing runtime by up to 20%).
+	In order to optimize this model you have the following options:
+		(i)  Run the genAutoExamplesWhitelist.sh script in your LIGGGHTS(R) source folder to automatically parse the input script
+		(ii) Add the model combination by hand to your style_contact_model_user.whitelist that can be found in your LIGGGHTS(R) source folder
+		(iii) Use the ENABLE_MODEL_* flag when building with cmake.
+	If you perform one of the steps above LIGGGHTS(R) needs to be recompiled to generate the optimized code.
+
+ (../contact_models.h:365)
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/superquadric 123457 atom_type 1 density constant 2500.000 volume_limit 1e-64 shape constant 2.5e-3 2.5e-3 25.1e-6 blockiness constant 10 10
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=6.598213e-03 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=6.598213e-03 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 1000 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.05
+# Apply integration fix
+# fix               ms  superquadric
+fix		  ms nve_group1 nve/superquadric
+
+
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Thu Sep 14 12:18:31 2023
+
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 19.1503 Mbytes
+    Step 
+       0 
+WARNING: Particle insertion on proc 5: sub-domain is smaller than the bounding radius of insert particles to insert: 
+Max. bounding sphere diameter is 0.006598, sub-domain extent in x direction is only 0.005333  (../fix_insert.cpp:730)
+WARNING: Particle insertion on proc 0: sub-domain is smaller than the bounding radius of insert particles to insert: 
+Max. bounding sphere diameter is 0.006598, sub-domain extent in x direction is only 0.005333  (../fix_insert.cpp:730)
+insertion: proc 0 at 0 %
+WARNING: Particle insertion on proc 1: sub-domain is smaller than the bounding radius of insert particles to insert: 
+Max. bounding sphere diameter is 0.006598, sub-domain extent in x direction is only 0.005333  (../fix_insert.cpp:730)
+WARNING: Particle insertion on proc 2: sub-domain is smaller than the bounding radius of insert particles to insert: 
+Max. bounding sphere diameter is 0.006598, sub-domain extent in x direction is only 0.005333  (../fix_insert.cpp:730)
+insertion: proc 2 at 0 %
+WARNING: Particle insertion on proc 3: sub-domain is smaller than the bounding radius of insert particles to insert: 
+Max. bounding sphere diameter is 0.006598, sub-domain extent in x direction is only 0.005333  (../fix_insert.cpp:730)
+insertion: proc 3 at 0 %
+WARNING: Particle insertion on proc 4: sub-domain is smaller than the bounding radius of insert particles to insert: 
+Max. bounding sphere diameter is 0.006598, sub-domain extent in x direction is only 0.005333  (../fix_insert.cpp:730)
+insertion: proc 3 at 0 %
+insertion: proc 3 at 10 %
+insertion: proc 3 at 20 %
+insertion: proc 3 at 30 %
+insertion: proc 3 at 40 %
+insertion: proc 3 at 50 %
+insertion: proc 3 at 60 %
+insertion: proc 3 at 70 %
+insertion: proc 3 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 3 at 100 %
+insertion: proc 3 at 110 %
+insertion: proc 2 at 0 %
+insertion: proc 2 at 10 %
+insertion: proc 2 at 20 %
+insertion: proc 2 at 30 %
+insertion: proc 2 at 40 %
+insertion: proc 2 at 50 %
+insertion: proc 2 at 60 %
+insertion: proc 2 at 70 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 2 at 100 %
+insertion: proc 2 at 110 %
+insertion: proc 2 at 120 %
+insertion: proc 0 at 0 %
+insertion: proc 0 at 10 %
+insertion: proc 0 at 20 %
+insertion: proc 0 at 30 %
+insertion: proc 0 at 40 %
+insertion: proc 0 at 50 %
+insertion: proc 0 at 60 %
+insertion: proc 0 at 70 %
+insertion: proc 0 at 80 %
+insertion: proc 0 at 90 %
+INFO: Particle insertion ins1: inserted 86 particle templates (mass 2.588713e-04) at step 1
+ - a total of 86 particle templates (mass 2.588713e-04) inserted so far.
+       1 
+Loop time of 0.0074921 on 6 procs for 1 steps with 86 atoms, finish time Thu Sep 14 12:18:33 2023
+
+
+Pair  time (%) = 0.000272154 (3.63255)
+Neigh time (%) = 0.000108273 (1.44516)
+Comm  time (%) = 0.000200281 (2.67323)
+Outpt time (%) = 6.77626e-05 (0.904455)
+Other time (%) = 0.00684363 (91.3446)
+
+Nlocal:    14.3333 ave 25 max 9 min
+Histogram: 4 0 0 0 0 0 0 0 0 2
+Nghost:    786.667 ave 852 max 675 min
+Histogram: 2 0 0 0 0 0 0 0 2 2
+Neighs:    3790 ave 6565 max 2400 min
+Histogram: 4 0 0 0 0 0 0 0 0 2
+
+Total # of neighbors = 22740
+Ave neighs/atom = 264.419
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+86 atoms in group nve_group
+
+
+dump              dmp2 all custom/vtk 2000 post/dump*.superq.vtk type mass x y z id vx vy vz fx fy fz omegax omegay omegaz radius shapex shapey shapez quat1 quat2 quat3 quat4 blockiness1 blockiness2 tqx tqy tqz angmomx angmomy angmomz
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+
+
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+fix               limcheck2 all slowinit xmax 2.85e-06 reset 1000 threshold 0.50e-06 start_dt 3.4420e-07 end_dt 3.3420e-09
+run               100000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Thu Sep 14 12:18:33 2023
+
+Memory usage per processor = 23.5092 Mbytes
+    Step 
+       1 
+pre-run, step: 1000, ke/mass=2.685e+01, natoms=86, overlap=5.725e-05, cor=1.087e-01, dt=3.633e-09
+pre-run, step: 2000, ke/mass=8.094e-01, natoms=86, overlap=4.039e-06, cor=1.127e-01, dt=3.766e-09
+pre-run, step: 3000, ke/mass=2.485e-01, natoms=86, overlap=1.767e-06, cor=1.167e-01, dt=3.900e-09
+pre-run, step: 4000, ke/mass=1.132e-01, natoms=86, overlap=7.893e-05, cor=1.207e-01, dt=4.034e-09
+pre-run, step: 5000, ke/mass=2.877e-01, natoms=86, overlap=1.772e-05, cor=1.247e-01, dt=4.167e-09
+pre-run, step: 6000, ke/mass=2.745e-01, natoms=86, overlap=7.114e-06, cor=1.287e-01, dt=4.301e-09
+pre-run, step: 7000, ke/mass=9.003e-02, natoms=86, overlap=4.295e-06, cor=1.327e-01, dt=4.435e-09
+pre-run, step: 8000, ke/mass=2.016e-01, natoms=86, overlap=9.279e-06, cor=1.367e-01, dt=4.568e-09
+pre-run, step: 9000, ke/mass=3.638e-01, natoms=86, overlap=3.306e-06, cor=1.407e-01, dt=4.702e-09
+pre-run, step: 10000, ke/mass=1.184e-01, natoms=86, overlap=6.057e-06, cor=1.447e-01, dt=4.836e-09
+pre-run, step: 11000, ke/mass=1.053e-01, natoms=86, overlap=1.370e-05, cor=1.487e-01, dt=4.969e-09
+pre-run, step: 12000, ke/mass=2.175e-02, natoms=86, overlap=6.348e-08, cor=1.527e-01, dt=5.103e-09
+pre-run, step: 13000, ke/mass=2.023e-01, natoms=86, overlap=4.971e-06, cor=1.567e-01, dt=5.237e-09
+pre-run, step: 14000, ke/mass=8.822e-02, natoms=86, overlap=8.991e-07, cor=1.607e-01, dt=5.370e-09
+pre-run, step: 15000, ke/mass=4.305e-03, natoms=86, overlap=7.276e-06, cor=1.647e-01, dt=5.504e-09
+pre-run, step: 16000, ke/mass=7.964e-02, natoms=86, overlap=6.024e-06, cor=1.687e-01, dt=5.638e-09
+pre-run, step: 17000, ke/mass=1.154e-02, natoms=86, overlap=2.915e-06, cor=1.727e-01, dt=5.771e-09
+pre-run, step: 18000, ke/mass=4.522e-02, natoms=86, overlap=3.101e-06, cor=1.767e-01, dt=5.905e-09
+pre-run, step: 19000, ke/mass=1.129e-02, natoms=86, overlap=5.866e-06, cor=1.807e-01, dt=6.039e-09
+pre-run, step: 20000, ke/mass=2.701e-04, natoms=86, overlap=1.076e-06, cor=1.847e-01, dt=6.172e-09
+pre-run, step: 21000, ke/mass=1.649e-02, natoms=86, overlap=4.238e-07, cor=1.887e-01, dt=6.306e-09
+pre-run, step: 22000, ke/mass=2.002e-03, natoms=86, overlap=1.225e-06, cor=1.927e-01, dt=6.440e-09
+pre-run, step: 23000, ke/mass=3.522e-04, natoms=86, overlap=3.610e-06, cor=1.967e-01, dt=6.574e-09
+pre-run, step: 24000, ke/mass=1.217e-02, natoms=86, overlap=1.218e-06, cor=2.007e-01, dt=6.707e-09
+pre-run, step: 25000, ke/mass=8.659e-02, natoms=86, overlap=2.733e-07, cor=2.047e-01, dt=6.841e-09
+pre-run, step: 26000, ke/mass=4.491e-03, natoms=86, overlap=1.801e-06, cor=2.087e-01, dt=6.975e-09
+pre-run, step: 27000, ke/mass=3.879e-04, natoms=86, overlap=3.690e-07, cor=2.127e-01, dt=7.108e-09
+pre-run, step: 28000, ke/mass=1.608e-02, natoms=86, overlap=8.867e-07, cor=2.167e-01, dt=7.242e-09
+pre-run, step: 29000, ke/mass=9.821e-04, natoms=86, overlap=3.144e-06, cor=2.207e-01, dt=7.376e-09
+pre-run, step: 30000, ke/mass=5.688e-02, natoms=86, overlap=2.254e-06, cor=2.247e-01, dt=7.509e-09
+pre-run, step: 31000, ke/mass=2.801e-03, natoms=86, overlap=3.676e-07, cor=2.287e-01, dt=7.643e-09
+pre-run, step: 32000, ke/mass=1.204e-02, natoms=86, overlap=1.075e-06, cor=2.327e-01, dt=7.777e-09
+pre-run, step: 33000, ke/mass=2.911e-03, natoms=86, overlap=9.268e-07, cor=2.367e-01, dt=7.910e-09
+pre-run, step: 34000, ke/mass=1.075e-03, natoms=86, overlap=3.828e-07, cor=2.407e-01, dt=8.044e-09
+pre-run, step: 35000, ke/mass=9.952e-04, natoms=86, overlap=1.037e-06, cor=2.447e-01, dt=8.178e-09
+pre-run, step: 36000, ke/mass=9.892e-05, natoms=86, overlap=4.495e-06, cor=2.487e-01, dt=8.311e-09
+pre-run, step: 37000, ke/mass=1.772e-01, natoms=86, overlap=1.986e-07, cor=2.527e-01, dt=8.445e-09
+pre-run, step: 38000, ke/mass=5.515e-04, natoms=86, overlap=7.293e-07, cor=2.567e-01, dt=8.579e-09
+pre-run, step: 39000, ke/mass=1.595e-04, natoms=86, overlap=9.885e-07, cor=2.607e-01, dt=8.712e-09
+pre-run, step: 40000, ke/mass=3.800e-02, natoms=86, overlap=3.440e-07, cor=2.647e-01, dt=8.846e-09
+pre-run, step: 41000, ke/mass=2.764e-04, natoms=86, overlap=6.594e-07, cor=2.687e-01, dt=8.980e-09
+pre-run, step: 42000, ke/mass=1.797e-04, natoms=86, overlap=3.135e-06, cor=2.727e-01, dt=9.113e-09
+pre-run, step: 43000, ke/mass=8.325e-05, natoms=86, overlap=2.098e-07, cor=2.767e-01, dt=9.247e-09
+pre-run, step: 44000, ke/mass=5.707e-05, natoms=86, overlap=1.697e-06, cor=2.807e-01, dt=9.381e-09
+pre-run, step: 45000, ke/mass=2.581e-02, natoms=86, overlap=8.908e-07, cor=2.847e-01, dt=9.514e-09
+pre-run, step: 46000, ke/mass=2.537e-03, natoms=86, overlap=4.491e-07, cor=2.887e-01, dt=9.648e-09
+pre-run, step: 47000, ke/mass=3.601e-05, natoms=86, overlap=8.667e-07, cor=2.927e-01, dt=9.782e-09
+pre-run, step: 48000, ke/mass=7.189e-06, natoms=86, overlap=6.451e-07, cor=2.967e-01, dt=9.916e-09
+pre-run, step: 49000, ke/mass=9.401e-06, natoms=86, overlap=9.816e-07, cor=3.007e-01, dt=1.005e-08
+pre-run, step: 50000, ke/mass=1.450e-03, natoms=86, overlap=1.251e-06, cor=3.047e-01, dt=1.018e-08
+pre-run, step: 51000, ke/mass=1.751e-05, natoms=86, overlap=6.313e-07, cor=3.087e-01, dt=1.032e-08
+pre-run, step: 52000, ke/mass=1.280e-05, natoms=86, overlap=4.202e-07, cor=3.127e-01, dt=1.045e-08
+pre-run, step: 53000, ke/mass=3.075e-05, natoms=86, overlap=6.973e-07, cor=3.167e-01, dt=1.058e-08
+pre-run, step: 54000, ke/mass=1.811e-03, natoms=86, overlap=5.694e-08, cor=3.207e-01, dt=1.072e-08
+pre-run, step: 55000, ke/mass=8.041e-05, natoms=86, overlap=2.571e-06, cor=3.247e-01, dt=1.085e-08
+pre-run, step: 56000, ke/mass=2.522e-05, natoms=86, overlap=1.146e-06, cor=3.287e-01, dt=1.098e-08
+pre-run, step: 57000, ke/mass=2.878e-05, natoms=86, overlap=3.757e-07, cor=3.327e-01, dt=1.112e-08
+pre-run, step: 58000, ke/mass=3.673e-05, natoms=86, overlap=2.300e-07, cor=3.367e-01, dt=1.125e-08
+pre-run, step: 59000, ke/mass=3.957e-05, natoms=86, overlap=4.552e-07, cor=3.407e-01, dt=1.139e-08
+pre-run, step: 60000, ke/mass=8.429e-03, natoms=86, overlap=1.713e-06, cor=3.447e-01, dt=1.152e-08
+pre-run, step: 61000, ke/mass=1.234e-04, natoms=86, overlap=4.217e-07, cor=3.487e-01, dt=1.165e-08
+pre-run, step: 62000, ke/mass=1.032e-03, natoms=86, overlap=2.295e-07, cor=3.527e-01, dt=1.179e-08
+pre-run, step: 63000, ke/mass=9.535e-04, natoms=86, overlap=1.474e-06, cor=3.567e-01, dt=1.192e-08
+pre-run, step: 64000, ke/mass=8.506e-04, natoms=86, overlap=3.924e-07, cor=3.607e-01, dt=1.205e-08
+pre-run, step: 65000, ke/mass=5.739e-04, natoms=86, overlap=1.215e-07, cor=3.647e-01, dt=1.219e-08
+pre-run, step: 66000, ke/mass=1.684e-02, natoms=86, overlap=1.935e-06, cor=3.687e-01, dt=1.232e-08
+pre-run, step: 67000, ke/mass=4.593e-05, natoms=86, overlap=1.517e-07, cor=3.727e-01, dt=1.246e-08
+pre-run, step: 68000, ke/mass=1.499e-04, natoms=86, overlap=3.835e-07, cor=3.767e-01, dt=1.259e-08
+pre-run, step: 69000, ke/mass=1.911e-05, natoms=86, overlap=1.833e-07, cor=3.807e-01, dt=1.272e-08
+pre-run, step: 70000, ke/mass=1.035e-05, natoms=86, overlap=7.876e-07, cor=3.847e-01, dt=1.286e-08
+pre-run, step: 71000, ke/mass=1.908e-05, natoms=86, overlap=1.049e-06, cor=3.887e-01, dt=1.299e-08
+pre-run, step: 72000, ke/mass=7.255e-04, natoms=86, overlap=9.291e-07, cor=3.927e-01, dt=1.312e-08
+pre-run, step: 73000, ke/mass=5.996e-04, natoms=86, overlap=3.971e-07, cor=3.967e-01, dt=1.326e-08
+pre-run, step: 74000, ke/mass=6.796e-06, natoms=86, overlap=6.261e-07, cor=4.007e-01, dt=1.339e-08
+pre-run, step: 75000, ke/mass=4.723e-04, natoms=86, overlap=5.213e-08, cor=4.047e-01, dt=1.352e-08
+pre-run, step: 76000, ke/mass=1.999e-04, natoms=86, overlap=6.182e-08, cor=4.087e-01, dt=1.366e-08
+pre-run, step: 77000, ke/mass=1.405e-03, natoms=86, overlap=6.220e-07, cor=4.127e-01, dt=1.379e-08
+pre-run, step: 78000, ke/mass=1.291e-04, natoms=86, overlap=2.783e-07, cor=4.167e-01, dt=1.393e-08
+pre-run, step: 79000, ke/mass=2.837e-05, natoms=86, overlap=7.451e-07, cor=4.207e-01, dt=1.406e-08
+pre-run, step: 80000, ke/mass=3.914e-04, natoms=86, overlap=2.121e-07, cor=4.247e-01, dt=1.419e-08
+pre-run, step: 81000, ke/mass=2.844e-04, natoms=86, overlap=5.693e-08, cor=4.287e-01, dt=1.433e-08
+pre-run, step: 82000, ke/mass=4.490e-05, natoms=86, overlap=1.830e-06, cor=4.327e-01, dt=1.446e-08
+pre-run, step: 83000, ke/mass=2.247e-02, natoms=86, overlap=7.803e-07, cor=4.367e-01, dt=1.459e-08
+pre-run, step: 84000, ke/mass=3.138e-03, natoms=86, overlap=2.046e-06, cor=4.407e-01, dt=1.473e-08
+pre-run, step: 85000, ke/mass=2.326e-04, natoms=86, overlap=7.033e-07, cor=4.447e-01, dt=1.486e-08
+pre-run, step: 86000, ke/mass=7.237e-03, natoms=86, overlap=2.312e-07, cor=4.487e-01, dt=1.500e-08
+pre-run, step: 87000, ke/mass=5.160e-05, natoms=86, overlap=1.224e-06, cor=4.527e-01, dt=1.513e-08
+pre-run, step: 88000, ke/mass=2.852e-05, natoms=86, overlap=2.593e-06, cor=4.567e-01, dt=1.526e-08
+pre-run, step: 89000, ke/mass=7.532e-05, natoms=86, overlap=1.205e-06, cor=4.607e-01, dt=1.540e-08
+pre-run, step: 90000, ke/mass=9.689e-04, natoms=86, overlap=1.093e-06, cor=4.647e-01, dt=1.553e-08
+pre-run, step: 91000, ke/mass=2.329e-03, natoms=86, overlap=1.062e-06, cor=4.687e-01, dt=1.566e-08
+pre-run, step: 92000, ke/mass=1.935e-04, natoms=86, overlap=7.373e-07, cor=4.727e-01, dt=1.580e-08
+pre-run, step: 93000, ke/mass=7.701e-05, natoms=86, overlap=6.038e-07, cor=4.767e-01, dt=1.593e-08
+pre-run, step: 94000, ke/mass=1.142e-04, natoms=86, overlap=2.543e-06, cor=4.807e-01, dt=1.606e-08
+pre-run, step: 95000, ke/mass=1.320e-05, natoms=86, overlap=2.226e-07, cor=4.847e-01, dt=1.620e-08
+pre-run, step: 96000, ke/mass=3.102e-05, natoms=86, overlap=1.058e-07, cor=4.887e-01, dt=1.633e-08
+pre-run, step: 97000, ke/mass=2.005e-05, natoms=86, overlap=1.110e-07, cor=4.927e-01, dt=1.647e-08
+pre-run, step: 98000, ke/mass=1.284e-05, natoms=86, overlap=4.689e-07, cor=4.967e-01, dt=1.660e-08
+pre-run, step: 99000, ke/mass=2.393e-03, natoms=86, overlap=1.018e-06, cor=5.007e-01, dt=1.673e-08
+pre-run, step: 100000, ke/mass=4.992e-04, natoms=86, overlap=4.548e-07, cor=5.047e-01, dt=1.687e-08
+  100001 
+Loop time of 22.4696 on 6 procs for 100000 steps with 86 atoms, finish time Thu Sep 14 12:18:56 2023
+
+
+Pair  time (%) = 8.3432 (37.131)
+Neigh time (%) = 3.2772 (14.585)
+Comm  time (%) = 4.1149 (18.3132)
+Outpt time (%) = 0.213073 (0.948273)
+Other time (%) = 6.52125 (29.0225)
+
+Nlocal:    14.3333 ave 19 max 10 min
+Histogram: 1 0 1 0 1 1 1 0 0 1
+Nghost:    772.833 ave 788 max 755 min
+Histogram: 1 1 0 0 1 0 0 1 0 2
+Neighs:    3688 ave 4823 max 2566 min
+Histogram: 1 0 1 0 0 2 1 0 0 1
+
+Total # of neighbors = 22128
+Ave neighs/atom = 257.302
+Neighbor list builds = 100000
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck2
+
+
+
+# Set the top/bottom boundaries as LE
+timestep          3.3420e-07
+
+
+run 10000
+Setting up run at Thu Sep 14 12:18:56 2023
+
+Memory usage per processor = 23.885 Mbytes
+    Step 
+  100001 
+  110001 
+Loop time of 2.14359 on 6 procs for 10000 steps with 86 atoms, finish time Thu Sep 14 12:18:58 2023
+
+
+Pair  time (%) = 0.821406 (38.3192)
+Neigh time (%) = 0.340864 (15.9015)
+Comm  time (%) = 0.853046 (39.7952)
+Outpt time (%) = 0.0219858 (1.02565)
+Other time (%) = 0.106287 (4.95837)
+
+Nlocal:    14.3333 ave 17 max 11 min
+Histogram: 1 1 0 0 0 0 2 0 1 1
+Nghost:    794.167 ave 802 max 787 min
+Histogram: 1 0 1 1 1 0 0 0 0 2
+Neighs:    3668.5 ave 4318 max 2818 min
+Histogram: 1 1 0 0 0 0 1 1 1 1
+
+Total # of neighbors = 22011
+Ave neighs/atom = 255.942
+Neighbor list builds = 10000
+Dangerous builds = 0
+
+
+fix               leboundary all lebc 100.0 true gtemp 1.00e-06
+
+# Run desired simulation
+run               15000000
+Setting up run at Thu Sep 14 12:18:58 2023
+
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.

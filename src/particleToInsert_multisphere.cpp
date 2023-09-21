@@ -211,29 +211,15 @@ int ParticleToInsertMultisphere::insert()
         //if (domain->is_in_extended_subdomain(xcm_ins))
         //{
             inserted++;
-
-	    if(atom_type_vector_flag){
-              atom->avec->create_atom(atom_type_vector[i],x_ins[i]);
-	    }
-	    else
-              atom->avec->create_atom(atom_type,x_ins[i]);
+            atom->avec->create_atom(atom_type,x_ins[i]);
             
             int m = atom->nlocal - 1;
             atom->mask[m] = 1 | groupbit;
             atom->radius[m] = radius_ins[i];
-	    if(atom_type_vector_flag){
-	       atom->density[m] = ndensity_ins[i];
-               atom->rmass[m] = volume_ins*ndensity_ins[i];
+            atom->density[m] = density_ins;
 
-              if (atom_type_vector[i] == 2) {
-                atom->type[m] = 2;
-              }
-	    }
-	    else{
-              atom->density[m] = density_ins;
+            atom->rmass[m] = mass_ins; 
 
-              atom->rmass[m] = volume_ins*density_ins;
-            }
             vectorZeroize3D(atom->v[m]);
             vectorZeroize3D(atom->omega[m]);
             vectorZeroize3D(atom->f[m]);

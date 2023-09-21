@@ -1,0 +1,549 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-06-18:40:11 by liz.suehr, git commit 20bafd84e54ba1e14cc5c444673f017ba084bbe9)
+communicate       single vel yes
+units             si
+log               log.shear.multisphere43_MPI321_1.liggghts
+atom_modify       map array
+
+processors        3 2 1
+
+# Set domain
+region            domain block 0.0 5.04000e-03 0.0 5.04000e-03 0.0 2.52000e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00504 0.00504 0.00252)
+  3 by 2 by 1 MPI processor grid
+
+# Set neighbor and list options
+neighbor          1.721e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 43 ntry 10000000 spheres file multisphere43.txt scale 1.0 type 1
+Calculating the properties of the given template.
+   Depending on ntry, this may take a while...
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=2.782000e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=2.782000e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 3 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.5
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Fri Sep  8 10:30:12 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.46764 Mbytes
+    Step 
+       0 
+insertion: proc 5 at 0 %
+insertion: proc 0 at 0 %
+insertion: proc 4 at 0 %
+insertion: proc 1 at 0 %
+insertion: proc 2 at 0 %
+insertion: proc 3 at 0 %
+insertion: proc 4 at 10 %
+insertion: proc 1 at 10 %
+insertion: proc 5 at 10 %
+insertion: proc 0 at 10 %
+insertion: proc 3 at 10 %
+insertion: proc 2 at 10 %
+insertion: proc 4 at 20 %
+insertion: proc 5 at 20 %
+insertion: proc 0 at 20 %
+insertion: proc 1 at 20 %
+insertion: proc 2 at 20 %
+insertion: proc 3 at 20 %
+insertion: proc 1 at 30 %
+insertion: proc 4 at 30 %
+insertion: proc 5 at 30 %
+insertion: proc 0 at 30 %
+insertion: proc 2 at 30 %
+insertion: proc 3 at 30 %
+insertion: proc 0 at 40 %
+insertion: proc 0 at 50 %
+insertion: proc 0 at 60 %
+insertion: proc 0 at 70 %
+insertion: proc 0 at 80 %
+insertion: proc 0 at 90 %
+insertion: proc 0 at 100 %
+insertion: proc 1 at 40 %
+insertion: proc 1 at 50 %
+insertion: proc 1 at 60 %
+insertion: proc 1 at 70 %
+insertion: proc 1 at 80 %
+insertion: proc 1 at 90 %
+insertion: proc 4 at 40 %
+insertion: proc 1 at 100 %
+insertion: proc 5 at 40 %
+insertion: proc 4 at 50 %
+insertion: proc 2 at 40 %
+insertion: proc 5 at 50 %
+insertion: proc 5 at 60 %
+insertion: proc 4 at 60 %
+insertion: proc 4 at 70 %
+insertion: proc 2 at 50 %
+insertion: proc 2 at 60 %
+insertion: proc 5 at 70 %
+insertion: proc 5 at 80 %
+insertion: proc 4 at 80 %
+insertion: proc 2 at 70 %
+insertion: proc 5 at 90 %
+insertion: proc 4 at 90 %
+insertion: proc 4 at 100 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 2 at 100 %
+insertion: proc 3 at 40 %
+insertion: proc 3 at 50 %
+insertion: proc 3 at 60 %
+insertion: proc 3 at 70 %
+insertion: proc 3 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 3 at 100 %
+INFO: Particle insertion ins1: inserted 2971 particle templates (mass 8.001939e-05) at step 1
+ - a total of 2971 particle templates (mass 8.001939e-05) inserted so far.
+       1 
+Loop time of 0.544744 on 6 procs for 1 steps with 127753 atoms, finish time Fri Sep  8 10:30:16 2023
+
+
+Pair  time (%) = 0.119595 (21.9544)
+Neigh time (%) = 0.33452 (61.4087)
+Comm  time (%) = 0.00979494 (1.79808)
+Outpt time (%) = 0.0425102 (7.80369)
+Other time (%) = 0.0383234 (7.03512)
+
+Nlocal:    21292.2 ave 22514 max 20600 min
+Histogram: 3 1 0 0 0 0 0 0 0 2
+Nghost:    26630.2 ave 28004 max 25255 min
+Histogram: 2 1 0 0 0 0 0 1 0 2
+Neighs:    4.60014e+06 ave 5.04621e+06 max 4.16022e+06 min
+Histogram: 1 1 0 1 0 1 0 0 1 1
+
+Total # of neighbors = 27600830
+Ave neighs/atom = 216.048
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+127753 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 5.35e-06 reset 1000 threshold 1.00e-06 start_dt 2.616e-11 end_dt 1.570e-08
+run               100000
+Setting up run at Fri Sep  8 10:30:16 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 197.352 Mbytes
+    Step 
+       1 
+pre-run, step: 1000, ke/mass=1.561e+04, natoms=127753, overlap=5.700e-03, cor=1.047e-01, dt=6.238e-11 nbody: 2971 
+pre-run, step: 2000, ke/mass=1.455e+04, natoms=127753, overlap=1.395e-02, cor=1.047e-01, dt=1.488e-10 nbody: 2971 
+pre-run, step: 3000, ke/mass=1.351e+04, natoms=127753, overlap=1.730e-02, cor=1.047e-01, dt=3.547e-10 nbody: 2971 
+pre-run, step: 4000, ke/mass=1.254e+04, natoms=127753, overlap=1.538e-02, cor=1.047e-01, dt=8.460e-10 nbody: 2971 
+pre-run, step: 5000, ke/mass=1.160e+04, natoms=127753, overlap=1.976e-02, cor=1.047e-01, dt=2.017e-09 nbody: 2971 
+pre-run, step: 6000, ke/mass=1.072e+04, natoms=127753, overlap=5.843e-03, cor=1.047e-01, dt=4.811e-09 nbody: 2971 
+pre-run, step: 7000, ke/mass=9.890e+03, natoms=127753, overlap=7.699e-03, cor=1.047e-01, dt=1.147e-08 nbody: 2971 
+pre-run, step: 8000, ke/mass=9.131e+03, natoms=127753, overlap=3.039e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 9000, ke/mass=8.422e+03, natoms=127753, overlap=1.260e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 10000, ke/mass=7.770e+03, natoms=127753, overlap=9.019e-03, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 11000, ke/mass=7.169e+03, natoms=127753, overlap=2.096e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 12000, ke/mass=6.627e+03, natoms=127753, overlap=2.459e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 13000, ke/mass=6.142e+03, natoms=127753, overlap=3.157e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 14000, ke/mass=5.703e+03, natoms=127753, overlap=2.509e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 15000, ke/mass=5.305e+03, natoms=127753, overlap=5.192e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 16000, ke/mass=4.943e+03, natoms=127753, overlap=8.229e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 17000, ke/mass=4.613e+03, natoms=127753, overlap=1.113e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 18000, ke/mass=4.311e+03, natoms=127753, overlap=1.414e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 19000, ke/mass=4.030e+03, natoms=127753, overlap=1.711e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 20000, ke/mass=3.771e+03, natoms=127753, overlap=1.997e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 21000, ke/mass=3.532e+03, natoms=127753, overlap=2.272e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 22000, ke/mass=3.313e+03, natoms=127753, overlap=2.535e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 23000, ke/mass=3.111e+03, natoms=127753, overlap=2.785e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 24000, ke/mass=2.924e+03, natoms=127753, overlap=3.024e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 25000, ke/mass=2.750e+03, natoms=127753, overlap=3.255e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 26000, ke/mass=2.588e+03, natoms=127753, overlap=3.476e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 27000, ke/mass=2.433e+03, natoms=127753, overlap=3.691e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 28000, ke/mass=2.290e+03, natoms=127753, overlap=3.896e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 29000, ke/mass=2.156e+03, natoms=127753, overlap=4.094e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 30000, ke/mass=2.029e+03, natoms=127753, overlap=4.287e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 31000, ke/mass=1.911e+03, natoms=127753, overlap=4.473e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 32000, ke/mass=1.803e+03, natoms=127753, overlap=4.654e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 33000, ke/mass=1.701e+03, natoms=127753, overlap=4.827e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 34000, ke/mass=1.607e+03, natoms=127753, overlap=4.997e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2971 
+pre-run, step: 35000, ke/mass=1.519e+03, natoms=127753, overlap=5.160e-01, cor=1.062e-01, dt=1.667e-08 nbody: 2971 
+pre-run, step: 36000, ke/mass=1.438e+03, natoms=127753, overlap=5.316e-01, cor=1.081e-01, dt=1.698e-08 nbody: 2971 
+pre-run, step: 37000, ke/mass=1.362e+03, natoms=127753, overlap=5.467e-01, cor=1.106e-01, dt=1.736e-08 nbody: 2971 
+pre-run, step: 38000, ke/mass=1.291e+03, natoms=127753, overlap=5.614e-01, cor=1.136e-01, dt=1.784e-08 nbody: 2971 
+pre-run, step: 39000, ke/mass=1.225e+03, natoms=127753, overlap=5.755e-01, cor=1.173e-01, dt=1.842e-08 nbody: 2971 
+pre-run, step: 40000, ke/mass=1.162e+03, natoms=127753, overlap=5.890e-01, cor=1.219e-01, dt=1.913e-08 nbody: 2971 
+pre-run, step: 41000, ke/mass=1.102e+03, natoms=127753, overlap=6.020e-01, cor=1.273e-01, dt=1.998e-08 nbody: 2971 
+pre-run, step: 42000, ke/mass=1.046e+03, natoms=127753, overlap=6.145e-01, cor=1.337e-01, dt=2.100e-08 nbody: 2971 
+pre-run, step: 43000, ke/mass=9.943e+02, natoms=127753, overlap=6.267e-01, cor=1.414e-01, dt=2.220e-08 nbody: 2971 
+pre-run, step: 44000, ke/mass=9.447e+02, natoms=127753, overlap=6.384e-01, cor=1.502e-01, dt=2.359e-08 nbody: 2971 
+pre-run, step: 45000, ke/mass=8.979e+02, natoms=127753, overlap=6.497e-01, cor=1.605e-01, dt=2.520e-08 nbody: 2971 
+pre-run, step: 46000, ke/mass=8.547e+02, natoms=127753, overlap=6.605e-01, cor=1.721e-01, dt=2.702e-08 nbody: 2971 
+pre-run, step: 47000, ke/mass=8.142e+02, natoms=127753, overlap=6.688e-01, cor=1.824e-01, dt=2.863e-08 nbody: 2971 
+pre-run, step: 48000, ke/mass=7.760e+02, natoms=127753, overlap=6.760e-01, cor=1.922e-01, dt=3.018e-08 nbody: 2971 
+pre-run, step: 49000, ke/mass=7.399e+02, natoms=127753, overlap=6.828e-01, cor=2.025e-01, dt=3.180e-08 nbody: 2971 
+pre-run, step: 50000, ke/mass=7.058e+02, natoms=127753, overlap=6.892e-01, cor=2.132e-01, dt=3.347e-08 nbody: 2971 
+pre-run, step: 51000, ke/mass=6.737e+02, natoms=127753, overlap=6.954e-01, cor=2.243e-01, dt=3.522e-08 nbody: 2971 
+pre-run, step: 52000, ke/mass=6.433e+02, natoms=127753, overlap=7.013e-01, cor=2.357e-01, dt=3.701e-08 nbody: 2971 
+pre-run, step: 53000, ke/mass=6.146e+02, natoms=127753, overlap=7.069e-01, cor=2.475e-01, dt=3.886e-08 nbody: 2971 
+pre-run, step: 54000, ke/mass=5.875e+02, natoms=127753, overlap=7.123e-01, cor=2.595e-01, dt=4.074e-08 nbody: 2971 
+pre-run, step: 55000, ke/mass=5.624e+02, natoms=127753, overlap=7.175e-01, cor=2.718e-01, dt=4.267e-08 nbody: 2971 
+pre-run, step: 56000, ke/mass=5.384e+02, natoms=127753, overlap=7.224e-01, cor=2.842e-01, dt=4.462e-08 nbody: 2971 
+pre-run, step: 57000, ke/mass=5.152e+02, natoms=127753, overlap=7.272e-01, cor=2.967e-01, dt=4.658e-08 nbody: 2971 
+pre-run, step: 58000, ke/mass=4.933e+02, natoms=127753, overlap=7.318e-01, cor=3.094e-01, dt=4.857e-08 nbody: 2971 
+pre-run, step: 59000, ke/mass=4.725e+02, natoms=127753, overlap=7.344e-01, cor=3.168e-01, dt=4.974e-08 nbody: 2971 
+pre-run, step: 60000, ke/mass=4.531e+02, natoms=127753, overlap=7.361e-01, cor=3.216e-01, dt=5.049e-08 nbody: 2971 
+pre-run, step: 61000, ke/mass=4.345e+02, natoms=127753, overlap=7.377e-01, cor=3.263e-01, dt=5.123e-08 nbody: 2971 
+pre-run, step: 62000, ke/mass=4.168e+02, natoms=127753, overlap=7.393e-01, cor=3.310e-01, dt=5.197e-08 nbody: 2971 
+pre-run, step: 63000, ke/mass=4.001e+02, natoms=127753, overlap=7.408e-01, cor=3.358e-01, dt=5.272e-08 nbody: 2971 
+pre-run, step: 64000, ke/mass=3.841e+02, natoms=127753, overlap=7.424e-01, cor=3.406e-01, dt=5.348e-08 nbody: 2971 
+pre-run, step: 65000, ke/mass=3.688e+02, natoms=127753, overlap=7.440e-01, cor=3.455e-01, dt=5.424e-08 nbody: 2971 
+pre-run, step: 66000, ke/mass=3.543e+02, natoms=127753, overlap=7.455e-01, cor=3.504e-01, dt=5.501e-08 nbody: 2971 
+pre-run, step: 67000, ke/mass=3.407e+02, natoms=127753, overlap=7.471e-01, cor=3.553e-01, dt=5.578e-08 nbody: 2971 
+pre-run, step: 68000, ke/mass=3.279e+02, natoms=127753, overlap=7.486e-01, cor=3.603e-01, dt=5.656e-08 nbody: 2971 
+pre-run, step: 69000, ke/mass=3.155e+02, natoms=127753, overlap=7.502e-01, cor=3.654e-01, dt=5.736e-08 nbody: 2971 
+pre-run, step: 70000, ke/mass=3.037e+02, natoms=127753, overlap=7.518e-01, cor=3.706e-01, dt=5.819e-08 nbody: 2971 
+pre-run, step: 71000, ke/mass=2.926e+02, natoms=127753, overlap=7.534e-01, cor=3.759e-01, dt=5.902e-08 nbody: 2971 
+pre-run, step: 72000, ke/mass=2.819e+02, natoms=127753, overlap=7.550e-01, cor=3.813e-01, dt=5.987e-08 nbody: 2971 
+pre-run, step: 73000, ke/mass=2.717e+02, natoms=127753, overlap=7.566e-01, cor=3.868e-01, dt=6.073e-08 nbody: 2971 
+pre-run, step: 74000, ke/mass=2.621e+02, natoms=127753, overlap=7.582e-01, cor=3.924e-01, dt=6.162e-08 nbody: 2971 
+pre-run, step: 75000, ke/mass=2.529e+02, natoms=127753, overlap=7.598e-01, cor=3.981e-01, dt=6.250e-08 nbody: 2971 
+pre-run, step: 76000, ke/mass=2.441e+02, natoms=127753, overlap=7.614e-01, cor=4.036e-01, dt=6.338e-08 nbody: 2971 
+pre-run, step: 77000, ke/mass=2.356e+02, natoms=127753, overlap=7.630e-01, cor=4.092e-01, dt=6.425e-08 nbody: 2971 
+pre-run, step: 78000, ke/mass=2.275e+02, natoms=127753, overlap=7.646e-01, cor=4.148e-01, dt=6.513e-08 nbody: 2971 
+pre-run, step: 79000, ke/mass=2.198e+02, natoms=127753, overlap=7.662e-01, cor=4.205e-01, dt=6.602e-08 nbody: 2971 
+pre-run, step: 80000, ke/mass=2.124e+02, natoms=127753, overlap=7.677e-01, cor=4.261e-01, dt=6.691e-08 nbody: 2971 
+pre-run, step: 81000, ke/mass=2.054e+02, natoms=127753, overlap=7.693e-01, cor=4.318e-01, dt=6.779e-08 nbody: 2971 
+pre-run, step: 82000, ke/mass=1.987e+02, natoms=127753, overlap=7.708e-01, cor=4.374e-01, dt=6.867e-08 nbody: 2971 
+pre-run, step: 83000, ke/mass=1.922e+02, natoms=127753, overlap=7.723e-01, cor=4.430e-01, dt=6.956e-08 nbody: 2971 
+pre-run, step: 84000, ke/mass=1.861e+02, natoms=127753, overlap=7.738e-01, cor=4.487e-01, dt=7.044e-08 nbody: 2971 
+pre-run, step: 85000, ke/mass=1.802e+02, natoms=127753, overlap=7.753e-01, cor=4.543e-01, dt=7.132e-08 nbody: 2971 
+pre-run, step: 86000, ke/mass=1.746e+02, natoms=127753, overlap=7.768e-01, cor=4.598e-01, dt=7.220e-08 nbody: 2971 
+pre-run, step: 87000, ke/mass=1.692e+02, natoms=127753, overlap=7.783e-01, cor=4.654e-01, dt=7.307e-08 nbody: 2971 
+pre-run, step: 88000, ke/mass=1.641e+02, natoms=127753, overlap=7.794e-01, cor=4.697e-01, dt=7.374e-08 nbody: 2971 
+pre-run, step: 89000, ke/mass=1.591e+02, natoms=127753, overlap=7.802e-01, cor=4.727e-01, dt=7.421e-08 nbody: 2971 
+pre-run, step: 90000, ke/mass=1.544e+02, natoms=127753, overlap=7.809e-01, cor=4.757e-01, dt=7.468e-08 nbody: 2971 
+pre-run, step: 91000, ke/mass=1.498e+02, natoms=127753, overlap=7.817e-01, cor=4.786e-01, dt=7.514e-08 nbody: 2971 
+pre-run, step: 92000, ke/mass=1.454e+02, natoms=127753, overlap=7.825e-01, cor=4.815e-01, dt=7.559e-08 nbody: 2971 
+pre-run, step: 93000, ke/mass=1.411e+02, natoms=127753, overlap=7.832e-01, cor=4.843e-01, dt=7.604e-08 nbody: 2971 
+pre-run, step: 94000, ke/mass=1.371e+02, natoms=127753, overlap=7.839e-01, cor=4.871e-01, dt=7.648e-08 nbody: 2971 
+pre-run, step: 95000, ke/mass=1.333e+02, natoms=127753, overlap=7.847e-01, cor=4.899e-01, dt=7.692e-08 nbody: 2971 
+pre-run, step: 96000, ke/mass=1.295e+02, natoms=127753, overlap=7.854e-01, cor=4.927e-01, dt=7.735e-08 nbody: 2971 
+pre-run, step: 97000, ke/mass=1.260e+02, natoms=127753, overlap=7.861e-01, cor=4.954e-01, dt=7.777e-08 nbody: 2971 
+pre-run, step: 98000, ke/mass=1.225e+02, natoms=127753, overlap=7.867e-01, cor=4.980e-01, dt=7.819e-08 nbody: 2971 
+pre-run, step: 99000, ke/mass=1.193e+02, natoms=127753, overlap=7.874e-01, cor=5.007e-01, dt=7.861e-08 nbody: 2971 
+pre-run, step: 100000, ke/mass=1.161e+02, natoms=127753, overlap=7.881e-01, cor=5.033e-01, dt=7.902e-08 nbody: 2971 
+  100001 
+Loop time of 38237.7 on 6 procs for 100000 steps with 127753 atoms, finish time Fri Sep  8 21:07:34 2023
+
+
+Pair  time (%) = 7646.71 (19.9979)
+Neigh time (%) = 24368 (63.7278)
+Comm  time (%) = 318.925 (0.834059)
+Outpt time (%) = 0.0239892 (6.27371e-05)
+Other time (%) = 5903.99 (15.4402)
+
+Nlocal:    21292.2 ave 22382 max 20556 min
+Histogram: 2 1 1 0 0 0 0 0 0 2
+Nghost:    27873 ave 29835 max 26061 min
+Histogram: 1 1 1 0 0 1 0 0 0 2
+Neighs:    4.47138e+06 ave 4.92835e+06 max 4.22491e+06 min
+Histogram: 3 0 1 0 0 0 0 1 0 1
+
+Total # of neighbors = 26828302
+Ave neighs/atom = 210.001
+Neighbor list builds = 100000
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          1.5697e-09
+
+fix               leboundary all lebc 100.0 true gtemp 1.00e-06
+
+# Run desired simulation
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Fri Sep  8 21:07:34 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:   10:34:38
+ Wall time:   10:37:27
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Fri Sep  8 21:07:34 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 200.748 Mbytes
+    Step 
+  100001 
+102501 2500 body_count: 2971 atom_count: 127753 3.148e+06 3.183e+06 4.469e+04 2.812e+07 2.873e+07 2.036e+05
+105001 5000 body_count: 2971 atom_count: 127753 2.171e+06 2.182e+06 3.592e+04 1.851e+07 1.892e+07 8.034e+04
+107501 7500 body_count: 2971 atom_count: 127753 1.655e+06 1.665e+06 2.057e+04 1.403e+07 1.431e+07 6.754e+04
+  110001 
+110001 10000 body_count: 2971 atom_count: 127753 1.339e+06 1.350e+06 1.274e+04 1.134e+07 1.156e+07 4.330e+04
+Loop time of 3969.1 on 6 procs for 10000 steps with 127753 atoms, finish time Fri Sep  8 22:13:44 2023
+
+
+Pair  time (%) = 722.197 (18.1955)
+Neigh time (%) = 2712.36 (68.337)
+Comm  time (%) = 63.6844 (1.60451)
+Outpt time (%) = 0.00541982 (0.00013655)
+Other time (%) = 470.851 (11.8629)
+
+Nlocal:    21292.2 ave 21443 max 21106 min
+Histogram: 1 0 1 0 0 0 2 1 0 1
+Nghost:    41496.2 ave 45593 max 37244 min
+Histogram: 2 0 0 0 1 1 0 0 0 2
+Neighs:    5.06967e+06 ave 5.21816e+06 max 4.9374e+06 min
+Histogram: 2 0 0 0 1 0 1 1 0 1
+
+Total # of neighbors = 30418034
+Ave neighs/atom = 238.1
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Fri Sep  8 22:13:44 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:   11:40:36
+ Wall time:   11:43:36
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Fri Sep  8 22:13:44 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 213.007 Mbytes
+    Step 
+  110001 
+112501 12500 body_count: 2971 atom_count: 127753 1.078e+06 1.087e+06 1.006e+04 9.181e+06 9.359e+06 3.434e+04
+115001 15000 body_count: 2971 atom_count: 127753 9.043e+05 9.118e+05 8.346e+03 7.716e+06 7.863e+06 2.741e+04
+117501 17500 body_count: 2971 atom_count: 127753 7.796e+05 7.860e+05 7.176e+03 6.665e+06 6.791e+06 2.258e+04
+  120001 
+120001 20000 body_count: 2971 atom_count: 127753 6.858e+05 6.914e+05 6.333e+03 5.873e+06 5.983e+06 1.903e+04
+Loop time of 3717.13 on 6 procs for 10000 steps with 127753 atoms, finish time Fri Sep  8 23:15:41 2023
+
+
+Pair  time (%) = 703.659 (18.9302)
+Neigh time (%) = 2627.27 (70.6801)
+Comm  time (%) = 57.3294 (1.5423)
+Outpt time (%) = 0.0103986 (0.000279749)
+Other time (%) = 328.859 (8.84712)
+
+Nlocal:    21292.2 ave 21664 max 20992 min
+Histogram: 2 0 1 0 0 1 0 0 1 1
+Nghost:    41526.8 ave 45820 max 37315 min
+Histogram: 2 0 0 0 2 0 0 0 0 2
+Neighs:    5.1038e+06 ave 5.36852e+06 max 4.9191e+06 min
+Histogram: 2 0 1 1 0 0 0 0 1 1
+
+Total # of neighbors = 30622819
+Ave neighs/atom = 239.703
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Fri Sep  8 23:15:41 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:   12:42:24
+ Wall time:   12:45:34
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Fri Sep  8 23:15:41 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 213.014 Mbytes
+    Step 
+  120001 
+122501 22500 body_count: 2971 atom_count: 127753 6.099e+05 6.149e+05 5.643e+03 5.228e+06 5.325e+06 1.695e+04
+125001 25000 body_count: 2971 atom_count: 127753 5.492e+05 5.537e+05 5.087e+03 4.710e+06 4.797e+06 1.512e+04
+127501 27500 body_count: 2971 atom_count: 127753 4.996e+05 5.037e+05 4.635e+03 4.287e+06 4.366e+06 1.380e+04
+  130001 
+130001 30000 body_count: 2971 atom_count: 127753 4.583e+05 4.622e+05 4.251e+03 3.934e+06 4.007e+06 1.272e+04
+Loop time of 3729.11 on 6 procs for 10000 steps with 127753 atoms, finish time Sat Sep  9 00:17:51 2023
+
+
+Pair  time (%) = 698.741 (18.7375)
+Neigh time (%) = 2610.43 (70.0016)
+Comm  time (%) = 57.0899 (1.53093)
+Outpt time (%) = 0.0100891 (0.00027055)
+Other time (%) = 362.83 (9.72968)
+
+Nlocal:    21292.2 ave 21663 max 21048 min
+Histogram: 2 0 1 1 0 0 0 1 0 1
+Nghost:    41623.2 ave 45879 max 37574 min
+Histogram: 2 0 0 0 2 0 0 0 0 2
+Neighs:    5.1365e+06 ave 5.39193e+06 max 4.9227e+06 min
+Histogram: 1 1 0 2 0 0 0 0 1 1
+
+Total # of neighbors = 30819000
+Ave neighs/atom = 241.239
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Sat Sep  9 00:17:51 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:   13:44:23
+ Wall time:   13:47:43
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Sat Sep  9 00:17:51 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 213.014 Mbytes
+    Step 
+  130001 
+132501 32500 body_count: 2971 atom_count: 127753 4.231e+05 4.266e+05 3.925e+03 3.633e+06 3.700e+06 1.172e+04
+135001 35000 body_count: 2971 atom_count: 127753 3.930e+05 3.962e+05 3.645e+03 3.374e+06 3.437e+06 1.089e+04
+137501 37500 body_count: 2971 atom_count: 127753 3.668e+05 3.699e+05 3.402e+03 3.150e+06 3.209e+06 1.013e+04
+  140001 
+140001 40000 body_count: 2971 atom_count: 127753 3.440e+05 3.468e+05 3.187e+03 2.955e+06 3.009e+06 9.429e+03
+Loop time of 3728.21 on 6 procs for 10000 steps with 127753 atoms, finish time Sat Sep  9 01:19:59 2023
+
+
+Pair  time (%) = 698.552 (18.7369)
+Neigh time (%) = 2610.04 (70.0078)
+Comm  time (%) = 57.0139 (1.52926)
+Outpt time (%) = 0.0102672 (0.000275393)
+Other time (%) = 362.595 (9.72572)
+
+Nlocal:    21292.2 ave 21660 max 21044 min
+Histogram: 2 0 1 1 0 0 0 0 1 1
+Nghost:    41635.2 ave 45960 max 37561 min
+Histogram: 2 0 0 0 2 0 0 0 0 2
+Neighs:    5.14686e+06 ave 5.40026e+06 max 4.94262e+06 min
+Histogram: 2 0 0 2 0 0 0 0 1 1
+
+Total # of neighbors = 30881142
+Ave neighs/atom = 241.725
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Sat Sep  9 01:19:59 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:   14:46:22
+ Wall time:   14:49:52
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Sat Sep  9 01:19:59 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 213.014 Mbytes
+    Step 
+  140001 
+142501 42500 body_count: 2971 atom_count: 127753 3.238e+05 3.265e+05 2.999e+03 2.781e+06 2.833e+06 8.862e+03
+145001 45000 body_count: 2971 atom_count: 127753 3.058e+05 3.083e+05 2.832e+03 2.627e+06 2.676e+06 8.360e+03
+147501 47500 body_count: 2971 atom_count: 127753 2.897e+05 2.921e+05 2.681e+03 2.489e+06 2.535e+06 7.904e+03
+  150001 
+150001 50000 body_count: 2971 atom_count: 127753 2.753e+05 2.775e+05 2.546e+03 2.365e+06 2.409e+06 7.496e+03
+150001 2.753e+05 2.775e+05 2.546e+03 2.365e+06 2.409e+06 7.496e+03
+Loop time of 3718.5 on 6 procs for 10000 steps with 127753 atoms, finish time Sat Sep  9 02:21:58 2023
+
+
+Pair  time (%) = 697.861 (18.7673)
+Neigh time (%) = 2608.05 (70.1373)
+Comm  time (%) = 57.1203 (1.53611)
+Outpt time (%) = 0.00994461 (0.000267437)
+Other time (%) = 355.453 (9.55906)
+
+Nlocal:    21292.2 ave 21646 max 21022 min
+Histogram: 2 0 1 0 1 0 0 1 0 1
+Nghost:    41607 ave 45959 max 37542 min
+Histogram: 2 0 0 0 2 0 0 0 0 2
+Neighs:    5.15305e+06 ave 5.41028e+06 max 4.9582e+06 min
+Histogram: 2 0 0 2 0 0 0 0 1 1
+
+Total # of neighbors = 30918300
+Ave neighs/atom = 242.016
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Sat Sep  9 02:21:58 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:   15:48:11
+ Wall time:   15:51:50
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Sat Sep  9 02:21:58 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 213.014 Mbytes
+    Step 
+  150001 
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.

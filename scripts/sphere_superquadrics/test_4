@@ -1,0 +1,399 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-14-12:09:13 by liz.suehr, git commit 357ff034cff53320eeedb4a37627805705ae7ff9)
+communicate       single vel yes
+units             si
+log               log.shear.cyl6_4.liggghts
+atom_modify       map array
+
+processors        3 3 2
+
+# Set domain
+region            domain block 0.0 6.49340e-04 0.0 6.49340e-04 0.0 3.24670e-04 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00064934 0.00064934 0.00032467)
+  3 by 3 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          6.633e-05 bin
+neigh_modify      every 1 delay 0 check no
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history surface superquadric
+WARNING: 
+	The contact model you specified is not located in any whitelist.
+	Because of this the model will be run in an unoptimized version (increasing runtime by up to 20%).
+	In order to optimize this model you have the following options:
+		(i)  Run the genAutoExamplesWhitelist.sh script in your LIGGGHTS(R) source folder to automatically parse the input script
+		(ii) Add the model combination by hand to your style_contact_model_user.whitelist that can be found in your LIGGGHTS(R) source folder
+		(iii) Use the ENABLE_MODEL_* flag when building with cmake.
+	If you perform one of the steps above LIGGGHTS(R) needs to be recompiled to generate the optimized code.
+
+ (../contact_models.h:365)
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/superquadric 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 shape constant 0.000010 0.000010 0.000060 blockiness constant 10.000000 2.000000
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=1.216674e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=1.216674e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 22 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.3
+# Apply integration fix
+fix               ms nve_group1 nve/superquadric
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Thu Sep 14 12:32:06 2023
+
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 19.1299 Mbytes
+    Step 
+       0 
+insertion: proc 5 at 0 %
+insertion: proc 5 at 10 %
+insertion: proc 7 at 0 %
+insertion: proc 7 at 10 %
+insertion: proc 8 at 0 %
+insertion: proc 9 at 0 %
+insertion: proc 9 at 10 %
+insertion: proc 10 at 0 %
+insertion: proc 10 at 10 %
+insertion: proc 11 at 0 %
+insertion: proc 11 at 10 %
+insertion: proc 12 at 0 %
+insertion: proc 12 at 10 %
+insertion: proc 12 at 20 %
+insertion: proc 13 at 0 %
+insertion: proc 13 at 10 %
+insertion: proc 13 at 20 %
+insertion: proc 14 at 0 %
+insertion: proc 14 at 10 %
+insertion: proc 15 at 0 %
+insertion: proc 15 at 10 %
+insertion: proc 16 at 0 %
+insertion: proc 16 at 10 %
+insertion: proc 16 at 20 %
+insertion: proc 17 at 0 %
+insertion: proc 17 at 10 %
+insertion: proc 17 at 20 %
+insertion: proc 0 at 0 %
+insertion: proc 0 at 10 %
+insertion: proc 0 at 20 %
+insertion: proc 7 at 20 %
+insertion: proc 8 at 10 %
+insertion: proc 1 at 0 %
+insertion: proc 1 at 10 %
+insertion: proc 1 at 20 %
+insertion: proc 2 at 0 %
+insertion: proc 2 at 10 %
+insertion: proc 3 at 0 %
+insertion: proc 3 at 10 %
+insertion: proc 3 at 20 %
+insertion: proc 4 at 0 %
+insertion: proc 4 at 10 %
+insertion: proc 4 at 20 %
+insertion: proc 4 at 30 %
+insertion: proc 6 at 0 %
+insertion: proc 6 at 10 %
+insertion: proc 6 at 20 %
+insertion: proc 5 at 20 %
+insertion: proc 1 at 30 %
+insertion: proc 17 at 30 %
+insertion: proc 10 at 20 %
+insertion: proc 11 at 20 %
+insertion: proc 12 at 30 %
+insertion: proc 14 at 20 %
+insertion: proc 15 at 20 %
+insertion: proc 13 at 30 %
+insertion: proc 5 at 30 %
+insertion: proc 0 at 30 %
+insertion: proc 2 at 20 %
+insertion: proc 3 at 30 %
+insertion: proc 4 at 40 %
+insertion: proc 12 at 40 %
+insertion: proc 16 at 30 %
+insertion: proc 13 at 40 %
+insertion: proc 17 at 40 %
+insertion: proc 11 at 30 %
+insertion: proc 11 at 40 %
+insertion: proc 11 at 50 %
+insertion: proc 11 at 60 %
+insertion: proc 11 at 70 %
+insertion: proc 0 at 40 %
+insertion: proc 3 at 30 %
+insertion: proc 3 at 40 %
+insertion: proc 3 at 50 %
+insertion: proc 3 at 60 %
+insertion: proc 3 at 70 %
+insertion: proc 3 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 3 at 100 %
+insertion: proc 3 at 110 %
+insertion: proc 9 at 20 %
+insertion: proc 9 at 30 %
+insertion: proc 9 at 40 %
+insertion: proc 9 at 50 %
+insertion: proc 9 at 60 %
+insertion: proc 9 at 70 %
+insertion: proc 9 at 80 %
+insertion: proc 9 at 90 %
+insertion: proc 9 at 100 %
+insertion: proc 11 at 80 %
+insertion: proc 11 at 90 %
+insertion: proc 11 at 100 %
+insertion: proc 11 at 110 %
+insertion: proc 12 at 50 %
+insertion: proc 12 at 60 %
+insertion: proc 12 at 70 %
+insertion: proc 12 at 80 %
+insertion: proc 12 at 90 %
+insertion: proc 12 at 100 %
+insertion: proc 12 at 110 %
+insertion: proc 12 at 120 %
+insertion: proc 1 at 40 %
+insertion: proc 7 at 30 %
+insertion: proc 7 at 40 %
+insertion: proc 7 at 50 %
+insertion: proc 7 at 60 %
+insertion: proc 7 at 70 %
+insertion: proc 7 at 80 %
+insertion: proc 7 at 90 %
+insertion: proc 7 at 100 %
+insertion: proc 7 at 110 %
+insertion: proc 5 at 30 %
+insertion: proc 5 at 40 %
+insertion: proc 10 at 30 %
+insertion: proc 10 at 40 %
+insertion: proc 10 at 50 %
+insertion: proc 10 at 60 %
+insertion: proc 10 at 70 %
+insertion: proc 10 at 80 %
+insertion: proc 10 at 90 %
+insertion: proc 10 at 100 %
+insertion: proc 5 at 50 %
+insertion: proc 5 at 60 %
+insertion: proc 5 at 70 %
+insertion: proc 5 at 80 %
+insertion: proc 5 at 90 %
+insertion: proc 5 at 100 %
+insertion: proc 2 at 30 %
+insertion: proc 2 at 40 %
+insertion: proc 2 at 50 %
+insertion: proc 2 at 60 %
+insertion: proc 2 at 70 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 2 at 100 %
+insertion: proc 2 at 110 %
+insertion: proc 0 at 40 %
+insertion: proc 0 at 50 %
+insertion: proc 0 at 60 %
+insertion: proc 0 at 70 %
+insertion: proc 0 at 80 %
+insertion: proc 0 at 90 %
+insertion: proc 0 at 100 %
+insertion: proc 10 at 110 %
+insertion: proc 17 at 50 %
+insertion: proc 17 at 60 %
+insertion: proc 17 at 70 %
+insertion: proc 17 at 80 %
+insertion: proc 17 at 90 %
+insertion: proc 17 at 100 %
+insertion: proc 17 at 110 %
+insertion: proc 15 at 30 %
+insertion: proc 15 at 40 %
+insertion: proc 15 at 50 %
+insertion: proc 15 at 60 %
+insertion: proc 15 at 70 %
+insertion: proc 15 at 80 %
+insertion: proc 15 at 90 %
+insertion: proc 14 at 30 %
+insertion: proc 14 at 40 %
+insertion: proc 14 at 50 %
+insertion: proc 14 at 60 %
+insertion: proc 14 at 70 %
+insertion: proc 14 at 80 %
+insertion: proc 14 at 90 %
+insertion: proc 14 at 100 %
+insertion: proc 14 at 110 %
+insertion: proc 8 at 20 %
+insertion: proc 8 at 30 %
+insertion: proc 8 at 40 %
+insertion: proc 8 at 50 %
+insertion: proc 8 at 60 %
+insertion: proc 8 at 70 %
+insertion: proc 8 at 80 %
+insertion: proc 8 at 90 %
+insertion: proc 8 at 100 %
+insertion: proc 1 at 40 %
+insertion: proc 1 at 50 %
+insertion: proc 1 at 60 %
+insertion: proc 1 at 70 %
+insertion: proc 1 at 80 %
+insertion: proc 1 at 90 %
+insertion: proc 1 at 100 %
+insertion: proc 13 at 40 %
+insertion: proc 13 at 50 %
+insertion: proc 13 at 60 %
+insertion: proc 13 at 70 %
+insertion: proc 13 at 80 %
+insertion: proc 13 at 90 %
+insertion: proc 0 at 110 %
+insertion: proc 0 at 120 %
+insertion: proc 15 at 100 %
+insertion: proc 15 at 110 %
+insertion: proc 16 at 40 %
+insertion: proc 16 at 50 %
+insertion: proc 16 at 60 %
+insertion: proc 16 at 70 %
+insertion: proc 16 at 80 %
+insertion: proc 16 at 90 %
+insertion: proc 6 at 30 %
+insertion: proc 6 at 40 %
+insertion: proc 6 at 50 %
+insertion: proc 6 at 60 %
+insertion: proc 6 at 70 %
+insertion: proc 6 at 80 %
+insertion: proc 6 at 90 %
+insertion: proc 6 at 100 %
+insertion: proc 6 at 110 %
+insertion: proc 13 at 100 %
+insertion: proc 13 at 110 %
+insertion: proc 13 at 120 %
+insertion: proc 4 at 50 %
+insertion: proc 4 at 60 %
+insertion: proc 4 at 70 %
+insertion: proc 4 at 80 %
+insertion: proc 4 at 90 %
+insertion: proc 4 at 100 %
+insertion: proc 4 at 110 %
+insertion: proc 1 at 110 %
+INFO: Particle insertion ins1: inserted 1120 particle templates (mass 1.027382e-07) at step 1
+ - a total of 1120 particle templates (mass 1.027382e-07) inserted so far.
+       1 
+Loop time of 0.0100211 on 18 procs for 1 steps with 1120 atoms, finish time Thu Sep 14 12:32:09 2023
+
+
+Pair  time (%) = 0.00149417 (14.9102)
+Neigh time (%) = 0.00090474 (9.02837)
+Comm  time (%) = 0.000764861 (7.63253)
+Outpt time (%) = 0.000856099 (8.54299)
+Other time (%) = 0.00600121 (59.8859)
+
+Nlocal:    62.2222 ave 94 max 48 min
+Histogram: 8 0 0 0 8 0 0 0 0 2
+Nghost:    1544.83 ave 1704 max 1462 min
+Histogram: 8 0 0 2 2 4 0 0 0 2
+Neighs:    14048.7 ave 28320 max 8018 min
+Histogram: 8 0 0 6 2 0 0 0 0 2
+
+Total # of neighbors = 252876
+Ave neighs/atom = 225.782
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+1120 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 1.10e-06 reset 1000 threshold 1.00e-06 start_dt 1.291e-09 end_dt 1.291e-08
+run               100000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Thu Sep 14 12:32:09 2023
+
+Memory usage per processor = 23.7342 Mbytes
+    Step 
+       1 
+pre-run, step: 1000, ke/mass=5.565e+02, natoms=1120, overlap=2.006e-05, cor=1.087e-01, dt=2.044e-09
+pre-run, step: 2000, ke/mass=1.349e+01, natoms=1120, overlap=1.174e-06, cor=1.127e-01, dt=3.237e-09
+pre-run, step: 3000, ke/mass=3.210e+00, natoms=1120, overlap=2.377e-07, cor=1.167e-01, dt=5.125e-09
+pre-run, step: 4000, ke/mass=1.325e+00, natoms=1120, overlap=1.551e-06, cor=1.207e-01, dt=8.114e-09
+pre-run, step: 5000, ke/mass=7.163e-01, natoms=1120, overlap=1.709e-07, cor=1.247e-01, dt=1.285e-08
+pre-run, step: 6000, ke/mass=4.067e-01, natoms=1120, overlap=2.492e-06, cor=1.287e-01, dt=1.661e-08
+pre-run, step: 7000, ke/mass=3.084e-01, natoms=1120, overlap=1.872e-06, cor=1.327e-01, dt=1.713e-08
+pre-run, step: 8000, ke/mass=2.836e-01, natoms=1120, overlap=1.043e-06, cor=1.367e-01, dt=1.765e-08
+pre-run, step: 9000, ke/mass=1.882e-01, natoms=1120, overlap=3.931e-07, cor=1.407e-01, dt=1.816e-08
+pre-run, step: 10000, ke/mass=1.576e-01, natoms=1120, overlap=9.859e-07, cor=1.447e-01, dt=1.868e-08
+pre-run, step: 11000, ke/mass=1.050e-01, natoms=1120, overlap=1.490e-06, cor=1.487e-01, dt=1.920e-08
+pre-run, step: 12000, ke/mass=9.261e-02, natoms=1120, overlap=6.998e-07, cor=1.527e-01, dt=1.971e-08
+pre-run, step: 13000, ke/mass=7.807e-02, natoms=1120, overlap=1.681e-06, cor=1.567e-01, dt=2.023e-08
+pre-run, step: 14000, ke/mass=7.279e-02, natoms=1120, overlap=5.437e-07, cor=1.607e-01, dt=2.075e-08
+pre-run, step: 15000, ke/mass=6.164e-02, natoms=1120, overlap=3.553e-07, cor=1.647e-01, dt=2.126e-08
+pre-run, step: 16000, ke/mass=4.173e-02, natoms=1120, overlap=1.388e-07, cor=1.687e-01, dt=2.178e-08
+pre-run, step: 17000, ke/mass=3.954e-02, natoms=1120, overlap=1.223e-06, cor=1.727e-01, dt=2.229e-08
+pre-run, step: 18000, ke/mass=3.321e-02, natoms=1120, overlap=2.233e-07, cor=1.767e-01, dt=2.281e-08
+pre-run, step: 19000, ke/mass=2.799e-02, natoms=1120, overlap=2.908e-06, cor=1.807e-01, dt=2.333e-08
+pre-run, step: 20000, ke/mass=2.574e-02, natoms=1120, overlap=2.162e-07, cor=1.847e-01, dt=2.384e-08
+pre-run, step: 21000, ke/mass=2.456e-02, natoms=1120, overlap=1.060e-06, cor=1.887e-01, dt=2.436e-08
+pre-run, step: 22000, ke/mass=2.203e-02, natoms=1120, overlap=1.184e-07, cor=1.927e-01, dt=2.488e-08
+pre-run, step: 23000, ke/mass=1.856e-02, natoms=1120, overlap=1.116e-06, cor=1.967e-01, dt=2.539e-08
+pre-run, step: 24000, ke/mass=1.464e-02, natoms=1120, overlap=5.530e-07, cor=2.007e-01, dt=2.591e-08
+pre-run, step: 25000, ke/mass=1.235e-02, natoms=1120, overlap=2.101e-06, cor=2.047e-01, dt=2.643e-08
+pre-run, step: 26000, ke/mass=1.099e-02, natoms=1120, overlap=1.253e-06, cor=2.087e-01, dt=2.694e-08
+pre-run, step: 27000, ke/mass=9.673e-03, natoms=1120, overlap=9.615e-07, cor=2.127e-01, dt=2.746e-08
+pre-run, step: 28000, ke/mass=9.857e-03, natoms=1120, overlap=1.741e-07, cor=2.167e-01, dt=2.798e-08
+pre-run, step: 29000, ke/mass=7.961e-03, natoms=1120, overlap=1.078e-06, cor=2.207e-01, dt=2.849e-08
+pre-run, step: 30000, ke/mass=7.702e-03, natoms=1120, overlap=5.737e-07, cor=2.247e-01, dt=2.901e-08
+pre-run, step: 31000, ke/mass=6.212e-03, natoms=1120, overlap=3.012e-07, cor=2.287e-01, dt=2.952e-08
+pre-run, step: 32000, ke/mass=6.525e-03, natoms=1120, overlap=5.529e-08, cor=2.327e-01, dt=3.004e-08
+pre-run, step: 33000, ke/mass=5.651e-03, natoms=1120, overlap=4.276e-07, cor=2.367e-01, dt=3.056e-08
+pre-run, step: 34000, ke/mass=5.658e-03, natoms=1120, overlap=3.397e-07, cor=2.407e-01, dt=3.107e-08
+pre-run, step: 35000, ke/mass=6.966e-03, natoms=1120, overlap=2.887e-07, cor=2.447e-01, dt=3.159e-08
+pre-run, step: 36000, ke/mass=5.673e-03, natoms=1120, overlap=1.545e-06, cor=2.487e-01, dt=3.211e-08
+pre-run, step: 37000, ke/mass=4.141e-03, natoms=1120, overlap=7.096e-07, cor=2.527e-01, dt=3.262e-08
+pre-run, step: 38000, ke/mass=3.710e-03, natoms=1120, overlap=1.267e-06, cor=2.567e-01, dt=3.314e-08
+pre-run, step: 39000, ke/mass=3.789e-03, natoms=1120, overlap=1.980e-07, cor=2.607e-01, dt=3.366e-08
+pre-run, step: 40000, ke/mass=3.707e-03, natoms=1120, overlap=2.196e-07, cor=2.647e-01, dt=3.417e-08
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.

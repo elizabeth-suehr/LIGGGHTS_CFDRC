@@ -1,0 +1,110 @@
+atom_modify       map array
+
+processors        3 3 2
+
+# Set domain
+region            domain block 0.0 6.49340e-04 0.0 6.49340e-04 0.0 3.24670e-04 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00064934 0.00064934 0.00032467)
+  3 by 3 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          6.633e-05 bin
+neigh_modify      every 1 delay 0 check no
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history surface superquadric
+WARNING: 
+	The contact model you specified is not located in any whitelist.
+	Because of this the model will be run in an unoptimized version (increasing runtime by up to 20%).
+	In order to optimize this model you have the following options:
+		(i)  Run the genAutoExamplesWhitelist.sh script in your LIGGGHTS(R) source folder to automatically parse the input script
+		(ii) Add the model combination by hand to your style_contact_model_user.whitelist that can be found in your LIGGGHTS(R) source folder
+		(iii) Use the ENABLE_MODEL_* flag when building with cmake.
+	If you perform one of the steps above LIGGGHTS(R) needs to be recompiled to generate the optimized code.
+
+ (../contact_models.h:365)
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/superquadric 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 shape constant 0.000010 0.000010 0.000060 blockiness constant 10.000000 2.000000
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 100000 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.05
+# Apply integration fix
+fix               ms nve_group1 nve/superquadric
+
+run               1
+Setting up run at Thu Sep 14 12:00:39 2023
+
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 19.1299 Mbytes
+    Step    Atoms         KinEng            CPU 
+       0        0              0              0 
+INFO: Particle insertion ins1: inserted 187 particle templates (mass 1.715361e-08) at step 1
+ - a total of 187 particle templates (mass 1.715361e-08) inserted so far.
+       1      187              0   0.0016713669 
+Loop time of 0.00188645 on 18 procs for 1 steps with 187 atoms, finish time Thu Sep 14 12:00:43 2023
+
+
+Pair  time (%) = 0.00014932 (7.91541)
+Neigh time (%) = 4.88461e-05 (2.58931)
+Comm  time (%) = 0.000245514 (13.0146)
+Outpt time (%) = 2.37555e-05 (1.25927)
+Other time (%) = 0.00141901 (75.2214)
+
+Nlocal:    10.3889 ave 16 max 8 min
+Histogram: 7 1 0 6 0 1 1 0 1 1
+Nghost:    270.111 ave 274 max 264 min
+Histogram: 1 0 2 1 2 0 1 7 0 4
+Neighs:    328.944 ave 656 max 189 min
+Histogram: 8 0 0 5 2 1 0 0 0 2
+
+Total # of neighbors = 5921
+Ave neighs/atom = 31.6631
+Neighbor list builds = 1
+Dangerous builds = 0
+
+# Set the top/bottom boundaries as LE
+timestep          1.2909e-08
+
+fix               leboundary all lebc 100.0 true gtemp 0.1
+
+# Run desired simulation
+run               15000000
+Setting up run at Thu Sep 14 12:00:43 2023
+
+Memory usage per processor = 23.469 Mbytes
+    Step    Atoms         KinEng            CPU 
+       1      187  3.6359596e-12              0 
+stress: 0.004067 0.008832 0.000864 0.000000 0.000001 -0.000000
+stress: 0.004190 0.007944 0.000147 0.000000 0.000000 -0.000000
+stress: 0.004332 0.007567 -0.000461 0.000000 0.000000 -0.000000
+stress: 0.004505 0.007359 -0.001074 0.000000 0.000000 -0.000000
+stress: 0.004642 0.007289 -0.001656 0.000000 0.000000 -0.000000
+stress: 0.004945 0.007235 -0.002150 0.000000 0.000000 0.000000
+stress: 0.005603 0.006334 -0.002156 0.000000 0.000000 0.000000
+stress: 0.005990 0.005786 -0.002352 0.000000 0.000000 0.000000
+stress: 0.006238 0.005650 -0.002726 0.000000 0.000000 -0.000000
+stress: 0.006441 0.005225 -0.002753 0.000000 0.000000 -0.000000
+stress: 0.006239 0.004884 -0.002675 0.000000 0.000000 -0.000000
+stress: 0.006473 0.004916 -0.002936 0.000000 0.000000 -0.000000
+stress: 0.006532 0.004662 -0.002930 0.000000 0.000000 -0.000000
+stress: 0.006893 0.004461 -0.002911 0.000000 0.000000 -0.000000
+stress: 0.007047 0.004596 -0.003162 0.000000 0.000000 -0.000000
+stress: 0.006587 0.004328 -0.002794 0.000000 0.000000 -0.000000
+stress: 0.006412 0.004002 -0.002627 0.000000 0.000000 -0.000000
+stress: 0.006258 0.003830 -0.002395 0.000000 0.000000 -0.000000
+stress: 0.006263 0.003819 -0.002080 0.000000 0.000000 -0.000000
+stress: 0.006237 0.003862 -0.002096 0.000000 0.000000 -0.000000
+stress: 0.006561 0.003877 -0.002345 0.000000 0.000000 -0.000000

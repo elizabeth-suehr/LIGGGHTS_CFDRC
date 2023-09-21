@@ -94,9 +94,8 @@ FixTemplateMultisphere::FixTemplateMultisphere(LAMMPS *lmp, int narg, char **arg
     volumeweight_ = new double[nspheres];
 
     type_ = 0;
+
     mass_expect = 0;
-    density_expect = 0;
-    density2 =0;
     vectorZeroize3D(inertia_);
     vectorZeroize3D(ex_space_);
     vectorZeroize3D(ey_space_);
@@ -129,12 +128,6 @@ FixTemplateMultisphere::FixTemplateMultisphere(LAMMPS *lmp, int narg, char **arg
             iarg++;
             mass_expect = atof(arg[iarg++]);
             mass_set_ = true;
-            hasargs = true;
-        } else if(strcmp(arg[iarg],"density2") == 0) {
-            if (iarg+2 > narg)
-                error->fix_error(FLERR,this,"not enough arguments for 'density2'");
-            iarg++;
-            density2 = atof(arg[iarg++]);
             hasargs = true;
         } else if(strcmp(arg[iarg],"use_volume") == 0) {
             iarg++;
@@ -388,10 +381,6 @@ void FixTemplateMultisphere::calc_inertia()
 {
   double x_try[3],xcm[3],distSqr;
   bool alreadyChecked;
-  double density1 = expectancy(pdf_density);
-  double volweight1= 0.0;
-  double volweight2=0.0;
-  double  densitypi= expectancy(pdf_density);
 
   for(int i = 0; i < 3; i++)
     vectorZeroize3D(moi_[i]);
@@ -409,54 +398,23 @@ void FixTemplateMultisphere::calc_inertia()
           distSqr = dist_sqr(j,x_try);
           if(distSqr < r_sphere[j]*r_sphere[j])
           {
-	   if (atom_type_sphere){//need specific density
-              if (atom_type_sphere[j] == 1){
-                  densitypi= expectancy(pdf_density);
-                  volweight1 += 4/3*M_PI*r_sphere[j]*r_sphere[j]*r_sphere[j];
-              }
-              else if (atom_type_sphere[j] == 2){
-                volweight2 += 4/3*M_PI*r_sphere[j]*r_sphere[j]*r_sphere[j];
-                densitypi= density2;
-              }
-              else{
-                  printf("Atom type not defined! l407\n" );
-              }
-	        moi_[0][0] +=  densitypi*((x_try[1]-xcm[1])*(x_try[1]-xcm[1]) + (x_try[2]-xcm[2])*(x_try[2]-xcm[2]));
-                moi_[0][1] -=  densitypi*((x_try[0]-xcm[0])*(x_try[1]-xcm[1]));
-                moi_[0][2] -=  densitypi*((x_try[0]-xcm[0])*(x_try[2]-xcm[2]));
-                moi_[1][0] -=  densitypi*((x_try[1]-xcm[1])*(x_try[0]-xcm[0]));
-                moi_[1][1] +=  densitypi*((x_try[0]-xcm[0])*(x_try[0]-xcm[0]) + (x_try[2]-xcm[2])*(x_try[2]-xcm[2]));
-                moi_[1][2] -=  densitypi*((x_try[1]-xcm[1])*(x_try[2]-xcm[2]));
-                moi_[2][0] -=  densitypi*((x_try[2]-xcm[2])*(x_try[0]-xcm[0]));
-                moi_[2][1] -=  densitypi*((x_try[2]-xcm[2])*(x_try[1]-xcm[1]));
-                moi_[2][2] +=  densitypi*((x_try[0]-xcm[0])*(x_try[0]-xcm[0]) + (x_try[1]-xcm[1])*(x_try[1]-xcm[1]));
-                alreadyChecked = true;
-           }
-	   else{
-                  moi_[0][0] +=  (x_try[1]-xcm[1])*(x_try[1]-xcm[1]) + (x_try[2]-xcm[2])*(x_try[2]-xcm[2]);
-                  moi_[0][1] -=  (x_try[0]-xcm[0])*(x_try[1]-xcm[1]);
-                  moi_[0][2] -=  (x_try[0]-xcm[0])*(x_try[2]-xcm[2]);
-                  moi_[1][0] -=  (x_try[1]-xcm[1])*(x_try[0]-xcm[0]);
-                  moi_[1][1] +=  (x_try[0]-xcm[0])*(x_try[0]-xcm[0]) + (x_try[2]-xcm[2])*(x_try[2]-xcm[2]);
-                  moi_[1][2] -=  (x_try[1]-xcm[1])*(x_try[2]-xcm[2]);
-                  moi_[2][0] -=  (x_try[2]-xcm[2])*(x_try[0]-xcm[0]);
-                  moi_[2][1] -=  (x_try[2]-xcm[2])*(x_try[1]-xcm[1]);
-                  moi_[2][2] +=  (x_try[0]-xcm[0])*(x_try[0]-xcm[0]) + (x_try[1]-xcm[1])*(x_try[1]-xcm[1]);
-                  alreadyChecked = true;
-	  }
-        }
+              moi_[0][0] +=  (x_try[1]-xcm[1])*(x_try[1]-xcm[1]) + (x_try[2]-xcm[2])*(x_try[2]-xcm[2]);
+              moi_[0][1] -=  (x_try[0]-xcm[0])*(x_try[1]-xcm[1]);
+              moi_[0][2] -=  (x_try[0]-xcm[0])*(x_try[2]-xcm[2]);
+              moi_[1][0] -=  (x_try[1]-xcm[1])*(x_try[0]-xcm[0]);
+              moi_[1][1] +=  (x_try[0]-xcm[0])*(x_try[0]-xcm[0]) + (x_try[2]-xcm[2])*(x_try[2]-xcm[2]);
+              moi_[1][2] -=  (x_try[1]-xcm[1])*(x_try[2]-xcm[2]);
+              moi_[2][0] -=  (x_try[2]-xcm[2])*(x_try[0]-xcm[0]);
+              moi_[2][1] -=  (x_try[2]-xcm[2])*(x_try[1]-xcm[1]);
+              moi_[2][2] +=  (x_try[0]-xcm[0])*(x_try[0]-xcm[0]) + (x_try[1]-xcm[1])*(x_try[1]-xcm[1]);
+              alreadyChecked = true;
+          }
       }
   }
-  for(int i = 0; i < 3; i++){
-      for(int j = 0; j < 3; j++){
-	if (atom_type_sphere){
-          moi_[i][j] *= 1.0/static_cast<double>(ntry)*(x_max[0]-x_min[0])*(x_max[1]-x_min[1])*(x_max[2]-x_min[2]);
-        }
-	else{
+  for(int i = 0; i < 3; i++)
+      for(int j = 0; j < 3; j++)
           moi_[i][j] *= expectancy(pdf_density)/static_cast<double>(ntry)*(x_max[0]-x_min[0])*(x_max[1]-x_min[1])*(x_max[2]-x_min[2]);
-	}
-      }
-  }
+
   // check if tensor is symmetric enough(numerical errors)
   // not sure if this check is sufficient
   
@@ -647,36 +605,23 @@ void FixTemplateMultisphere::delete_ptilist()
 
 void FixTemplateMultisphere::randomize_ptilist(int n_random,int distribution_groupbit,int distorder)
 {
-    double density1 = expectancy(pdf_density);
-
+    
     for(int i = 0; i < n_random; i++)
     {
           
           ParticleToInsertMultisphere *pti_m = static_cast<ParticleToInsertMultisphere*>(pti_list[i]);
 
           pti_m->nparticles = nspheres;
-          pti_m->density_ins = density_expect;//expectancy(pdf_density);
+          pti_m->density_ins = expectancy(pdf_density);
           pti_m->type_ms = type_;
           pti_m->volume_ins = volume_expect;
           pti_m->mass_ins = mass_expect;
           pti_m->r_bound_ins = r_bound;
           vectorCopy3D(x_bound,pti->x_bound_ins);
           pti_m->atom_type = atom_type;
-	  if(atom_type_sphere){
-                vectorCopyN(atom_type_sphere,pti->atom_type_vector,nspheres);
-          }
+
           for(int j = 0; j < nspheres; j++)
           {
-	      if (atom_type_sphere){//need specific massi
-		pti_m->atom_type_vector[j]=atom_type_sphere[j];
-	        pti_m->atom_type_vector_flag = true;
-                 if (atom_type_sphere[j] == 1) {
-                    pti_m->ndensity_ins[j] = density1;
-                 }
-                 else if (atom_type_sphere[j] == 2) {
-                     pti_m->ndensity_ins[j] = density2;
-	         }
-	      }
               pti_m->radius_ins[j] = r_sphere[j];
               pti_m->volumeweight[j] = volumeweight_[j];
               vectorCopy3D(x_sphere[j],pti_m->x_ins[j]);
@@ -721,7 +666,7 @@ ParticleToInsertMultisphere *FixTemplateMultisphere::get_particle_to_insert()
     ParticleToInsertMultisphere *pti_new = new ParticleToInsertMultisphere(lmp, nspheres);
 
     pti_new->nparticles = nspheres;
-    pti_new->density_ins = density_expect;//expectancy(pdf_density);
+    pti_new->density_ins = expectancy(pdf_density);
 
     pti_new->volume_ins = volume_expect;
     pti_new->mass_ins = mass_expect;
@@ -730,21 +675,9 @@ ParticleToInsertMultisphere *FixTemplateMultisphere::get_particle_to_insert()
     pti_new->atom_type = atom_type;
 
     pti_new->type_ms = type_;
-    if(atom_type_sphere){
-                vectorCopyN(atom_type_sphere,pti_new->atom_type_vector,nspheres);
-    }
+
     for (int j = 0; j < nspheres; j++)
     {
-      if (atom_type_sphere){//need specific massi
-                pti_new->atom_type_vector[j]=atom_type_sphere[j];
-
-                 if (atom_type_sphere[j] == 1) {
-                    pti_new->ndensity_ins[j] = expectancy(pdf_density);
-                 }
-                 else if (atom_type_sphere[j] == 2) {
-                    pti_new->ndensity_ins[j] = density2;
-                 }
-      }
         pti_new->radius_ins[j] = r_sphere[j];
         pti_new->volumeweight[j] = volumeweight_[j];
         vectorCopy3D(x_sphere[j], pti_new->x_ins[j]);

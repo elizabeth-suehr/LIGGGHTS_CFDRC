@@ -8,4 +8,4 @@ newton            off
 echo              both
 communicate       single vel yes
 units             si
-log               log.shear.rod4_7.liggghts
+log               log.shear.rod4_1.liggghts

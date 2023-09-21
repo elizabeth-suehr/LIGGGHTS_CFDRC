@@ -1,0 +1,758 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-06-18:40:11 by liz.suehr, git commit 20bafd84e54ba1e14cc5c444673f017ba084bbe9)
+communicate       single vel yes
+units             si
+log               log.shear.multisphere93_MPI442_1.liggghts
+atom_modify       map array
+
+processors        4 4 2
+
+# Set domain
+region            domain block 0.0 5.04000e-03 0.0 5.04000e-03 0.0 2.52000e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00504 0.00504 0.00252)
+  4 by 4 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          1.721e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 93 ntry 10000000 spheres file multisphere93.txt scale 1.0 type 1
+Calculating the properties of the given template.
+   Depending on ntry, this may take a while...
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=2.782000e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=2.782000e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 3 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.5
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Fri Sep  8 10:30:32 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.45116 Mbytes
+    Step 
+       0 
+insertion: proc 22 at 0 %
+insertion: proc 27 at 0 %
+insertion: proc 11 at 0 %
+insertion: proc 12 at 0 %
+insertion: proc 13 at 0 %
+insertion: proc 14 at 0 %
+insertion: proc 15 at 0 %
+insertion: proc 16 at 0 %
+insertion: proc 17 at 0 %
+insertion: proc 18 at 0 %
+insertion: proc 21 at 0 %
+insertion: proc 0 at 0 %
+insertion: proc 24 at 0 %
+insertion: proc 26 at 0 %
+insertion: proc 29 at 0 %
+insertion: proc 30 at 0 %
+insertion: proc 31 at 0 %
+insertion: proc 2 at 0 %
+insertion: proc 5 at 0 %
+insertion: proc 7 at 0 %
+insertion: proc 8 at 0 %
+insertion: proc 23 at 0 %
+insertion: proc 25 at 0 %
+insertion: proc 28 at 0 %
+insertion: proc 1 at 0 %
+insertion: proc 3 at 0 %
+insertion: proc 4 at 0 %
+insertion: proc 6 at 0 %
+insertion: proc 9 at 0 %
+insertion: proc 10 at 0 %
+insertion: proc 19 at 0 %
+insertion: proc 20 at 0 %
+insertion: proc 7 at 10 %
+insertion: proc 31 at 10 %
+insertion: proc 1 at 10 %
+insertion: proc 4 at 10 %
+insertion: proc 27 at 10 %
+insertion: proc 8 at 10 %
+insertion: proc 22 at 10 %
+insertion: proc 0 at 10 %
+insertion: proc 26 at 10 %
+insertion: proc 5 at 10 %
+insertion: proc 6 at 10 %
+insertion: proc 11 at 10 %
+insertion: proc 16 at 10 %
+insertion: proc 2 at 10 %
+insertion: proc 9 at 10 %
+insertion: proc 12 at 10 %
+insertion: proc 18 at 10 %
+insertion: proc 21 at 10 %
+insertion: proc 24 at 10 %
+insertion: proc 25 at 10 %
+insertion: proc 3 at 10 %
+insertion: proc 14 at 10 %
+insertion: proc 15 at 10 %
+insertion: proc 17 at 10 %
+insertion: proc 30 at 10 %
+insertion: proc 13 at 10 %
+insertion: proc 29 at 10 %
+insertion: proc 23 at 10 %
+insertion: proc 28 at 10 %
+insertion: proc 20 at 10 %
+insertion: proc 10 at 10 %
+insertion: proc 19 at 10 %
+insertion: proc 31 at 20 %
+insertion: proc 1 at 20 %
+insertion: proc 25 at 20 %
+insertion: proc 4 at 20 %
+insertion: proc 8 at 20 %
+insertion: proc 0 at 20 %
+insertion: proc 22 at 20 %
+insertion: proc 7 at 20 %
+insertion: proc 30 at 20 %
+insertion: proc 24 at 20 %
+insertion: proc 6 at 20 %
+insertion: proc 14 at 20 %
+insertion: proc 15 at 20 %
+insertion: proc 5 at 20 %
+insertion: proc 16 at 20 %
+insertion: proc 29 at 20 %
+insertion: proc 18 at 20 %
+insertion: proc 23 at 20 %
+insertion: proc 27 at 20 %
+insertion: proc 26 at 20 %
+insertion: proc 17 at 20 %
+insertion: proc 12 at 20 %
+insertion: proc 9 at 20 %
+insertion: proc 3 at 20 %
+insertion: proc 21 at 20 %
+insertion: proc 28 at 20 %
+insertion: proc 2 at 20 %
+insertion: proc 11 at 20 %
+insertion: proc 13 at 20 %
+insertion: proc 10 at 20 %
+insertion: proc 20 at 20 %
+insertion: proc 19 at 20 %
+insertion: proc 24 at 30 %
+insertion: proc 7 at 30 %
+insertion: proc 6 at 30 %
+insertion: proc 25 at 30 %
+insertion: proc 1 at 30 %
+insertion: proc 31 at 30 %
+insertion: proc 30 at 30 %
+insertion: proc 5 at 30 %
+insertion: proc 16 at 30 %
+insertion: proc 16 at 40 %
+insertion: proc 16 at 50 %
+insertion: proc 16 at 60 %
+insertion: proc 16 at 70 %
+insertion: proc 15 at 30 %
+insertion: proc 16 at 80 %
+insertion: proc 16 at 90 %
+insertion: proc 14 at 30 %
+insertion: proc 0 at 30 %
+insertion: proc 8 at 30 %
+insertion: proc 17 at 30 %
+insertion: proc 27 at 30 %
+insertion: proc 2 at 30 %
+insertion: proc 2 at 40 %
+insertion: proc 28 at 30 %
+insertion: proc 2 at 50 %
+insertion: proc 2 at 60 %
+insertion: proc 2 at 70 %
+insertion: proc 19 at 30 %
+insertion: proc 19 at 40 %
+insertion: proc 19 at 50 %
+insertion: proc 19 at 60 %
+insertion: proc 19 at 70 %
+insertion: proc 19 at 80 %
+insertion: proc 19 at 90 %
+insertion: proc 19 at 100 %
+insertion: proc 22 at 30 %
+insertion: proc 22 at 40 %
+insertion: proc 22 at 50 %
+insertion: proc 22 at 60 %
+insertion: proc 28 at 30 %
+insertion: proc 28 at 40 %
+insertion: proc 28 at 50 %
+insertion: proc 28 at 60 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 22 at 70 %
+insertion: proc 22 at 80 %
+insertion: proc 22 at 90 %
+insertion: proc 22 at 100 %
+insertion: proc 28 at 70 %
+insertion: proc 28 at 80 %
+insertion: proc 28 at 90 %
+insertion: proc 8 at 40 %
+insertion: proc 8 at 50 %
+insertion: proc 8 at 60 %
+insertion: proc 8 at 70 %
+insertion: proc 8 at 80 %
+insertion: proc 8 at 90 %
+insertion: proc 29 at 30 %
+insertion: proc 14 at 40 %
+insertion: proc 14 at 50 %
+insertion: proc 14 at 60 %
+insertion: proc 14 at 70 %
+insertion: proc 14 at 80 %
+insertion: proc 14 at 90 %
+insertion: proc 4 at 30 %
+insertion: proc 0 at 40 %
+insertion: proc 0 at 50 %
+insertion: proc 0 at 60 %
+insertion: proc 0 at 70 %
+insertion: proc 0 at 80 %
+insertion: proc 0 at 90 %
+insertion: proc 0 at 100 %
+insertion: proc 18 at 30 %
+insertion: proc 18 at 40 %
+insertion: proc 18 at 50 %
+insertion: proc 18 at 60 %
+insertion: proc 18 at 70 %
+insertion: proc 18 at 80 %
+insertion: proc 14 at 100 %
+insertion: proc 18 at 90 %
+insertion: proc 18 at 100 %
+insertion: proc 3 at 30 %
+insertion: proc 25 at 40 %
+insertion: proc 25 at 50 %
+insertion: proc 25 at 60 %
+insertion: proc 25 at 70 %
+insertion: proc 25 at 80 %
+insertion: proc 25 at 90 %
+insertion: proc 9 at 30 %
+insertion: proc 9 at 30 %
+insertion: proc 9 at 40 %
+insertion: proc 13 at 30 %
+insertion: proc 13 at 40 %
+insertion: proc 13 at 50 %
+insertion: proc 13 at 60 %
+insertion: proc 13 at 70 %
+insertion: proc 13 at 80 %
+insertion: proc 30 at 40 %
+insertion: proc 30 at 50 %
+insertion: proc 30 at 60 %
+insertion: proc 30 at 70 %
+insertion: proc 30 at 80 %
+insertion: proc 30 at 90 %
+insertion: proc 12 at 30 %
+insertion: proc 12 at 40 %
+insertion: proc 12 at 50 %
+insertion: proc 12 at 60 %
+insertion: proc 12 at 70 %
+insertion: proc 12 at 80 %
+insertion: proc 12 at 90 %
+insertion: proc 9 at 50 %
+insertion: proc 9 at 60 %
+insertion: proc 9 at 70 %
+insertion: proc 9 at 80 %
+insertion: proc 9 at 90 %
+insertion: proc 9 at 100 %
+insertion: proc 23 at 30 %
+insertion: proc 13 at 90 %
+insertion: proc 13 at 100 %
+insertion: proc 12 at 100 %
+insertion: proc 31 at 40 %
+insertion: proc 31 at 50 %
+insertion: proc 31 at 60 %
+insertion: proc 31 at 70 %
+insertion: proc 31 at 80 %
+insertion: proc 31 at 90 %
+insertion: proc 4 at 30 %
+insertion: proc 4 at 40 %
+insertion: proc 4 at 50 %
+insertion: proc 26 at 30 %
+insertion: proc 26 at 30 %
+insertion: proc 4 at 60 %
+insertion: proc 4 at 70 %
+insertion: proc 4 at 80 %
+insertion: proc 26 at 40 %
+insertion: proc 26 at 50 %
+insertion: proc 26 at 60 %
+insertion: proc 26 at 70 %
+insertion: proc 26 at 80 %
+insertion: proc 26 at 90 %
+insertion: proc 20 at 30 %
+insertion: proc 20 at 40 %
+insertion: proc 20 at 50 %
+insertion: proc 20 at 60 %
+insertion: proc 1 at 40 %
+insertion: proc 1 at 50 %
+insertion: proc 1 at 60 %
+insertion: proc 1 at 70 %
+insertion: proc 1 at 80 %
+insertion: proc 1 at 90 %
+insertion: proc 15 at 40 %
+insertion: proc 15 at 50 %
+insertion: proc 15 at 60 %
+insertion: proc 4 at 90 %
+insertion: proc 20 at 70 %
+insertion: proc 20 at 80 %
+insertion: proc 20 at 90 %
+insertion: proc 24 at 40 %
+insertion: proc 24 at 50 %
+insertion: proc 24 at 60 %
+insertion: proc 27 at 40 %
+insertion: proc 27 at 50 %
+insertion: proc 27 at 60 %
+insertion: proc 27 at 70 %
+insertion: proc 27 at 80 %
+insertion: proc 27 at 90 %
+insertion: proc 11 at 30 %
+insertion: proc 11 at 40 %
+insertion: proc 11 at 50 %
+insertion: proc 11 at 60 %
+insertion: proc 15 at 70 %
+insertion: proc 15 at 80 %
+insertion: proc 15 at 90 %
+insertion: proc 23 at 40 %
+insertion: proc 23 at 50 %
+insertion: proc 23 at 60 %
+insertion: proc 17 at 40 %
+insertion: proc 17 at 50 %
+insertion: proc 17 at 60 %
+insertion: proc 17 at 70 %
+insertion: proc 20 at 100 %
+insertion: proc 24 at 70 %
+insertion: proc 24 at 80 %
+insertion: proc 24 at 90 %
+insertion: proc 11 at 70 %
+insertion: proc 11 at 80 %
+insertion: proc 11 at 90 %
+insertion: proc 11 at 100 %
+insertion: proc 10 at 30 %
+insertion: proc 23 at 70 %
+insertion: proc 23 at 80 %
+insertion: proc 23 at 90 %
+insertion: proc 21 at 30 %
+insertion: proc 17 at 80 %
+insertion: proc 17 at 90 %
+insertion: proc 3 at 40 %
+insertion: proc 3 at 50 %
+insertion: proc 3 at 60 %
+insertion: proc 3 at 70 %
+insertion: proc 3 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 10 at 40 %
+insertion: proc 10 at 50 %
+insertion: proc 10 at 60 %
+insertion: proc 6 at 40 %
+insertion: proc 6 at 50 %
+insertion: proc 6 at 60 %
+insertion: proc 6 at 70 %
+insertion: proc 6 at 80 %
+insertion: proc 6 at 90 %
+insertion: proc 10 at 70 %
+insertion: proc 10 at 80 %
+insertion: proc 10 at 90 %
+insertion: proc 7 at 40 %
+insertion: proc 7 at 50 %
+insertion: proc 7 at 60 %
+insertion: proc 7 at 70 %
+insertion: proc 7 at 80 %
+insertion: proc 7 at 90 %
+insertion: proc 10 at 100 %
+insertion: proc 29 at 40 %
+insertion: proc 29 at 50 %
+insertion: proc 29 at 60 %
+insertion: proc 29 at 70 %
+insertion: proc 29 at 80 %
+insertion: proc 29 at 90 %
+insertion: proc 29 at 100 %
+insertion: proc 21 at 40 %
+insertion: proc 21 at 50 %
+insertion: proc 5 at 40 %
+insertion: proc 5 at 50 %
+insertion: proc 5 at 60 %
+insertion: proc 5 at 70 %
+insertion: proc 5 at 80 %
+insertion: proc 5 at 90 %
+insertion: proc 21 at 60 %
+insertion: proc 21 at 70 %
+insertion: proc 21 at 80 %
+insertion: proc 21 at 90 %
+insertion: proc 21 at 100 %
+INFO: Particle insertion ins1: inserted 2899 particle templates (mass 8.003477e-05) at step 1
+ - a total of 2899 particle templates (mass 8.003477e-05) inserted so far.
+       1 
+Loop time of 0.600141 on 32 procs for 1 steps with 269607 atoms, finish time Fri Sep  8 10:30:37 2023
+
+
+Pair  time (%) = 0.11804 (19.6688)
+Neigh time (%) = 0.309231 (51.5264)
+Comm  time (%) = 0.0199113 (3.31777)
+Outpt time (%) = 0.0925137 (15.4153)
+Other time (%) = 0.0604444 (10.0717)
+
+Nlocal:    8425.22 ave 9726 max 7304 min
+Histogram: 5 3 0 3 9 4 0 0 5 3
+Nghost:    25625.4 ave 30815 max 21435 min
+Histogram: 3 3 3 6 6 2 2 2 4 1
+Neighs:    4.2396e+06 ave 5.66024e+06 max 3.00259e+06 min
+Histogram: 2 4 1 10 4 3 0 1 4 3
+
+Total # of neighbors = 135667281
+Ave neighs/atom = 503.204
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+269607 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 5.35e-06 reset 1000 threshold 1.00e-06 start_dt 2.616e-11 end_dt 1.570e-08
+run               100000
+Setting up run at Fri Sep  8 10:30:37 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 159.4 Mbytes
+    Step 
+       1 
+pre-run, step: 1000, ke/mass=2.222e+04, natoms=269607, overlap=9.325e-03, cor=1.047e-01, dt=6.238e-11 nbody: 2899 
+pre-run, step: 2000, ke/mass=2.078e+04, natoms=269607, overlap=5.645e-03, cor=1.047e-01, dt=1.488e-10 nbody: 2899 
+pre-run, step: 3000, ke/mass=1.936e+04, natoms=269607, overlap=5.962e-03, cor=1.047e-01, dt=3.547e-10 nbody: 2899 
+pre-run, step: 4000, ke/mass=1.807e+04, natoms=269607, overlap=7.812e-03, cor=1.047e-01, dt=8.460e-10 nbody: 2899 
+pre-run, step: 5000, ke/mass=1.676e+04, natoms=269607, overlap=6.792e-03, cor=1.047e-01, dt=2.017e-09 nbody: 2899 
+pre-run, step: 6000, ke/mass=1.564e+04, natoms=269607, overlap=6.190e-03, cor=1.047e-01, dt=4.811e-09 nbody: 2899 
+pre-run, step: 7000, ke/mass=1.473e+04, natoms=269607, overlap=1.105e-02, cor=1.047e-01, dt=1.147e-08 nbody: 2899 
+pre-run, step: 8000, ke/mass=1.363e+04, natoms=269607, overlap=1.512e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 9000, ke/mass=1.254e+04, natoms=269607, overlap=1.731e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 10000, ke/mass=1.149e+04, natoms=269607, overlap=5.979e-03, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 11000, ke/mass=1.052e+04, natoms=269607, overlap=1.657e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 12000, ke/mass=9.623e+03, natoms=269607, overlap=3.889e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 13000, ke/mass=8.882e+03, natoms=269607, overlap=1.671e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 14000, ke/mass=8.207e+03, natoms=269607, overlap=2.611e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 15000, ke/mass=7.558e+03, natoms=269607, overlap=5.926e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 16000, ke/mass=7.001e+03, natoms=269607, overlap=9.391e-02, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 17000, ke/mass=6.473e+03, natoms=269607, overlap=1.272e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 18000, ke/mass=5.983e+03, natoms=269607, overlap=1.587e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 19000, ke/mass=5.538e+03, natoms=269607, overlap=1.886e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 20000, ke/mass=5.123e+03, natoms=269607, overlap=2.170e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 21000, ke/mass=4.746e+03, natoms=269607, overlap=2.439e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 22000, ke/mass=4.404e+03, natoms=269607, overlap=2.694e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 23000, ke/mass=4.090e+03, natoms=269607, overlap=2.938e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 24000, ke/mass=3.803e+03, natoms=269607, overlap=3.172e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 25000, ke/mass=3.542e+03, natoms=269607, overlap=3.395e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 26000, ke/mass=3.300e+03, natoms=269607, overlap=3.610e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 27000, ke/mass=3.079e+03, natoms=269607, overlap=3.818e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 28000, ke/mass=2.874e+03, natoms=269607, overlap=4.018e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 29000, ke/mass=2.685e+03, natoms=269607, overlap=4.212e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 30000, ke/mass=2.510e+03, natoms=269607, overlap=4.398e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 31000, ke/mass=2.349e+03, natoms=269607, overlap=4.578e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 32000, ke/mass=2.202e+03, natoms=269607, overlap=4.752e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 33000, ke/mass=2.068e+03, natoms=269607, overlap=4.921e-01, cor=1.047e-01, dt=1.644e-08 nbody: 2899 
+pre-run, step: 34000, ke/mass=1.942e+03, natoms=269607, overlap=5.084e-01, cor=1.054e-01, dt=1.655e-08 nbody: 2899 
+pre-run, step: 35000, ke/mass=1.825e+03, natoms=269607, overlap=5.241e-01, cor=1.071e-01, dt=1.682e-08 nbody: 2899 
+pre-run, step: 36000, ke/mass=1.717e+03, natoms=269607, overlap=5.391e-01, cor=1.093e-01, dt=1.715e-08 nbody: 2899 
+pre-run, step: 37000, ke/mass=1.619e+03, natoms=269607, overlap=5.536e-01, cor=1.119e-01, dt=1.757e-08 nbody: 2899 
+pre-run, step: 38000, ke/mass=1.528e+03, natoms=269607, overlap=5.676e-01, cor=1.151e-01, dt=1.808e-08 nbody: 2899 
+pre-run, step: 39000, ke/mass=1.443e+03, natoms=269607, overlap=5.811e-01, cor=1.191e-01, dt=1.870e-08 nbody: 2899 
+pre-run, step: 40000, ke/mass=1.364e+03, natoms=269607, overlap=5.942e-01, cor=1.239e-01, dt=1.946e-08 nbody: 2899 
+pre-run, step: 41000, ke/mass=1.291e+03, natoms=269607, overlap=6.068e-01, cor=1.296e-01, dt=2.035e-08 nbody: 2899 
+pre-run, step: 42000, ke/mass=1.224e+03, natoms=269607, overlap=6.189e-01, cor=1.363e-01, dt=2.140e-08 nbody: 2899 
+pre-run, step: 43000, ke/mass=1.160e+03, natoms=269607, overlap=6.305e-01, cor=1.440e-01, dt=2.262e-08 nbody: 2899 
+pre-run, step: 44000, ke/mass=1.100e+03, natoms=269607, overlap=6.416e-01, cor=1.529e-01, dt=2.401e-08 nbody: 2899 
+pre-run, step: 45000, ke/mass=1.045e+03, natoms=269607, overlap=6.523e-01, cor=1.631e-01, dt=2.561e-08 nbody: 2899 
+pre-run, step: 46000, ke/mass=9.918e+02, natoms=269607, overlap=6.625e-01, cor=1.745e-01, dt=2.739e-08 nbody: 2899 
+pre-run, step: 47000, ke/mass=9.415e+02, natoms=269607, overlap=6.723e-01, cor=1.870e-01, dt=2.937e-08 nbody: 2899 
+pre-run, step: 48000, ke/mass=8.936e+02, natoms=269607, overlap=6.817e-01, cor=2.007e-01, dt=3.152e-08 nbody: 2899 
+pre-run, step: 49000, ke/mass=8.487e+02, natoms=269607, overlap=6.907e-01, cor=2.158e-01, dt=3.388e-08 nbody: 2899 
+pre-run, step: 50000, ke/mass=8.074e+02, natoms=269607, overlap=6.994e-01, cor=2.321e-01, dt=3.645e-08 nbody: 2899 
+pre-run, step: 51000, ke/mass=7.684e+02, natoms=269607, overlap=7.079e-01, cor=2.497e-01, dt=3.921e-08 nbody: 2899 
+pre-run, step: 52000, ke/mass=7.322e+02, natoms=269607, overlap=7.160e-01, cor=2.683e-01, dt=4.213e-08 nbody: 2899 
+pre-run, step: 53000, ke/mass=6.985e+02, natoms=269607, overlap=7.239e-01, cor=2.879e-01, dt=4.520e-08 nbody: 2899 
+pre-run, step: 54000, ke/mass=6.673e+02, natoms=269607, overlap=7.314e-01, cor=3.082e-01, dt=4.839e-08 nbody: 2899 
+pre-run, step: 55000, ke/mass=6.383e+02, natoms=269607, overlap=7.386e-01, cor=3.292e-01, dt=5.168e-08 nbody: 2899 
+pre-run, step: 56000, ke/mass=6.112e+02, natoms=269607, overlap=7.456e-01, cor=3.507e-01, dt=5.507e-08 nbody: 2899 
+pre-run, step: 57000, ke/mass=5.853e+02, natoms=269607, overlap=7.524e-01, cor=3.728e-01, dt=5.854e-08 nbody: 2899 
+pre-run, step: 58000, ke/mass=5.608e+02, natoms=269607, overlap=7.591e-01, cor=3.954e-01, dt=6.207e-08 nbody: 2899 
+pre-run, step: 59000, ke/mass=5.375e+02, natoms=269607, overlap=7.655e-01, cor=4.181e-01, dt=6.565e-08 nbody: 2899 
+pre-run, step: 60000, ke/mass=5.157e+02, natoms=269607, overlap=7.717e-01, cor=4.409e-01, dt=6.922e-08 nbody: 2899 
+pre-run, step: 61000, ke/mass=4.943e+02, natoms=269607, overlap=7.778e-01, cor=4.634e-01, dt=7.277e-08 nbody: 2899 
+pre-run, step: 62000, ke/mass=4.740e+02, natoms=269607, overlap=7.835e-01, cor=4.856e-01, dt=7.625e-08 nbody: 2899 
+pre-run, step: 63000, ke/mass=4.547e+02, natoms=269607, overlap=7.891e-01, cor=5.073e-01, dt=7.966e-08 nbody: 2899 
+pre-run, step: 64000, ke/mass=4.359e+02, natoms=269607, overlap=7.945e-01, cor=5.285e-01, dt=8.298e-08 nbody: 2899 
+pre-run, step: 65000, ke/mass=4.184e+02, natoms=269607, overlap=7.998e-01, cor=5.490e-01, dt=8.620e-08 nbody: 2899 
+pre-run, step: 66000, ke/mass=4.021e+02, natoms=269607, overlap=8.048e-01, cor=5.687e-01, dt=8.929e-08 nbody: 2899 
+pre-run, step: 67000, ke/mass=3.866e+02, natoms=269607, overlap=8.096e-01, cor=5.876e-01, dt=9.226e-08 nbody: 2899 
+pre-run, step: 68000, ke/mass=3.717e+02, natoms=269607, overlap=8.135e-01, cor=6.028e-01, dt=9.464e-08 nbody: 2899 
+pre-run, step: 69000, ke/mass=3.574e+02, natoms=269607, overlap=8.167e-01, cor=6.153e-01, dt=9.662e-08 nbody: 2899 
+pre-run, step: 70000, ke/mass=3.436e+02, natoms=269607, overlap=8.190e-01, cor=6.242e-01, dt=9.801e-08 nbody: 2899 
+pre-run, step: 71000, ke/mass=3.302e+02, natoms=269607, overlap=8.206e-01, cor=6.303e-01, dt=9.895e-08 nbody: 2899 
+pre-run, step: 72000, ke/mass=3.173e+02, natoms=269607, overlap=8.159e-01, cor=6.356e-01, dt=9.978e-08 nbody: 2899 
+pre-run, step: 73000, ke/mass=3.051e+02, natoms=269607, overlap=8.234e-01, cor=6.408e-01, dt=1.006e-07 nbody: 2899 
+pre-run, step: 74000, ke/mass=2.937e+02, natoms=269607, overlap=8.153e-01, cor=6.433e-01, dt=1.010e-07 nbody: 2899 
+pre-run, step: 75000, ke/mass=2.828e+02, natoms=269607, overlap=8.179e-01, cor=6.465e-01, dt=1.015e-07 nbody: 2899 
+pre-run, step: 76000, ke/mass=2.722e+02, natoms=269607, overlap=8.208e-01, cor=6.514e-01, dt=1.023e-07 nbody: 2899 
+pre-run, step: 77000, ke/mass=2.621e+02, natoms=269607, overlap=8.240e-01, cor=6.566e-01, dt=1.031e-07 nbody: 2899 
+pre-run, step: 78000, ke/mass=2.524e+02, natoms=269607, overlap=8.268e-01, cor=6.619e-01, dt=1.039e-07 nbody: 2899 
+pre-run, step: 79000, ke/mass=2.433e+02, natoms=269607, overlap=8.294e-01, cor=6.682e-01, dt=1.049e-07 nbody: 2899 
+pre-run, step: 80000, ke/mass=2.346e+02, natoms=269607, overlap=8.330e-01, cor=6.768e-01, dt=1.063e-07 nbody: 2899 
+pre-run, step: 81000, ke/mass=2.261e+02, natoms=269607, overlap=8.345e-01, cor=6.819e-01, dt=1.071e-07 nbody: 2899 
+pre-run, step: 82000, ke/mass=2.178e+02, natoms=269607, overlap=8.359e-01, cor=6.868e-01, dt=1.078e-07 nbody: 2899 
+pre-run, step: 83000, ke/mass=2.099e+02, natoms=269607, overlap=8.368e-01, cor=6.902e-01, dt=1.084e-07 nbody: 2899 
+pre-run, step: 84000, ke/mass=2.023e+02, natoms=269607, overlap=8.374e-01, cor=6.921e-01, dt=1.087e-07 nbody: 2899 
+pre-run, step: 85000, ke/mass=1.952e+02, natoms=269607, overlap=8.380e-01, cor=6.965e-01, dt=1.094e-07 nbody: 2899 
+pre-run, step: 86000, ke/mass=1.883e+02, natoms=269607, overlap=8.386e-01, cor=7.023e-01, dt=1.103e-07 nbody: 2899 
+pre-run, step: 87000, ke/mass=1.818e+02, natoms=269607, overlap=8.392e-01, cor=7.088e-01, dt=1.113e-07 nbody: 2899 
+pre-run, step: 88000, ke/mass=1.755e+02, natoms=269607, overlap=8.398e-01, cor=7.148e-01, dt=1.122e-07 nbody: 2899 
+pre-run, step: 89000, ke/mass=1.695e+02, natoms=269607, overlap=8.405e-01, cor=7.192e-01, dt=1.129e-07 nbody: 2899 
+pre-run, step: 90000, ke/mass=1.637e+02, natoms=269607, overlap=8.412e-01, cor=7.235e-01, dt=1.136e-07 nbody: 2899 
+pre-run, step: 91000, ke/mass=1.583e+02, natoms=269607, overlap=8.418e-01, cor=7.277e-01, dt=1.143e-07 nbody: 2899 
+pre-run, step: 92000, ke/mass=1.530e+02, natoms=269607, overlap=8.425e-01, cor=7.304e-01, dt=1.147e-07 nbody: 2899 
+pre-run, step: 93000, ke/mass=1.480e+02, natoms=269607, overlap=8.432e-01, cor=7.313e-01, dt=1.148e-07 nbody: 2899 
+pre-run, step: 94000, ke/mass=1.431e+02, natoms=269607, overlap=8.439e-01, cor=7.323e-01, dt=1.150e-07 nbody: 2899 
+pre-run, step: 95000, ke/mass=1.384e+02, natoms=269607, overlap=8.445e-01, cor=7.335e-01, dt=1.152e-07 nbody: 2899 
+pre-run, step: 96000, ke/mass=1.340e+02, natoms=269607, overlap=8.451e-01, cor=7.377e-01, dt=1.158e-07 nbody: 2899 
+pre-run, step: 97000, ke/mass=1.298e+02, natoms=269607, overlap=8.458e-01, cor=7.397e-01, dt=1.161e-07 nbody: 2899 
+pre-run, step: 98000, ke/mass=1.257e+02, natoms=269607, overlap=8.465e-01, cor=7.405e-01, dt=1.163e-07 nbody: 2899 
+pre-run, step: 99000, ke/mass=1.218e+02, natoms=269607, overlap=8.471e-01, cor=7.412e-01, dt=1.164e-07 nbody: 2899 
+pre-run, step: 100000, ke/mass=1.180e+02, natoms=269607, overlap=8.477e-01, cor=7.420e-01, dt=1.165e-07 nbody: 2899 
+  100001 
+Loop time of 47856.8 on 32 procs for 100000 steps with 269607 atoms, finish time Fri Sep  8 23:48:14 2023
+
+
+Pair  time (%) = 7800.19 (16.299)
+Neigh time (%) = 25879.3 (54.0765)
+Comm  time (%) = 802.058 (1.67595)
+Outpt time (%) = 0.0698454 (0.000145947)
+Other time (%) = 13375.2 (27.9483)
+
+Nlocal:    8425.22 ave 9680 max 7333 min
+Histogram: 5 3 1 4 6 4 2 1 2 4
+Nghost:    26824.5 ave 30970 max 22363 min
+Histogram: 2 4 2 0 9 5 2 0 3 5
+Neighs:    4.24403e+06 ave 5.51638e+06 max 3.24531e+06 min
+Histogram: 6 2 1 6 7 2 0 2 2 4
+
+Total # of neighbors = 135809075
+Ave neighs/atom = 503.73
+Neighbor list builds = 100000
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          1.5697e-09
+
+fix               leboundary all lebc 100.0 true gtemp 1.00e-06
+
+# Run desired simulation
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Fri Sep  8 23:48:14 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:   13:14:14
+ Wall time:   13:17:52
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Fri Sep  8 23:48:14 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 159.808 Mbytes
+    Step 
+  100001 
+102501 2500 body_count: 2899 atom_count: 269607 2.542e+06 2.581e+06 4.893e+03 2.621e+07 2.605e+07 -2.587e+05
+105001 5000 body_count: 2899 atom_count: 269607 1.646e+06 1.683e+06 4.079e+03 1.629e+07 1.617e+07 -1.235e+05
+107501 7500 body_count: 2899 atom_count: 269607 1.210e+06 1.236e+06 3.311e+03 1.196e+07 1.185e+07 -7.033e+04
+  110001 
+110001 10000 body_count: 2899 atom_count: 269607 9.591e+05 9.805e+05 2.002e+03 9.457e+06 9.379e+06 -5.345e+04
+Loop time of 4677.06 on 32 procs for 10000 steps with 269607 atoms, finish time Sat Sep  9 01:06:12 2023
+
+
+Pair  time (%) = 759.058 (16.2294)
+Neigh time (%) = 2745.52 (58.7018)
+Comm  time (%) = 137.361 (2.93691)
+Outpt time (%) = 0.0516312 (0.00110392)
+Other time (%) = 1035.07 (22.1308)
+
+Nlocal:    8425.22 ave 9086 max 7048 min
+Histogram: 3 0 2 1 1 2 4 6 4 9
+Nghost:    32489.2 ave 42513 max 25610 min
+Histogram: 8 8 0 0 4 0 3 5 0 4
+Neighs:    4.76876e+06 ave 5.70152e+06 max 3.26335e+06 min
+Histogram: 4 0 2 2 0 2 8 4 4 6
+
+Total # of neighbors = 152600269
+Ave neighs/atom = 566.01
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Sat Sep  9 01:06:12 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:   14:32:00
+ Wall time:   14:35:50
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Sat Sep  9 01:06:12 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 205.318 Mbytes
+    Step 
+  110001 
+112501 12500 body_count: 2899 atom_count: 269607 7.697e+05 7.871e+05 1.585e+03 7.612e+06 7.553e+06 -4.275e+04
+115001 15000 body_count: 2899 atom_count: 269607 6.435e+05 6.579e+05 1.285e+03 6.369e+06 6.321e+06 -3.606e+04
+117501 17500 body_count: 2899 atom_count: 269607 5.532e+05 5.656e+05 1.074e+03 5.479e+06 5.438e+06 -3.127e+04
+  120001 
+120001 20000 body_count: 2899 atom_count: 269607 4.854e+05 4.962e+05 9.091e+02 4.810e+06 4.773e+06 -2.711e+04
+Loop time of 4513.14 on 32 procs for 10000 steps with 269607 atoms, finish time Sat Sep  9 02:21:25 2023
+
+
+Pair  time (%) = 755.638 (16.743)
+Neigh time (%) = 2701.46 (59.8576)
+Comm  time (%) = 131.869 (2.92189)
+Outpt time (%) = 0.0488327 (0.00108201)
+Other time (%) = 924.127 (20.4763)
+
+Nlocal:    8425.22 ave 9073 max 7219 min
+Histogram: 3 1 1 2 0 3 4 5 10 3
+Nghost:    32431.7 ave 42510 max 26129 min
+Histogram: 9 7 0 0 4 0 3 5 0 4
+Neighs:    4.79476e+06 ave 5.66434e+06 max 3.4985e+06 min
+Histogram: 4 1 2 1 0 3 7 6 4 4
+
+Total # of neighbors = 153432198
+Ave neighs/atom = 569.096
+Neighbor list builds = 10000
+Dangerous builds = 0
+info time
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+Printed on Sat Sep  9 02:21:25 2023
+
+
+Total time information (MPI rank 0):
+  CPU time:   15:47:02
+ Wall time:   15:51:03
+
+Info-Info-Info-Info-Info-Info-Info-Info-Info-Info-Info
+
+run 10000
+Setting up run at Sat Sep  9 02:21:25 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 205.318 Mbytes
+    Step 
+  120001 
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.

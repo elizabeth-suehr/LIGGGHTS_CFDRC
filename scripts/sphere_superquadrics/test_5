@@ -1,0 +1,428 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-14-10:21:35 by liz.suehr, git commit 357ff034cff53320eeedb4a37627805705ae7ff9)
+communicate       single vel yes
+units             si
+log               log.shear.cyl6_5.liggghts
+atom_modify       map array
+
+processors        3 3 2
+
+# Set domain
+region            domain block 0.0 6.49340e-04 0.0 6.49340e-04 0.0 3.24670e-04 units box volume_limit 1e-16
+create_box        1 domain
+Created orthogonal box = (0 0 0) to (0.00064934 0.00064934 0.00032467)
+  3 by 3 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          6.633e-05 bin
+neigh_modify      every 1 delay 0 check no
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 1 0.95
+fix               m4 all property/global coefficientFriction peratomtypepair 1 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 1 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history surface superquadric
+WARNING: 
+	The contact model you specified is not located in any whitelist.
+	Because of this the model will be run in an unoptimized version (increasing runtime by up to 20%).
+	In order to optimize this model you have the following options:
+		(i)  Run the genAutoExamplesWhitelist.sh script in your LIGGGHTS(R) source folder to automatically parse the input script
+		(ii) Add the model combination by hand to your style_contact_model_user.whitelist that can be found in your LIGGGHTS(R) source folder
+		(iii) Use the ENABLE_MODEL_* flag when building with cmake.
+	If you perform one of the steps above LIGGGHTS(R) needs to be recompiled to generate the optimized code.
+
+ (../contact_models.h:365)
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/superquadric 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 shape constant 0.000010 0.000010 0.000060 blockiness constant 10.000000 2.000000
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=1.216674e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=1.216674e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 100000 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 1000000 volumefraction_region 0.4
+# Apply integration fix
+fix		          integr all nve/superquadric
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 1 0.1
+# Run one step to get particles inserted
+run               1
+Setting up run at Thu Sep 14 11:48:56 2023
+
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 19.1299 Mbytes
+    Step    Atoms         KinEng            CPU 
+       0        0              0              0 
+insertion: proc 0 at 0 %
+insertion: proc 0 at 10 %
+insertion: proc 1 at 0 %
+insertion: proc 1 at 10 %
+insertion: proc 2 at 0 %
+insertion: proc 2 at 10 %
+insertion: proc 3 at 0 %
+insertion: proc 3 at 10 %
+insertion: proc 4 at 0 %
+insertion: proc 4 at 10 %
+insertion: proc 5 at 0 %
+insertion: proc 5 at 10 %
+insertion: proc 6 at 0 %
+insertion: proc 6 at 10 %
+insertion: proc 7 at 0 %
+insertion: proc 7 at 10 %
+insertion: proc 8 at 0 %
+insertion: proc 9 at 0 %
+insertion: proc 10 at 0 %
+insertion: proc 10 at 10 %
+insertion: proc 11 at 0 %
+insertion: proc 11 at 10 %
+insertion: proc 12 at 0 %
+insertion: proc 12 at 10 %
+insertion: proc 13 at 0 %
+insertion: proc 13 at 10 %
+insertion: proc 13 at 20 %
+insertion: proc 14 at 0 %
+insertion: proc 14 at 10 %
+insertion: proc 15 at 0 %
+insertion: proc 15 at 10 %
+insertion: proc 16 at 0 %
+insertion: proc 16 at 10 %
+insertion: proc 17 at 0 %
+insertion: proc 17 at 10 %
+insertion: proc 17 at 20 %
+insertion: proc 4 at 20 %
+insertion: proc 8 at 10 %
+insertion: proc 16 at 20 %
+insertion: proc 12 at 20 %
+insertion: proc 0 at 20 %
+insertion: proc 1 at 20 %
+insertion: proc 5 at 20 %
+insertion: proc 9 at 10 %
+insertion: proc 17 at 30 %
+insertion: proc 15 at 20 %
+insertion: proc 16 at 30 %
+insertion: proc 1 at 30 %
+insertion: proc 7 at 20 %
+insertion: proc 14 at 20 %
+insertion: proc 11 at 20 %
+insertion: proc 3 at 20 %
+insertion: proc 10 at 20 %
+insertion: proc 2 at 20 %
+insertion: proc 4 at 30 %
+insertion: proc 12 at 30 %
+insertion: proc 6 at 20 %
+insertion: proc 5 at 30 %
+insertion: proc 0 at 30 %
+insertion: proc 13 at 30 %
+insertion: proc 12 at 40 %
+insertion: proc 12 at 50 %
+insertion: proc 12 at 60 %
+insertion: proc 12 at 70 %
+insertion: proc 12 at 80 %
+insertion: proc 12 at 90 %
+insertion: proc 12 at 100 %
+insertion: proc 17 at 40 %
+insertion: proc 17 at 50 %
+insertion: proc 17 at 60 %
+insertion: proc 17 at 70 %
+insertion: proc 17 at 80 %
+insertion: proc 17 at 90 %
+insertion: proc 17 at 100 %
+insertion: proc 16 at 40 %
+insertion: proc 16 at 50 %
+insertion: proc 16 at 60 %
+insertion: proc 16 at 70 %
+insertion: proc 16 at 80 %
+insertion: proc 16 at 90 %
+insertion: proc 16 at 100 %
+insertion: proc 10 at 30 %
+insertion: proc 10 at 40 %
+insertion: proc 10 at 50 %
+insertion: proc 10 at 60 %
+insertion: proc 10 at 70 %
+insertion: proc 10 at 80 %
+insertion: proc 10 at 90 %
+insertion: proc 7 at 30 %
+insertion: proc 7 at 40 %
+insertion: proc 7 at 50 %
+insertion: proc 7 at 60 %
+insertion: proc 7 at 70 %
+insertion: proc 7 at 80 %
+insertion: proc 7 at 90 %
+insertion: proc 15 at 30 %
+insertion: proc 15 at 40 %
+insertion: proc 15 at 50 %
+insertion: proc 15 at 60 %
+insertion: proc 15 at 70 %
+insertion: proc 15 at 80 %
+insertion: proc 15 at 90 %
+insertion: proc 15 at 100 %
+insertion: proc 4 at 40 %
+insertion: proc 4 at 50 %
+insertion: proc 4 at 60 %
+insertion: proc 4 at 70 %
+insertion: proc 4 at 80 %
+insertion: proc 4 at 90 %
+insertion: proc 4 at 100 %
+insertion: proc 14 at 30 %
+insertion: proc 14 at 40 %
+insertion: proc 14 at 50 %
+insertion: proc 14 at 60 %
+insertion: proc 14 at 70 %
+insertion: proc 14 at 80 %
+insertion: proc 14 at 90 %
+insertion: proc 11 at 30 %
+insertion: proc 11 at 40 %
+insertion: proc 11 at 50 %
+insertion: proc 11 at 60 %
+insertion: proc 11 at 70 %
+insertion: proc 11 at 80 %
+insertion: proc 11 at 90 %
+insertion: proc 11 at 100 %
+insertion: proc 3 at 30 %
+insertion: proc 3 at 40 %
+insertion: proc 3 at 50 %
+insertion: proc 3 at 60 %
+insertion: proc 3 at 70 %
+insertion: proc 3 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 8 at 20 %
+insertion: proc 8 at 30 %
+insertion: proc 8 at 40 %
+insertion: proc 8 at 50 %
+insertion: proc 8 at 60 %
+insertion: proc 8 at 70 %
+insertion: proc 8 at 80 %
+insertion: proc 8 at 90 %
+insertion: proc 8 at 100 %
+insertion: proc 0 at 40 %
+insertion: proc 0 at 50 %
+insertion: proc 0 at 60 %
+insertion: proc 0 at 70 %
+insertion: proc 0 at 80 %
+insertion: proc 0 at 90 %
+insertion: proc 0 at 100 %
+insertion: proc 1 at 40 %
+insertion: proc 1 at 50 %
+insertion: proc 1 at 60 %
+insertion: proc 1 at 70 %
+insertion: proc 1 at 80 %
+insertion: proc 1 at 90 %
+insertion: proc 1 at 100 %
+insertion: proc 13 at 40 %
+insertion: proc 13 at 50 %
+insertion: proc 13 at 60 %
+insertion: proc 13 at 70 %
+insertion: proc 13 at 80 %
+insertion: proc 13 at 90 %
+insertion: proc 13 at 100 %
+insertion: proc 5 at 40 %
+insertion: proc 5 at 50 %
+insertion: proc 5 at 60 %
+insertion: proc 5 at 70 %
+insertion: proc 5 at 80 %
+insertion: proc 5 at 90 %
+insertion: proc 5 at 100 %
+insertion: proc 5 at 110 %
+insertion: proc 6 at 30 %
+insertion: proc 6 at 40 %
+insertion: proc 6 at 50 %
+insertion: proc 6 at 60 %
+insertion: proc 6 at 70 %
+insertion: proc 6 at 80 %
+insertion: proc 6 at 90 %
+insertion: proc 6 at 100 %
+insertion: proc 6 at 110 %
+insertion: proc 2 at 30 %
+insertion: proc 2 at 40 %
+insertion: proc 2 at 50 %
+insertion: proc 2 at 60 %
+insertion: proc 2 at 70 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 9 at 20 %
+insertion: proc 9 at 30 %
+insertion: proc 9 at 40 %
+insertion: proc 9 at 50 %
+insertion: proc 9 at 60 %
+insertion: proc 9 at 70 %
+insertion: proc 9 at 80 %
+insertion: proc 9 at 90 %
+insertion: proc 9 at 100 %
+INFO: Particle insertion ins1: inserted 1493 particle templates (mass 1.369537e-07) at step 1
+ - a total of 1493 particle templates (mass 1.369537e-07) inserted so far.
+       1     1493              0      1.5902137 
+Loop time of 1.59726 on 18 procs for 1 steps with 1493 atoms, finish time Thu Sep 14 11:48:58 2023
+
+
+Pair  time (%) = 0.00325297 (0.20366)
+Neigh time (%) = 0.00159352 (0.0997663)
+Comm  time (%) = 0.00132788 (0.0831349)
+Outpt time (%) = 0.00121712 (0.0762008)
+Other time (%) = 1.58987 (99.5372)
+
+Nlocal:    82.9444 ave 126 max 64 min
+Histogram: 8 0 0 0 8 0 0 0 0 2
+Nghost:    2041.89 ave 2263 max 1910 min
+Histogram: 6 2 0 0 3 5 0 0 0 2
+Neighs:    25132.5 ave 51436 max 14592 min
+Histogram: 8 0 0 8 0 0 0 0 0 2
+
+Total # of neighbors = 452385
+Ave neighs/atom = 303.004
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+1493 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 1 0.1
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 1.10e-06 reset 1000 threshold 1.00e-06 start_dt 1.291e-09 end_dt 1.291e-08
+run               10000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Thu Sep 14 11:48:58 2023
+
+Memory usage per processor = 23.8369 Mbytes
+    Step    Atoms         KinEng            CPU 
+       1     1493              0              0 
+pre-run, step: 1000, ke/mass=3.961e+02, natoms=1493, overlap=1.197e-05, cor=1.247e-01, dt=2.044e-09
+pre-run, step: 2000, ke/mass=8.272e+00, natoms=1493, overlap=1.415e-06, cor=1.447e-01, dt=3.237e-09
+pre-run, step: 3000, ke/mass=1.539e+00, natoms=1493, overlap=5.958e-07, cor=1.647e-01, dt=5.125e-09
+pre-run, step: 4000, ke/mass=5.799e-01, natoms=1493, overlap=3.168e-07, cor=1.847e-01, dt=8.114e-09
+pre-run, step: 5000, ke/mass=2.589e-01, natoms=1493, overlap=1.066e-07, cor=2.047e-01, dt=1.285e-08
+pre-run, step: 6000, ke/mass=1.373e-01, natoms=1493, overlap=3.414e-07, cor=2.247e-01, dt=2.034e-08
+pre-run, step: 7000, ke/mass=1.521e-01, natoms=1493, overlap=4.407e-07, cor=2.447e-01, dt=3.159e-08
+pre-run, step: 8000, ke/mass=6.324e-02, natoms=1493, overlap=1.078e-06, cor=2.647e-01, dt=3.417e-08
+pre-run, step: 9000, ke/mass=4.404e-02, natoms=1493, overlap=2.313e-07, cor=2.847e-01, dt=3.675e-08
+pre-run, step: 10000, ke/mass=4.108e-02, natoms=1493, overlap=3.472e-07, cor=3.047e-01, dt=3.933e-08
+   10001     1493  1.2820541e-08      44.476043 
+Loop time of 44.4783 on 18 procs for 10000 steps with 1493 atoms, finish time Thu Sep 14 11:49:42 2023
+
+
+Pair  time (%) = 16.2657 (36.5699)
+Neigh time (%) = 9.20665 (20.6992)
+Comm  time (%) = 6.17154 (13.8754)
+Outpt time (%) = 0.000290854 (0.000653923)
+Other time (%) = 12.8341 (28.8548)
+
+Nlocal:    82.9444 ave 92 max 71 min
+Histogram: 1 0 1 1 4 4 2 1 0 4
+Nghost:    1963.72 ave 2008 max 1929 min
+Histogram: 3 1 2 1 5 1 2 1 0 2
+Neighs:    22229.1 ave 24864 max 19548 min
+Histogram: 1 2 0 5 3 2 0 1 2 2
+
+Total # of neighbors = 400124
+Ave neighs/atom = 268
+Neighbor list builds = 10000
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 1 0.95
+unfix             limcheck
+# Run briefly to eliminate potential overlaps
+fix               limcheck1 all slowinit xmax 1.10e-06 reset 1000 threshold 1.00e-06 start_dt 8.291e-09 end_dt 1.291e-08
+run               10000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Thu Sep 14 11:49:42 2023
+
+Memory usage per processor = 23.8374 Mbytes
+    Step    Atoms         KinEng            CPU 
+   10001     1493              0              0 
+pre-run, step: 11000, ke/mass=8.124e-01, natoms=1493, overlap=2.959e-05, cor=1.247e-01, dt=1.610e-08
+pre-run, step: 12000, ke/mass=3.382e-01, natoms=1493, overlap=4.791e-05, cor=1.447e-01, dt=1.868e-08
+pre-run, step: 13000, ke/mass=1.382e-01, natoms=1493, overlap=1.849e-05, cor=1.647e-01, dt=2.126e-08
+pre-run, step: 14000, ke/mass=5.449e-02, natoms=1493, overlap=9.159e-05, cor=1.847e-01, dt=2.384e-08
+pre-run, step: 15000, ke/mass=2.659e-02, natoms=1493, overlap=2.696e-06, cor=2.047e-01, dt=2.642e-08
+pre-run, step: 16000, ke/mass=1.412e-02, natoms=1493, overlap=1.518e-05, cor=2.247e-01, dt=2.901e-08
+pre-run, step: 17000, ke/mass=8.320e-03, natoms=1493, overlap=1.497e-05, cor=2.447e-01, dt=3.159e-08
+pre-run, step: 18000, ke/mass=5.189e-03, natoms=1493, overlap=7.439e-06, cor=2.647e-01, dt=3.417e-08
+pre-run, step: 19000, ke/mass=3.550e-03, natoms=1493, overlap=1.043e-05, cor=2.847e-01, dt=3.675e-08
+pre-run, step: 20000, ke/mass=2.558e-03, natoms=1493, overlap=5.493e-06, cor=3.047e-01, dt=3.933e-08
+   20001     1493  8.2595489e-14      40.831477 
+Loop time of 40.8335 on 18 procs for 10000 steps with 1493 atoms, finish time Thu Sep 14 11:50:23 2023
+
+
+Pair  time (%) = 14.6461 (35.868)
+Neigh time (%) = 9.25725 (22.6707)
+Comm  time (%) = 6.20429 (15.1941)
+Outpt time (%) = 0.000352469 (0.000863186)
+Other time (%) = 10.7255 (26.2663)
+
+Nlocal:    82.9444 ave 93 max 75 min
+Histogram: 2 1 2 6 1 2 1 0 0 3
+Nghost:    1972.67 ave 1993 max 1951 min
+Histogram: 2 2 0 3 1 2 2 2 3 1
+Neighs:    22205.3 ave 25468 max 19816 min
+Histogram: 2 0 5 4 2 1 1 0 0 3
+
+Total # of neighbors = 399696
+Ave neighs/atom = 267.713
+Neighbor list builds = 10000
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 1 0.95
+unfix             limcheck1
+# Run briefly to eliminate potential overlaps
+fix               limcheck2 all slowinit xmax 1.10e-06 reset 1000 threshold 1.00e-08 start_dt 3.00e-08 end_dt 1.291e-08
+run               100000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Thu Sep 14 11:50:23 2023
+
+Memory usage per processor = 23.8374 Mbytes
+    Step    Atoms         KinEng            CPU 
+   20001     1493              0              0 
+pre-run, step: 21000, ke/mass=5.489e-03, natoms=1493, overlap=2.201e-05, cor=1.247e-01, dt=1.610e-08
+pre-run, step: 22000, ke/mass=2.308e-03, natoms=1493, overlap=1.685e-05, cor=1.447e-01, dt=1.868e-08
+pre-run, step: 23000, ke/mass=1.232e-03, natoms=1493, overlap=4.416e-06, cor=1.647e-01, dt=2.126e-08
+pre-run, step: 24000, ke/mass=5.838e-04, natoms=1493, overlap=3.342e-06, cor=1.847e-01, dt=2.384e-08
+pre-run, step: 25000, ke/mass=3.450e-04, natoms=1493, overlap=2.077e-05, cor=2.047e-01, dt=2.642e-08
+pre-run, step: 26000, ke/mass=1.985e-04, natoms=1493, overlap=2.575e-07, cor=2.247e-01, dt=2.901e-08
+pre-run, step: 27000, ke/mass=1.190e-04, natoms=1493, overlap=2.782e-06, cor=2.447e-01, dt=3.159e-08
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.

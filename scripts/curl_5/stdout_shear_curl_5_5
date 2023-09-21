@@ -1,0 +1,731 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-06-18:40:11 by liz.suehr, git commit 20bafd84e54ba1e14cc5c444673f017ba084bbe9)
+communicate       single vel yes
+units             si
+log               log.shear.curl_5_5.liggghts
+atom_modify       map array
+
+processors        4 4 2
+
+# Set domain
+region            domain block 0.0 7.49051e-03 0.0 7.49051e-03 0.0 3.74525e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00749051 0.00749051 0.00374525)
+  4 by 4 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          2.799e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 5 ntry 10000000 spheres file curl_5.particle scale 1.0 type 1
+Calculating the properties of the given template.
+   Depending on ntry, this may take a while...
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=8.510987e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=8.510987e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 12 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.4
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Thu Sep  7 11:34:25 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.45678 Mbytes
+    Step 
+       0 
+insertion: proc 9 at 0 %
+insertion: proc 9 at 10 %
+insertion: proc 15 at 0 %
+insertion: proc 15 at 10 %
+insertion: proc 19 at 0 %
+insertion: proc 19 at 10 %
+insertion: proc 19 at 20 %
+insertion: proc 19 at 20 %
+insertion: proc 19 at 30 %
+insertion: proc 19 at 40 %
+insertion: proc 19 at 50 %
+insertion: proc 1 at 0 %
+insertion: proc 1 at 10 %
+insertion: proc 1 at 20 %
+insertion: proc 1 at 30 %
+insertion: proc 3 at 0 %
+insertion: proc 3 at 10 %
+insertion: proc 3 at 20 %
+insertion: proc 4 at 0 %
+insertion: proc 4 at 10 %
+insertion: proc 4 at 20 %
+insertion: proc 5 at 0 %
+insertion: proc 5 at 10 %
+insertion: proc 5 at 20 %
+insertion: proc 5 at 20 %
+insertion: proc 5 at 30 %
+insertion: proc 5 at 40 %
+insertion: proc 5 at 50 %
+insertion: proc 5 at 60 %
+insertion: proc 7 at 0 %
+insertion: proc 7 at 10 %
+insertion: proc 7 at 20 %
+insertion: proc 7 at 30 %
+insertion: proc 7 at 40 %
+insertion: proc 7 at 50 %
+insertion: proc 7 at 60 %
+insertion: proc 7 at 70 %
+insertion: proc 7 at 80 %
+insertion: proc 7 at 90 %
+insertion: proc 7 at 100 %
+insertion: proc 8 at 0 %
+insertion: proc 8 at 10 %
+insertion: proc 8 at 20 %
+insertion: proc 8 at 30 %
+insertion: proc 8 at 40 %
+insertion: proc 8 at 50 %
+insertion: proc 8 at 60 %
+insertion: proc 0 at 0 %
+insertion: proc 0 at 10 %
+insertion: proc 0 at 20 %
+insertion: proc 0 at 30 %
+insertion: proc 0 at 30 %
+insertion: proc 0 at 40 %
+insertion: proc 0 at 50 %
+insertion: proc 0 at 60 %
+insertion: proc 0 at 70 %
+insertion: proc 0 at 80 %
+insertion: proc 0 at 90 %
+insertion: proc 0 at 100 %
+insertion: proc 10 at 0 %
+insertion: proc 10 at 10 %
+insertion: proc 10 at 20 %
+insertion: proc 10 at 30 %
+insertion: proc 10 at 40 %
+insertion: proc 10 at 50 %
+insertion: proc 10 at 60 %
+insertion: proc 10 at 70 %
+insertion: proc 10 at 80 %
+insertion: proc 10 at 90 %
+insertion: proc 11 at 0 %
+insertion: proc 11 at 10 %
+insertion: proc 11 at 20 %
+insertion: proc 11 at 30 %
+insertion: proc 11 at 40 %
+insertion: proc 11 at 50 %
+insertion: proc 11 at 60 %
+insertion: proc 11 at 70 %
+insertion: proc 11 at 80 %
+insertion: proc 11 at 90 %
+insertion: proc 11 at 100 %
+insertion: proc 11 at 110 %
+insertion: proc 13 at 0 %
+insertion: proc 13 at 10 %
+insertion: proc 13 at 20 %
+insertion: proc 13 at 30 %
+insertion: proc 13 at 40 %
+insertion: proc 13 at 50 %
+insertion: proc 13 at 60 %
+insertion: proc 13 at 70 %
+insertion: proc 13 at 80 %
+insertion: proc 13 at 90 %
+insertion: proc 13 at 100 %
+insertion: proc 13 at 110 %
+insertion: proc 9 at 20 %
+insertion: proc 9 at 30 %
+insertion: proc 9 at 40 %
+insertion: proc 9 at 50 %
+insertion: proc 9 at 60 %
+insertion: proc 9 at 70 %
+insertion: proc 9 at 80 %
+insertion: proc 9 at 90 %
+insertion: proc 9 at 100 %
+insertion: proc 9 at 110 %
+insertion: proc 16 at 0 %
+insertion: proc 16 at 10 %
+insertion: proc 16 at 20 %
+insertion: proc 16 at 30 %
+insertion: proc 17 at 0 %
+insertion: proc 17 at 10 %
+insertion: proc 17 at 20 %
+insertion: proc 17 at 20 %
+insertion: proc 17 at 30 %
+insertion: proc 17 at 40 %
+insertion: proc 17 at 50 %
+insertion: proc 17 at 60 %
+insertion: proc 17 at 70 %
+insertion: proc 17 at 80 %
+insertion: proc 17 at 90 %
+insertion: proc 17 at 100 %
+insertion: proc 17 at 110 %
+insertion: proc 18 at 0 %
+insertion: proc 18 at 10 %
+insertion: proc 18 at 20 %
+insertion: proc 18 at 20 %
+insertion: proc 18 at 30 %
+insertion: proc 18 at 40 %
+insertion: proc 18 at 50 %
+insertion: proc 18 at 60 %
+insertion: proc 18 at 70 %
+insertion: proc 18 at 80 %
+insertion: proc 18 at 90 %
+insertion: proc 18 at 100 %
+insertion: proc 15 at 20 %
+insertion: proc 15 at 20 %
+insertion: proc 15 at 30 %
+insertion: proc 15 at 40 %
+insertion: proc 15 at 50 %
+insertion: proc 15 at 60 %
+insertion: proc 15 at 70 %
+insertion: proc 15 at 80 %
+insertion: proc 15 at 90 %
+insertion: proc 15 at 100 %
+insertion: proc 15 at 110 %
+insertion: proc 20 at 0 %
+insertion: proc 20 at 10 %
+insertion: proc 20 at 20 %
+insertion: proc 20 at 30 %
+insertion: proc 21 at 0 %
+insertion: proc 21 at 10 %
+insertion: proc 21 at 20 %
+insertion: proc 21 at 20 %
+insertion: proc 21 at 30 %
+insertion: proc 21 at 40 %
+insertion: proc 21 at 50 %
+insertion: proc 21 at 60 %
+insertion: proc 21 at 70 %
+insertion: proc 21 at 80 %
+insertion: proc 21 at 90 %
+insertion: proc 21 at 100 %
+insertion: proc 21 at 110 %
+insertion: proc 22 at 0 %
+insertion: proc 22 at 10 %
+insertion: proc 22 at 20 %
+insertion: proc 22 at 30 %
+insertion: proc 22 at 40 %
+insertion: proc 22 at 50 %
+insertion: proc 22 at 60 %
+insertion: proc 22 at 70 %
+insertion: proc 22 at 80 %
+insertion: proc 22 at 90 %
+insertion: proc 22 at 100 %
+insertion: proc 22 at 110 %
+insertion: proc 23 at 0 %
+insertion: proc 23 at 10 %
+insertion: proc 23 at 20 %
+insertion: proc 23 at 30 %
+insertion: proc 23 at 40 %
+insertion: proc 23 at 50 %
+insertion: proc 23 at 60 %
+insertion: proc 23 at 70 %
+insertion: proc 23 at 80 %
+insertion: proc 23 at 90 %
+insertion: proc 23 at 100 %
+insertion: proc 23 at 110 %
+insertion: proc 24 at 0 %
+insertion: proc 24 at 10 %
+insertion: proc 24 at 20 %
+insertion: proc 24 at 30 %
+insertion: proc 24 at 30 %
+insertion: proc 24 at 40 %
+insertion: proc 24 at 50 %
+insertion: proc 24 at 60 %
+insertion: proc 24 at 70 %
+insertion: proc 24 at 80 %
+insertion: proc 24 at 90 %
+insertion: proc 24 at 100 %
+insertion: proc 24 at 110 %
+insertion: proc 25 at 0 %
+insertion: proc 25 at 10 %
+insertion: proc 25 at 20 %
+insertion: proc 25 at 30 %
+insertion: proc 25 at 40 %
+insertion: proc 25 at 50 %
+insertion: proc 25 at 60 %
+insertion: proc 25 at 70 %
+insertion: proc 25 at 80 %
+insertion: proc 25 at 90 %
+insertion: proc 25 at 100 %
+insertion: proc 25 at 110 %
+insertion: proc 26 at 0 %
+insertion: proc 26 at 10 %
+insertion: proc 26 at 20 %
+insertion: proc 26 at 30 %
+insertion: proc 26 at 40 %
+insertion: proc 26 at 50 %
+insertion: proc 26 at 60 %
+insertion: proc 26 at 70 %
+insertion: proc 26 at 80 %
+insertion: proc 26 at 90 %
+insertion: proc 26 at 100 %
+insertion: proc 26 at 110 %
+insertion: proc 27 at 0 %
+insertion: proc 27 at 10 %
+insertion: proc 27 at 20 %
+insertion: proc 27 at 30 %
+insertion: proc 27 at 40 %
+insertion: proc 27 at 50 %
+insertion: proc 27 at 60 %
+insertion: proc 27 at 70 %
+insertion: proc 27 at 80 %
+insertion: proc 27 at 90 %
+insertion: proc 27 at 100 %
+insertion: proc 27 at 110 %
+insertion: proc 28 at 0 %
+insertion: proc 28 at 10 %
+insertion: proc 28 at 20 %
+insertion: proc 28 at 20 %
+insertion: proc 28 at 30 %
+insertion: proc 28 at 40 %
+insertion: proc 28 at 50 %
+insertion: proc 28 at 60 %
+insertion: proc 28 at 70 %
+insertion: proc 28 at 80 %
+insertion: proc 28 at 90 %
+insertion: proc 28 at 100 %
+insertion: proc 28 at 110 %
+insertion: proc 29 at 0 %
+insertion: proc 29 at 10 %
+insertion: proc 29 at 20 %
+insertion: proc 29 at 30 %
+insertion: proc 29 at 40 %
+insertion: proc 29 at 50 %
+insertion: proc 29 at 60 %
+insertion: proc 29 at 70 %
+insertion: proc 29 at 80 %
+insertion: proc 29 at 90 %
+insertion: proc 29 at 100 %
+insertion: proc 29 at 110 %
+insertion: proc 30 at 0 %
+insertion: proc 30 at 10 %
+insertion: proc 30 at 20 %
+insertion: proc 30 at 30 %
+insertion: proc 30 at 40 %
+insertion: proc 30 at 50 %
+insertion: proc 30 at 60 %
+insertion: proc 30 at 70 %
+insertion: proc 30 at 80 %
+insertion: proc 30 at 90 %
+insertion: proc 30 at 100 %
+insertion: proc 30 at 110 %
+insertion: proc 31 at 0 %
+insertion: proc 31 at 10 %
+insertion: proc 31 at 20 %
+insertion: proc 31 at 30 %
+insertion: proc 31 at 40 %
+insertion: proc 31 at 50 %
+insertion: proc 31 at 60 %
+insertion: proc 31 at 70 %
+insertion: proc 31 at 80 %
+insertion: proc 31 at 90 %
+insertion: proc 31 at 100 %
+insertion: proc 31 at 110 %
+insertion: proc 20 at 40 %
+insertion: proc 20 at 50 %
+insertion: proc 20 at 60 %
+insertion: proc 20 at 70 %
+insertion: proc 20 at 80 %
+insertion: proc 20 at 90 %
+insertion: proc 20 at 100 %
+insertion: proc 20 at 110 %
+insertion: proc 19 at 60 %
+insertion: proc 19 at 70 %
+insertion: proc 19 at 80 %
+insertion: proc 19 at 90 %
+insertion: proc 19 at 100 %
+insertion: proc 19 at 110 %
+insertion: proc 2 at 0 %
+insertion: proc 2 at 10 %
+insertion: proc 2 at 20 %
+insertion: proc 2 at 30 %
+insertion: proc 2 at 40 %
+insertion: proc 2 at 50 %
+insertion: proc 2 at 60 %
+insertion: proc 2 at 70 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 2 at 100 %
+insertion: proc 2 at 110 %
+insertion: proc 1 at 30 %
+insertion: proc 1 at 40 %
+insertion: proc 1 at 50 %
+insertion: proc 1 at 60 %
+insertion: proc 1 at 70 %
+insertion: proc 1 at 80 %
+insertion: proc 1 at 90 %
+insertion: proc 1 at 100 %
+insertion: proc 1 at 110 %
+insertion: proc 3 at 30 %
+insertion: proc 3 at 40 %
+insertion: proc 3 at 50 %
+insertion: proc 3 at 60 %
+insertion: proc 3 at 70 %
+insertion: proc 3 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 3 at 100 %
+insertion: proc 3 at 110 %
+insertion: proc 4 at 30 %
+insertion: proc 4 at 40 %
+insertion: proc 4 at 50 %
+insertion: proc 4 at 60 %
+insertion: proc 4 at 70 %
+insertion: proc 4 at 80 %
+insertion: proc 4 at 90 %
+insertion: proc 4 at 100 %
+insertion: proc 4 at 110 %
+insertion: proc 6 at 0 %
+insertion: proc 6 at 10 %
+insertion: proc 6 at 20 %
+insertion: proc 6 at 30 %
+insertion: proc 6 at 40 %
+insertion: proc 6 at 50 %
+insertion: proc 6 at 60 %
+insertion: proc 6 at 70 %
+insertion: proc 6 at 80 %
+insertion: proc 6 at 90 %
+insertion: proc 6 at 100 %
+insertion: proc 6 at 110 %
+insertion: proc 5 at 70 %
+insertion: proc 5 at 80 %
+insertion: proc 5 at 90 %
+insertion: proc 5 at 100 %
+insertion: proc 5 at 110 %
+insertion: proc 7 at 110 %
+insertion: proc 8 at 70 %
+insertion: proc 8 at 80 %
+insertion: proc 8 at 90 %
+insertion: proc 8 at 100 %
+insertion: proc 8 at 110 %
+insertion: proc 0 at 110 %
+insertion: proc 12 at 0 %
+insertion: proc 12 at 10 %
+insertion: proc 12 at 20 %
+insertion: proc 12 at 30 %
+insertion: proc 12 at 40 %
+insertion: proc 12 at 50 %
+insertion: proc 12 at 60 %
+insertion: proc 12 at 70 %
+insertion: proc 12 at 80 %
+insertion: proc 12 at 90 %
+insertion: proc 12 at 100 %
+insertion: proc 12 at 110 %
+insertion: proc 14 at 0 %
+insertion: proc 14 at 10 %
+insertion: proc 14 at 20 %
+insertion: proc 14 at 20 %
+insertion: proc 14 at 30 %
+insertion: proc 14 at 40 %
+insertion: proc 14 at 50 %
+insertion: proc 14 at 60 %
+insertion: proc 14 at 70 %
+insertion: proc 14 at 80 %
+insertion: proc 14 at 90 %
+insertion: proc 14 at 100 %
+insertion: proc 14 at 110 %
+insertion: proc 16 at 40 %
+insertion: proc 16 at 50 %
+insertion: proc 16 at 60 %
+insertion: proc 16 at 70 %
+insertion: proc 16 at 80 %
+insertion: proc 16 at 90 %
+insertion: proc 16 at 100 %
+insertion: proc 16 at 110 %
+insertion: proc 18 at 110 %
+INFO: Particle insertion ins1: inserted 1487 particle templates (mass 2.101411e-04) at step 1
+ - a total of 1487 particle templates (mass 2.101411e-04) inserted so far.
+       1 
+Loop time of 0.00542404 on 32 procs for 1 steps with 7435 atoms, finish time Thu Sep  7 11:34:29 2023
+
+
+Pair  time (%) = 0.000287277 (5.29637)
+Neigh time (%) = 0.000815453 (15.034)
+Comm  time (%) = 0.000973918 (17.9556)
+Outpt time (%) = 0.000387725 (7.14826)
+Other time (%) = 0.00295967 (54.5658)
+
+Nlocal:    232.344 ave 309 max 166 min
+Histogram: 5 3 0 6 6 4 0 0 3 5
+Nghost:    1313.38 ave 1755 max 960 min
+Histogram: 3 5 1 5 8 2 0 1 5 2
+Neighs:    5486.44 ave 8607 max 3085 min
+Histogram: 6 2 3 8 4 1 0 0 2 6
+
+Total # of neighbors = 175566
+Ave neighs/atom = 23.6134
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+7435 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 1.39e-05 reset 1000 threshold 1.00e-06 start_dt 3.268e-08 end_dt 1.634e-07
+run               100000
+Setting up run at Thu Sep  7 11:34:30 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.7696 Mbytes
+    Step 
+       1 
+pre-run, step: 1000, ke/mass=6.036e+01, natoms=7435, overlap=7.023e-01, cor=2.400e-01, dt=4.828e-08 nbody: 1487 
+pre-run, step: 2000, ke/mass=7.664e-01, natoms=7435, overlap=6.945e-01, cor=2.400e-01, dt=7.132e-08 nbody: 1487 
+pre-run, step: 3000, ke/mass=1.010e-04, natoms=7435, overlap=6.918e-01, cor=2.400e-01, dt=1.054e-07 nbody: 1487 
+pre-run, step: 4000, ke/mass=4.283e-06, natoms=7435, overlap=6.893e-01, cor=2.400e-01, dt=1.557e-07 nbody: 1487 
+pre-run, step: 5000, ke/mass=1.395e-05, natoms=7435, overlap=6.887e-01, cor=2.400e-01, dt=2.300e-07 nbody: 1487 
+pre-run, step: 6000, ke/mass=4.415e-04, natoms=7435, overlap=6.500e-01, cor=2.400e-01, dt=3.397e-07 nbody: 1487 
+pre-run, step: 7000, ke/mass=4.734e-02, natoms=7435, overlap=7.034e-01, cor=2.401e-01, dt=3.923e-07 nbody: 1487 
+pre-run, step: 8000, ke/mass=4.187e-04, natoms=7435, overlap=7.034e-01, cor=2.401e-01, dt=3.923e-07 nbody: 1487 
+pre-run, step: 9000, ke/mass=2.096e-07, natoms=7435, overlap=7.034e-01, cor=2.401e-01, dt=3.923e-07 nbody: 1487 
+Loop time of 16.8913 on 32 procs for 100000 steps with 7435 atoms, finish time Thu Sep  7 11:34:46 2023
+
+
+Pair  time (%) = 0.724541 (4.28944)
+Neigh time (%) = 5.49524 (32.533)
+Comm  time (%) = 2.43196 (14.3977)
+Outpt time (%) = 0 (0)
+Other time (%) = 8.23955 (48.7799)
+
+Nlocal:    232.344 ave 293 max 128 min
+Histogram: 2 5 1 0 0 2 5 5 4 8
+Nghost:    1368.06 ave 1610 max 999 min
+Histogram: 3 2 3 0 0 4 7 5 2 6
+Neighs:    4368.72 ave 6267 max 1444 min
+Histogram: 5 3 0 0 1 3 4 6 2 8
+
+Total # of neighbors = 139799
+Ave neighs/atom = 18.8028
+Neighbor list builds = 8999
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          1.6341e-07
+
+fix               leboundary all lebc 100.0 true gtemp 1.00e-06
+
+# Run desired simulation
+run               24000000
+Setting up run at Thu Sep  7 11:34:46 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.8367 Mbytes
+    Step 
+    9000 
+11500 2500 body_count: 1487 atom_count: 7435 1.479e+04 2.268e+04 1.866e+02 2.018e+05 1.968e+05 6.218e+02
+14000 5000 body_count: 1487 atom_count: 7435 8.269e+03 1.234e+04 8.251e+01 1.136e+05 1.108e+05 3.145e+02
+16500 7500 body_count: 1487 atom_count: 7435 5.830e+03 8.571e+03 6.008e+01 8.015e+04 7.820e+04 2.194e+02
+19000 10000 body_count: 1487 atom_count: 7435 4.501e+03 6.569e+03 4.394e+01 6.194e+04 6.046e+04 1.196e+02
+21500 12500 body_count: 1487 atom_count: 7435 3.727e+03 5.381e+03 4.388e+01 5.101e+04 4.979e+04 9.139e+01
+24000 15000 body_count: 1487 atom_count: 7435 3.251e+03 4.622e+03 4.035e+01 4.421e+04 4.315e+04 7.042e+01
+26500 17500 body_count: 1487 atom_count: 7435 2.906e+03 4.078e+03 3.431e+01 3.938e+04 3.843e+04 4.949e+01
+29000 20000 body_count: 1487 atom_count: 7435 2.657e+03 3.688e+03 3.550e+01 3.582e+04 3.493e+04 4.267e+01
+31500 22500 body_count: 1487 atom_count: 7435 2.437e+03 3.359e+03 2.962e+01 3.274e+04 3.191e+04 2.716e+01
+34000 25000 body_count: 1487 atom_count: 7435 2.290e+03 3.121e+03 2.703e+01 3.063e+04 2.983e+04 1.343e+01
+36500 27500 body_count: 1487 atom_count: 7435 2.166e+03 2.929e+03 2.164e+01 2.889e+04 2.810e+04 1.427e+00
+39000 30000 body_count: 1487 atom_count: 7435 2.077e+03 2.788e+03 1.950e+01 2.767e+04 2.690e+04 -2.248e+01
+41500 32500 body_count: 1487 atom_count: 7435 2.023e+03 2.690e+03 1.615e+01 2.684e+04 2.608e+04 -5.021e+01
+44000 35000 body_count: 1487 atom_count: 7435 1.978e+03 2.597e+03 1.506e+01 2.612e+04 2.539e+04 -7.945e+01
+46500 37500 body_count: 1487 atom_count: 7435 1.935e+03 2.520e+03 1.236e+01 2.547e+04 2.475e+04 -1.001e+02
+49000 40000 body_count: 1487 atom_count: 7435 1.894e+03 2.448e+03 1.227e+01 2.488e+04 2.415e+04 -1.142e+02
+51500 42500 body_count: 1487 atom_count: 7435 1.829e+03 2.358e+03 1.020e+01 2.401e+04 2.331e+04 -1.271e+02
+54000 45000 body_count: 1487 atom_count: 7435 1.765e+03 2.264e+03 8.366e+00 2.312e+04 2.246e+04 -1.340e+02
+56500 47500 body_count: 1487 atom_count: 7435 1.711e+03 2.186e+03 8.590e+00 2.240e+04 2.177e+04 -1.398e+02
+59000 50000 body_count: 1487 atom_count: 7435 1.653e+03 2.106e+03 7.482e+00 2.160e+04 2.100e+04 -1.414e+02
+59000 1.653e+03 2.106e+03 7.482e+00 2.160e+04 2.100e+04 -1.414e+02
+61500 2500 body_count: 1487 atom_count: 7435 6.848e+02 6.473e+02 -2.645e+01 7.915e+03 7.856e+03 -2.050e+02
+64000 5000 body_count: 1487 atom_count: 7435 6.314e+02 6.173e+02 -9.892e+00 7.439e+03 7.353e+03 -1.741e+02
+66500 7500 body_count: 1487 atom_count: 7435 6.663e+02 6.359e+02 -2.282e+01 7.532e+03 7.436e+03 -1.997e+02
+69000 10000 body_count: 1487 atom_count: 7435 6.988e+02 6.874e+02 -1.735e+01 8.168e+03 8.153e+03 -1.992e+02
+71500 12500 body_count: 1487 atom_count: 7435 7.087e+02 7.099e+02 -8.617e+00 8.233e+03 8.244e+03 -1.910e+02
+74000 15000 body_count: 1487 atom_count: 7435 7.757e+02 7.835e+02 -1.036e+01 9.097e+03 9.122e+03 -2.073e+02
+76500 17500 body_count: 1487 atom_count: 7435 8.611e+02 8.848e+02 2.551e+00 1.014e+04 1.018e+04 -2.393e+02
+79000 20000 body_count: 1487 atom_count: 7435 1.066e+03 1.105e+03 -2.025e+00 1.253e+04 1.253e+04 -2.795e+02
+81500 22500 body_count: 1487 atom_count: 7435 1.141e+03 1.169e+03 -3.872e+00 1.347e+04 1.344e+04 -2.758e+02
+84000 25000 body_count: 1487 atom_count: 7435 1.136e+03 1.164e+03 -7.048e+00 1.350e+04 1.350e+04 -2.819e+02
+WARNING: Internal error in multisphere method less atoms then body needs (../multisphere.cpp:837)
+287 missing atoms real: 2 ghost: 2 not_first: 2
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): r atom_tag=1431 atom_map=128, x/L=0.487172, y/L=0.963285, z/L=0.873669, bt=287, me=15
+85027 FixMultisphere::pre_neighbor(): r atom_tag=1435 atom_map=129, x/L=0.461956, y/L=0.99019, z/L=0.88315, bt=287, me=15
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1433 atom_map=188, x/L=0.516905, y/L=1.02178, z/L=0.817184, bt=287, me=15
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1434 atom_map=253, x/L=0.484796, y/L=1.01447, z/L=0.850144, bt=287, me=15
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1433 atom_map=188, x/L=0.516905, y/L=1.02178, z/L=0.817184, bt=287, me=15
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1433 atom_map=365, x/L=0.516905, y/L=1.02178, z/L=0.817184, bt=287, me=23
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1432 atom_map=639, x/L=0.75232, y/L=1.98757, z/L=0.840663, bt=287, me=23
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1431 atom_map=891, x/L=0.487172, y/L=0.963285, z/L=0.873669, bt=287, me=23
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1435 atom_map=892, x/L=0.461956, y/L=0.99019, z/L=0.88315, bt=287, me=23
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1433 atom_map=365, x/L=0.516905, y/L=1.02178, z/L=0.817184, bt=287, me=23
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1434 atom_map=976, x/L=0.484796, y/L=1.01447, z/L=0.850144, bt=287, me=23
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1434 atom_map=1087, x/L=2.424e-01, y/L=1.447e-02, z/L=-1.499e-01, bt=287, me=0
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1431 atom_map=1212, x/L=2.448e-01, y/L=-3.672e-02, z/L=-1.263e-01, bt=287, me=0
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1435 atom_map=1213, x/L=2.196e-01, y/L=-9.810e-03, z/L=-1.168e-01, bt=287, me=0
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1433 atom_map=1221, x/L=2.745e-01, y/L=2.178e-02, z/L=-1.828e-01, bt=287, me=0
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1431 atom_map=1212, x/L=2.448e-01, y/L=-3.672e-02, z/L=-1.263e-01, bt=287, me=0
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1435 atom_map=1213, x/L=2.196e-01, y/L=-9.810e-03, z/L=-1.168e-01, bt=287, me=0
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): r atom_tag=1433 atom_map=71, x/L=0.274547, y/L=0.0217829, z/L=0.817184, bt=287, me=9
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1431 atom_map=289, x/L=0.244815, y/L=-0.0367154, z/L=0.873669, bt=287, me=9
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1435 atom_map=290, x/L=0.219598, y/L=-0.00981011, z/L=0.88315, bt=287, me=9
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1432 atom_map=698, x/L=0.509963, y/L=0.987568, z/L=0.840663, bt=287, me=9
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1434 atom_map=725, x/L=0.242439, y/L=0.0144733, z/L=0.850144, bt=287, me=9
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1431 atom_map=289, x/L=0.244815, y/L=-0.0367154, z/L=0.873669, bt=287, me=9
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1435 atom_map=290, x/L=0.219598, y/L=-0.00981011, z/L=0.88315, bt=287, me=9
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1431 atom_map=1255, x/L=0.487172, y/L=0.963285, z/L=-0.126331, bt=287, me=14
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1435 atom_map=1256, x/L=0.461956, y/L=0.99019, z/L=-0.11685, bt=287, me=14
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1433 atom_map=1284, x/L=0.516905, y/L=1.02178, z/L=-0.182816, bt=287, me=14
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1434 atom_map=1322, x/L=0.484796, y/L=1.01447, z/L=-0.149856, bt=287, me=14
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1433 atom_map=1284, x/L=0.516905, y/L=1.02178, z/L=-0.182816, bt=287, me=14
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1434 atom_map=1322, x/L=0.484796, y/L=1.01447, z/L=-0.149856, bt=287, me=14
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1432 atom_map=592, x/L=0.509963, y/L=0.987568, z/L=0.840663, bt=287, me=17
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1432 atom_map=592, x/L=0.509963, y/L=0.987568, z/L=0.840663, bt=287, me=17
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1432 atom_map=1881, x/L=0.509963, y/L=0.987568, z/L=-0.159337, bt=287, me=16
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1432 atom_map=1881, x/L=0.509963, y/L=0.987568, z/L=-0.159337, bt=287, me=16
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): r atom_tag=1432 atom_map=271, x/L=0.75232, y/L=1.98757, z/L=0.840663, bt=287, me=31
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1433 atom_map=1767, x/L=0.516905, y/L=1.02178, z/L=-0.182816, bt=287, me=22
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1432 atom_map=1909, x/L=0.75232, y/L=1.98757, z/L=-0.159337, bt=287, me=22
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1431 atom_map=2014, x/L=0.487172, y/L=0.963285, z/L=-0.126331, bt=287, me=22
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1435 atom_map=2015, x/L=0.461956, y/L=0.99019, z/L=-0.11685, bt=287, me=22
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1433 atom_map=1767, x/L=0.516905, y/L=1.02178, z/L=-0.182816, bt=287, me=22
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1434 atom_map=2059, x/L=0.484796, y/L=1.01447, z/L=-0.149856, bt=287, me=22
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1434 atom_map=253, x/L=0.484796, y/L=1.01447, z/L=0.850144, bt=287, me=15
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1432 atom_map=1423, x/L=0.509963, y/L=0.987568, z/L=-0.159337, bt=287, me=24
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1432 atom_map=400, x/L=0.509963, y/L=0.987568, z/L=0.840663, bt=287, me=25
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1432 atom_map=1769, x/L=0.75232, y/L=1.98757, z/L=-0.159337, bt=287, me=30
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): r atom_tag=1434 atom_map=76, x/L=0.242439, y/L=0.0144733, z/L=0.850144, bt=287, me=1
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1431 atom_map=330, x/L=0.244815, y/L=-0.0367154, z/L=0.873669, bt=287, me=1
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1435 atom_map=331, x/L=0.219598, y/L=-0.00981011, z/L=0.88315, bt=287, me=1
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1433 atom_map=361, x/L=0.274547, y/L=0.0217829, z/L=0.817184, bt=287, me=1
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1431 atom_map=330, x/L=0.244815, y/L=-0.0367154, z/L=0.873669, bt=287, me=1
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1435 atom_map=331, x/L=0.219598, y/L=-0.00981011, z/L=0.88315, bt=287, me=1
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1434 atom_map=1321, x/L=0.484796, y/L=1.01447, z/L=-0.149856, bt=287, me=6
+7435 total atoms
+at end bodies changed from: 1487 to: 1486
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+at end bodies changed from: 1487 to: 1486
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1434 atom_map=232, x/L=0.484796, y/L=1.01447, z/L=0.850144, bt=287, me=7
+7435 total atoms
+at end bodies changed from: 1487 to: 1486
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1433 atom_map=1427, x/L=0.274547, y/L=0.0217829, z/L=-0.182816, bt=287, me=8
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1431 atom_map=1551, x/L=0.244815, y/L=-0.0367154, z/L=-0.126331, bt=287, me=8
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1435 atom_map=1552, x/L=0.219598, y/L=-0.00981011, z/L=-0.11685, bt=287, me=8
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1432 atom_map=1747, x/L=0.509963, y/L=0.987568, z/L=-0.159337, bt=287, me=8
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1434 atom_map=1754, x/L=0.242439, y/L=0.0144733, z/L=-0.149856, bt=287, me=8
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1431 atom_map=1551, x/L=0.244815, y/L=-0.0367154, z/L=-0.126331, bt=287, me=8
+85027 FixMultisphere::pre_neighbor(): g atom_tag=1435 atom_map=1552, x/L=0.219598, y/L=-0.00981011, z/L=-0.11685, bt=287, me=8
+7435 total atoms
+at end bodies changed from: 1487 to: 1486
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+at end bodies changed from: 1487 to: 1486
+85027 FixMultisphere::pre_neighbor(), lost_body_tag=287
+7435 total atoms
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+at end bodies changed from: 1487 to: 1486
+--------------------------------------------------------------------------
+mpiexec noticed that process rank 30 with PID 235039 on node node-26 exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------

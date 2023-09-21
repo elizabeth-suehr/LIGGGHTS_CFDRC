@@ -1,0 +1,311 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-06-18:40:11 by liz.suehr, git commit 20bafd84e54ba1e14cc5c444673f017ba084bbe9)
+communicate       single vel yes
+units             si
+log               log.shear.BP1_0.liggghts
+atom_modify       map array
+
+processors        3 3 2
+
+# Set domain
+region            domain block 0.0 4.80000e-03 0.0 4.80000e-03 0.0 2.40000e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.0048 0.0048 0.0024)
+  3 by 3 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          1.610e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 5.50000e+08 5.50000e+08
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.9 0.95 0.95 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2800.000 nspheres 25 ntry 10000000 spheres file particle25 scale 1.0 type 1
+Calculating the properties of the given template.
+   Depending on ntry, this may take a while...
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=3.280720e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=3.280720e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 50 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.01000
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Wed Sep 13 13:21:06 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.45763 Mbytes
+    Step 
+       0 
+INFO: Particle insertion ins1: inserted 97 particle templates (mass 1.561610e-06) at step 1
+ - a total of 97 particle templates (mass 1.561610e-06) inserted so far.
+       1 
+Loop time of 0.00129232 on 18 procs for 1 steps with 2425 atoms, finish time Wed Sep 13 13:21:09 2023
+
+
+Pair  time (%) = 0.000116505 (9.0152)
+Neigh time (%) = 9.26107e-05 (7.16624)
+Comm  time (%) = 0.000223562 (17.2993)
+Outpt time (%) = 4.59398e-05 (3.55484)
+Other time (%) = 0.000813702 (62.9645)
+
+Nlocal:    134.722 ave 175 max 125 min
+Histogram: 12 0 0 0 0 5 0 0 0 1
+Nghost:    228.611 ave 331 max 113 min
+Histogram: 1 0 2 2 2 4 5 0 1 1
+Neighs:    120.056 ave 643 max 0 min
+Histogram: 7 4 3 3 0 0 0 0 0 1
+
+Total # of neighbors = 2161
+Ave neighs/atom = 0.891134
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+2425 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 1.00e-06 reset 1000 threshold 1.00e-06 start_dt 2.1100e-08 end_dt 2.1100e-07
+run               100000
+Setting up run at Wed Sep 13 13:21:09 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.6622 Mbytes
+    Step 
+       1 
+pre-run, step: 1000, ke/mass=0.000e+00, natoms=2425, overlap=1.000e+00, cor=9.736e-01, dt=3.341e-08 nbody: 97 
+Loop time of 0.267004 on 18 procs for 100000 steps with 2425 atoms, finish time Wed Sep 13 13:21:09 2023
+
+
+Pair  time (%) = 0.0020996 (0.786356)
+Neigh time (%) = 0.0582553 (21.8181)
+Comm  time (%) = 0.0468171 (17.5342)
+Outpt time (%) = 0 (0)
+Other time (%) = 0.159832 (59.8613)
+
+Nlocal:    134.722 ave 175 max 125 min
+Histogram: 12 0 0 0 0 5 0 0 0 1
+Nghost:    228.611 ave 331 max 113 min
+Histogram: 1 0 2 2 2 4 5 0 1 1
+Neighs:    120.056 ave 643 max 0 min
+Histogram: 7 4 3 3 0 0 0 0 0 1
+
+Total # of neighbors = 2161
+Ave neighs/atom = 0.891134
+Neighbor list builds = 999
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+
+# Set the top/bottom boundaries as LE
+timestep          2.1100e-08
+
+fix               leboundary all lebc 100.0 true gtemp 0.001
+
+# Run desired simulation
+run               20000000
+Setting up run at Wed Sep 13 13:21:09 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 11.6668 Mbytes
+    Step 
+    1000 
+3500 2500 body_count: 97 atom_count: 2425 4.048e-04 1.204e-05 3.183e-06 0.000e+00 0.000e+00 0.000e+00
+6000 5000 body_count: 97 atom_count: 2425 4.047e-04 1.204e-05 3.151e-06 0.000e+00 0.000e+00 0.000e+00
+8500 7500 body_count: 97 atom_count: 2425 4.047e-04 1.204e-05 3.119e-06 0.000e+00 0.000e+00 0.000e+00
+11000 10000 body_count: 97 atom_count: 2425 4.047e-04 1.204e-05 3.088e-06 0.000e+00 0.000e+00 0.000e+00
+13500 12500 body_count: 97 atom_count: 2425 4.047e-04 1.204e-05 3.056e-06 0.000e+00 0.000e+00 0.000e+00
+16000 15000 body_count: 97 atom_count: 2425 4.047e-04 1.204e-05 3.024e-06 0.000e+00 0.000e+00 0.000e+00
+18500 17500 body_count: 97 atom_count: 2425 4.047e-04 1.204e-05 2.992e-06 0.000e+00 0.000e+00 0.000e+00
+21000 20000 body_count: 97 atom_count: 2425 4.046e-04 1.204e-05 2.961e-06 0.000e+00 0.000e+00 0.000e+00
+23500 22500 body_count: 97 atom_count: 2425 4.047e-04 1.211e-05 2.852e-06 1.135e-04 1.126e-03 -1.170e-04
+26000 25000 body_count: 97 atom_count: 2425 4.072e-04 1.430e-05 4.921e-07 1.104e-04 1.099e-03 -1.137e-04
+28500 27500 body_count: 97 atom_count: 2425 4.092e-04 1.610e-05 -1.458e-06 1.004e-04 9.993e-04 -1.034e-04
+31000 30000 body_count: 97 atom_count: 2425 4.109e-04 1.760e-05 -3.099e-06 9.200e-05 9.161e-04 -9.478e-05
+33500 32500 body_count: 97 atom_count: 2425 4.123e-04 1.886e-05 -4.500e-06 8.492e-05 8.456e-04 -8.749e-05
+36000 35000 body_count: 97 atom_count: 2425 4.136e-04 1.995e-05 -5.715e-06 7.885e-05 7.852e-04 -8.124e-05
+38500 37500 body_count: 97 atom_count: 2425 4.147e-04 2.089e-05 -6.779e-06 7.360e-05 7.328e-04 -7.583e-05
+41000 40000 body_count: 97 atom_count: 2425 4.157e-04 2.172e-05 -7.722e-06 6.900e-05 6.870e-04 -7.109e-05
+43500 42500 body_count: 97 atom_count: 2425 4.166e-04 2.244e-05 -8.564e-06 6.494e-05 6.466e-04 -6.690e-05
+46000 45000 body_count: 97 atom_count: 2425 4.174e-04 2.309e-05 -9.323e-06 6.133e-05 6.107e-04 -6.319e-05
+48500 47500 body_count: 97 atom_count: 2425 4.181e-04 2.367e-05 -1.001e-05 5.810e-05 5.786e-04 -5.986e-05
+51000 50000 body_count: 97 atom_count: 2425 4.188e-04 2.419e-05 -1.064e-05 5.520e-05 5.496e-04 -5.687e-05
+51000 4.188e-04 2.419e-05 -1.064e-05 5.520e-05 5.496e-04 -5.687e-05
+53500 2500 body_count: 97 atom_count: 2425 4.317e-04 3.407e-05 -2.276e-05 0.000e+00 0.000e+00 0.000e+00
+56000 5000 body_count: 97 atom_count: 2425 4.318e-04 3.407e-05 -2.285e-05 0.000e+00 0.000e+00 0.000e+00
+58500 7500 body_count: 97 atom_count: 2425 4.319e-04 3.407e-05 -2.294e-05 0.000e+00 0.000e+00 0.000e+00
+61000 10000 body_count: 97 atom_count: 2425 4.320e-04 3.407e-05 -2.303e-05 0.000e+00 0.000e+00 0.000e+00
+63500 12500 body_count: 97 atom_count: 2425 4.322e-04 3.407e-05 -2.312e-05 0.000e+00 0.000e+00 0.000e+00
+66000 15000 body_count: 97 atom_count: 2425 4.323e-04 3.407e-05 -2.321e-05 0.000e+00 0.000e+00 0.000e+00
+68500 17500 body_count: 97 atom_count: 2425 4.324e-04 3.407e-05 -2.330e-05 0.000e+00 0.000e+00 0.000e+00
+71000 20000 body_count: 97 atom_count: 2425 4.325e-04 3.407e-05 -2.339e-05 0.000e+00 0.000e+00 0.000e+00
+73500 22500 body_count: 97 atom_count: 2425 4.327e-04 3.407e-05 -2.348e-05 0.000e+00 0.000e+00 0.000e+00
+76000 25000 body_count: 97 atom_count: 2425 4.328e-04 3.407e-05 -2.357e-05 0.000e+00 0.000e+00 0.000e+00
+78500 27500 body_count: 97 atom_count: 2425 4.329e-04 3.407e-05 -2.366e-05 0.000e+00 0.000e+00 0.000e+00
+81000 30000 body_count: 97 atom_count: 2425 4.330e-04 3.407e-05 -2.375e-05 0.000e+00 0.000e+00 0.000e+00
+83500 32500 body_count: 97 atom_count: 2425 4.332e-04 3.407e-05 -2.384e-05 0.000e+00 0.000e+00 0.000e+00
+86000 35000 body_count: 97 atom_count: 2425 4.333e-04 3.407e-05 -2.393e-05 0.000e+00 0.000e+00 0.000e+00
+88500 37500 body_count: 97 atom_count: 2425 4.334e-04 3.407e-05 -2.402e-05 0.000e+00 0.000e+00 0.000e+00
+91000 40000 body_count: 97 atom_count: 2425 4.335e-04 3.407e-05 -2.411e-05 0.000e+00 0.000e+00 0.000e+00
+93500 42500 body_count: 97 atom_count: 2425 4.337e-04 3.407e-05 -2.420e-05 0.000e+00 0.000e+00 0.000e+00
+96000 45000 body_count: 97 atom_count: 2425 4.338e-04 3.407e-05 -2.429e-05 0.000e+00 0.000e+00 0.000e+00
+98500 47500 body_count: 97 atom_count: 2425 4.339e-04 3.407e-05 -2.438e-05 0.000e+00 0.000e+00 0.000e+00
+101000 50000 body_count: 97 atom_count: 2425 4.341e-04 3.407e-05 -2.447e-05 0.000e+00 0.000e+00 0.000e+00
+101000 4.341e-04 3.407e-05 -2.447e-05 0.000e+00 0.000e+00 0.000e+00
+103500 2500 body_count: 97 atom_count: 2425 4.369e-04 3.407e-05 -2.635e-05 0.000e+00 0.000e+00 0.000e+00
+106000 5000 body_count: 97 atom_count: 2425 4.370e-04 3.407e-05 -2.644e-05 0.000e+00 0.000e+00 0.000e+00
+108500 7500 body_count: 97 atom_count: 2425 4.371e-04 3.407e-05 -2.653e-05 0.000e+00 0.000e+00 0.000e+00
+111000 10000 body_count: 97 atom_count: 2425 4.373e-04 3.407e-05 -2.662e-05 0.000e+00 0.000e+00 0.000e+00
+113500 12500 body_count: 97 atom_count: 2425 4.374e-04 3.407e-05 -2.671e-05 0.000e+00 0.000e+00 0.000e+00
+116000 15000 body_count: 97 atom_count: 2425 4.376e-04 3.407e-05 -2.680e-05 0.000e+00 0.000e+00 0.000e+00
+118500 17500 body_count: 97 atom_count: 2425 4.377e-04 3.407e-05 -2.689e-05 0.000e+00 0.000e+00 0.000e+00
+121000 20000 body_count: 97 atom_count: 2425 4.378e-04 3.407e-05 -2.698e-05 0.000e+00 0.000e+00 0.000e+00
+123500 22500 body_count: 97 atom_count: 2425 4.380e-04 3.407e-05 -2.707e-05 0.000e+00 0.000e+00 0.000e+00
+126000 25000 body_count: 97 atom_count: 2425 4.381e-04 3.407e-05 -2.716e-05 0.000e+00 0.000e+00 0.000e+00
+128500 27500 body_count: 97 atom_count: 2425 4.383e-04 3.407e-05 -2.725e-05 0.000e+00 0.000e+00 0.000e+00
+131000 30000 body_count: 97 atom_count: 2425 4.384e-04 3.407e-05 -2.734e-05 0.000e+00 0.000e+00 0.000e+00
+133500 32500 body_count: 97 atom_count: 2425 4.386e-04 3.407e-05 -2.743e-05 0.000e+00 0.000e+00 0.000e+00
+136000 35000 body_count: 97 atom_count: 2425 4.387e-04 3.407e-05 -2.752e-05 0.000e+00 0.000e+00 0.000e+00
+138500 37500 body_count: 97 atom_count: 2425 4.389e-04 3.407e-05 -2.761e-05 0.000e+00 0.000e+00 0.000e+00
+141000 40000 body_count: 97 atom_count: 2425 4.390e-04 3.407e-05 -2.770e-05 0.000e+00 0.000e+00 0.000e+00
+143500 42500 body_count: 97 atom_count: 2425 4.392e-04 3.407e-05 -2.779e-05 0.000e+00 0.000e+00 0.000e+00
+146000 45000 body_count: 97 atom_count: 2425 4.393e-04 3.407e-05 -2.788e-05 0.000e+00 0.000e+00 0.000e+00
+148500 47500 body_count: 97 atom_count: 2425 4.395e-04 3.407e-05 -2.797e-05 0.000e+00 0.000e+00 0.000e+00
+151000 50000 body_count: 97 atom_count: 2425 4.396e-04 3.407e-05 -2.806e-05 0.000e+00 0.000e+00 0.000e+00
+151000 4.396e-04 3.407e-05 -2.806e-05 0.000e+00 0.000e+00 0.000e+00
+153500 2500 body_count: 97 atom_count: 2425 4.428e-04 3.407e-05 -2.995e-05 0.000e+00 0.000e+00 0.000e+00
+156000 5000 body_count: 97 atom_count: 2425 4.430e-04 3.407e-05 -3.004e-05 0.000e+00 0.000e+00 0.000e+00
+158500 7500 body_count: 97 atom_count: 2425 4.431e-04 3.407e-05 -3.013e-05 0.000e+00 0.000e+00 0.000e+00
+161000 10000 body_count: 97 atom_count: 2425 4.433e-04 3.407e-05 -3.022e-05 0.000e+00 0.000e+00 0.000e+00
+163500 12500 body_count: 97 atom_count: 2425 4.434e-04 3.407e-05 -3.031e-05 0.000e+00 0.000e+00 0.000e+00
+166000 15000 body_count: 97 atom_count: 2425 4.436e-04 3.407e-05 -3.040e-05 0.000e+00 0.000e+00 0.000e+00
+168500 17500 body_count: 97 atom_count: 2425 4.438e-04 3.407e-05 -3.049e-05 0.000e+00 0.000e+00 0.000e+00
+171000 20000 body_count: 97 atom_count: 2425 4.439e-04 3.407e-05 -3.058e-05 0.000e+00 0.000e+00 0.000e+00
+173500 22500 body_count: 97 atom_count: 2425 4.441e-04 3.407e-05 -3.067e-05 0.000e+00 0.000e+00 0.000e+00
+176000 25000 body_count: 97 atom_count: 2425 4.442e-04 3.407e-05 -3.076e-05 0.000e+00 0.000e+00 0.000e+00
+178500 27500 body_count: 97 atom_count: 2425 4.444e-04 3.407e-05 -3.085e-05 0.000e+00 0.000e+00 0.000e+00
+181000 30000 body_count: 97 atom_count: 2425 4.446e-04 3.407e-05 -3.094e-05 0.000e+00 0.000e+00 0.000e+00
+183500 32500 body_count: 97 atom_count: 2425 4.447e-04 3.407e-05 -3.103e-05 0.000e+00 0.000e+00 0.000e+00
+186000 35000 body_count: 97 atom_count: 2425 4.449e-04 3.407e-05 -3.112e-05 0.000e+00 0.000e+00 0.000e+00
+188500 37500 body_count: 97 atom_count: 2425 4.451e-04 3.407e-05 -3.121e-05 0.000e+00 0.000e+00 0.000e+00
+191000 40000 body_count: 97 atom_count: 2425 4.452e-04 3.407e-05 -3.130e-05 0.000e+00 0.000e+00 0.000e+00
+193500 42500 body_count: 97 atom_count: 2425 4.454e-04 3.407e-05 -3.139e-05 0.000e+00 0.000e+00 0.000e+00
+196000 45000 body_count: 97 atom_count: 2425 4.456e-04 3.407e-05 -3.148e-05 0.000e+00 0.000e+00 0.000e+00
+198500 47500 body_count: 97 atom_count: 2425 4.457e-04 3.407e-05 -3.157e-05 0.000e+00 0.000e+00 0.000e+00
+201000 50000 body_count: 97 atom_count: 2425 4.459e-04 3.407e-05 -3.166e-05 0.000e+00 0.000e+00 0.000e+00
+201000 4.459e-04 3.407e-05 -3.166e-05 0.000e+00 0.000e+00 0.000e+00
+203500 2500 body_count: 97 atom_count: 2425 4.495e-04 3.407e-05 -3.354e-05 0.000e+00 0.000e+00 0.000e+00
+206000 5000 body_count: 97 atom_count: 2425 4.497e-04 3.407e-05 -3.363e-05 0.000e+00 0.000e+00 0.000e+00
+208500 7500 body_count: 97 atom_count: 2425 4.498e-04 3.407e-05 -3.372e-05 0.000e+00 0.000e+00 0.000e+00
+211000 10000 body_count: 97 atom_count: 2425 4.500e-04 3.407e-05 -3.381e-05 0.000e+00 0.000e+00 0.000e+00
+213500 12500 body_count: 97 atom_count: 2425 4.502e-04 3.407e-05 -3.390e-05 0.000e+00 0.000e+00 0.000e+00
+216000 15000 body_count: 97 atom_count: 2425 4.504e-04 3.407e-05 -3.399e-05 0.000e+00 0.000e+00 0.000e+00
+218500 17500 body_count: 97 atom_count: 2425 4.506e-04 3.407e-05 -3.408e-05 0.000e+00 0.000e+00 0.000e+00
+221000 20000 body_count: 97 atom_count: 2425 4.507e-04 3.407e-05 -3.417e-05 0.000e+00 0.000e+00 0.000e+00
+223500 22500 body_count: 97 atom_count: 2425 4.509e-04 3.407e-05 -3.426e-05 0.000e+00 0.000e+00 0.000e+00
+226000 25000 body_count: 97 atom_count: 2425 4.511e-04 3.407e-05 -3.435e-05 0.000e+00 0.000e+00 0.000e+00
+228500 27500 body_count: 97 atom_count: 2425 4.513e-04 3.407e-05 -3.444e-05 0.000e+00 0.000e+00 0.000e+00
+231000 30000 body_count: 97 atom_count: 2425 4.524e-04 3.431e-05 -3.500e-05 3.753e-04 1.431e-04 -1.610e-04
+233500 32500 body_count: 97 atom_count: 2425 4.534e-04 3.454e-05 -3.554e-05 3.464e-04 1.320e-04 -1.486e-04
+236000 35000 body_count: 97 atom_count: 2425 4.544e-04 3.473e-05 -3.602e-05 3.217e-04 1.226e-04 -1.380e-04
+238500 37500 body_count: 97 atom_count: 2425 4.552e-04 3.490e-05 -3.645e-05 3.002e-04 1.144e-04 -1.288e-04
+241000 40000 body_count: 97 atom_count: 2425 4.562e-04 3.520e-05 -3.702e-05 4.537e-04 2.150e-04 -2.331e-04
+243500 42500 body_count: 97 atom_count: 2425 4.572e-04 3.553e-05 -3.761e-05 4.270e-04 2.024e-04 -2.194e-04
+246000 45000 body_count: 97 atom_count: 2425 4.580e-04 3.582e-05 -3.814e-05 4.033e-04 1.911e-04 -2.072e-04
+248500 47500 body_count: 97 atom_count: 2425 4.589e-04 3.608e-05 -3.863e-05 3.820e-04 1.811e-04 -1.963e-04
+251000 50000 body_count: 97 atom_count: 2425 4.596e-04 3.631e-05 -3.908e-05 3.629e-04 1.720e-04 -1.864e-04
+251000 4.596e-04 3.631e-05 -3.908e-05 3.629e-04 1.720e-04 -1.864e-04
+253500 2500 body_count: 97 atom_count: 2425 4.746e-04 4.075e-05 -4.787e-05 0.000e+00 0.000e+00 0.000e+00
+256000 5000 body_count: 97 atom_count: 2425 4.748e-04 4.075e-05 -4.798e-05 0.000e+00 0.000e+00 0.000e+00
+258500 7500 body_count: 97 atom_count: 2425 4.751e-04 4.075e-05 -4.809e-05 0.000e+00 0.000e+00 0.000e+00
+261000 10000 body_count: 97 atom_count: 2425 4.753e-04 4.075e-05 -4.820e-05 0.000e+00 0.000e+00 0.000e+00
+263500 12500 body_count: 97 atom_count: 2425 4.756e-04 4.075e-05 -4.830e-05 0.000e+00 0.000e+00 0.000e+00
+266000 15000 body_count: 97 atom_count: 2425 4.758e-04 4.075e-05 -4.841e-05 0.000e+00 0.000e+00 0.000e+00
+268500 17500 body_count: 97 atom_count: 2425 4.761e-04 4.075e-05 -4.852e-05 0.000e+00 0.000e+00 0.000e+00
+271000 20000 body_count: 97 atom_count: 2425 4.763e-04 4.075e-05 -4.863e-05 0.000e+00 0.000e+00 0.000e+00
+273500 22500 body_count: 97 atom_count: 2425 4.766e-04 4.075e-05 -4.873e-05 0.000e+00 0.000e+00 0.000e+00
+276000 25000 body_count: 97 atom_count: 2425 4.769e-04 4.075e-05 -4.884e-05 0.000e+00 0.000e+00 0.000e+00
+278500 27500 body_count: 97 atom_count: 2425 4.771e-04 4.075e-05 -4.895e-05 0.000e+00 0.000e+00 0.000e+00
+281000 30000 body_count: 97 atom_count: 2425 4.774e-04 4.075e-05 -4.906e-05 0.000e+00 0.000e+00 0.000e+00
+283500 32500 body_count: 97 atom_count: 2425 4.776e-04 4.075e-05 -4.916e-05 1.561e-06 6.327e-06 -5.598e-06
+286000 35000 body_count: 97 atom_count: 2425 4.779e-04 4.074e-05 -4.927e-05 1.450e-06 5.875e-06 -5.198e-06
+288500 37500 body_count: 97 atom_count: 2425 4.782e-04 4.074e-05 -4.938e-05 1.353e-06 5.483e-06 -4.851e-06
+291000 40000 body_count: 97 atom_count: 2425 4.784e-04 4.074e-05 -4.949e-05 1.269e-06 5.141e-06 -4.548e-06
+293500 42500 body_count: 97 atom_count: 2425 4.787e-04 4.073e-05 -4.959e-05 1.194e-06 4.838e-06 -4.281e-06
+296000 45000 body_count: 97 atom_count: 2425 4.790e-04 4.073e-05 -4.970e-05 1.128e-06 4.570e-06 -4.043e-06
+298500 47500 body_count: 97 atom_count: 2425 4.792e-04 4.073e-05 -4.981e-05 1.068e-06 4.329e-06 -3.830e-06
+301000 50000 body_count: 97 atom_count: 2425 4.795e-04 4.073e-05 -4.992e-05 1.015e-06 4.113e-06 -3.639e-06
+301000 4.795e-04 4.073e-05 -4.992e-05 1.015e-06 4.113e-06 -3.639e-06
+303500 2500 body_count: 97 atom_count: 2425 4.851e-04 4.069e-05 -5.218e-05 0.000e+00 0.000e+00 0.000e+00
+306000 5000 body_count: 97 atom_count: 2425 4.854e-04 4.069e-05 -5.228e-05 0.000e+00 0.000e+00 0.000e+00
+308500 7500 body_count: 97 atom_count: 2425 4.857e-04 4.069e-05 -5.239e-05 0.000e+00 0.000e+00 0.000e+00
+311000 10000 body_count: 97 atom_count: 2425 4.860e-04 4.069e-05 -5.250e-05 0.000e+00 0.000e+00 0.000e+00
+313500 12500 body_count: 97 atom_count: 2425 4.862e-04 4.069e-05 -5.260e-05 0.000e+00 0.000e+00 0.000e+00
+316000 15000 body_count: 97 atom_count: 2425 4.865e-04 4.069e-05 -5.271e-05 0.000e+00 0.000e+00 0.000e+00
+318500 17500 body_count: 97 atom_count: 2425 4.868e-04 4.069e-05 -5.282e-05 0.000e+00 0.000e+00 0.000e+00
+321000 20000 body_count: 97 atom_count: 2425 4.871e-04 4.069e-05 -5.293e-05 0.000e+00 0.000e+00 0.000e+00
+323500 22500 body_count: 97 atom_count: 2425 4.873e-04 4.069e-05 -5.303e-05 0.000e+00 0.000e+00 0.000e+00
+326000 25000 body_count: 97 atom_count: 2425 4.876e-04 4.069e-05 -5.314e-05 0.000e+00 0.000e+00 0.000e+00
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.

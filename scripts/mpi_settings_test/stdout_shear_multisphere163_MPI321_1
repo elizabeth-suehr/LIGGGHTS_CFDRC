@@ -1,0 +1,192 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-06-18:40:11 by liz.suehr, git commit 20bafd84e54ba1e14cc5c444673f017ba084bbe9)
+communicate       single vel yes
+units             si
+log               log.shear.multisphere163_MPI321_1.liggghts
+atom_modify       map array
+
+processors        3 2 1
+
+# Set domain
+region            domain block 0.0 5.04000e-03 0.0 5.04000e-03 0.0 2.52000e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00504 0.00504 0.00252)
+  3 by 2 by 1 MPI processor grid
+
+# Set neighbor and list options
+neighbor          1.721e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 163 ntry 10000000 spheres file multisphere163.txt scale 1.0 type 1
+Calculating the properties of the given template.
+   Depending on ntry, this may take a while...
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=2.854574e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=2.854574e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 3 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.5
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Mon Sep 11 13:12:12 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.46764 Mbytes
+    Step 
+       0 
+insertion: proc 0 at 0 %
+insertion: proc 1 at 0 %
+insertion: proc 2 at 0 %
+insertion: proc 3 at 0 %
+insertion: proc 4 at 0 %
+insertion: proc 5 at 0 %
+insertion: proc 4 at 10 %
+insertion: proc 1 at 10 %
+insertion: proc 5 at 10 %
+insertion: proc 3 at 10 %
+insertion: proc 0 at 10 %
+insertion: proc 2 at 10 %
+insertion: proc 5 at 20 %
+insertion: proc 4 at 20 %
+insertion: proc 0 at 20 %
+insertion: proc 1 at 20 %
+insertion: proc 2 at 20 %
+insertion: proc 3 at 20 %
+insertion: proc 5 at 30 %
+insertion: proc 0 at 30 %
+insertion: proc 1 at 30 %
+insertion: proc 4 at 30 %
+insertion: proc 2 at 30 %
+insertion: proc 3 at 30 %
+insertion: proc 0 at 40 %
+insertion: proc 0 at 50 %
+insertion: proc 0 at 60 %
+insertion: proc 0 at 70 %
+insertion: proc 0 at 80 %
+insertion: proc 0 at 90 %
+insertion: proc 0 at 100 %
+insertion: proc 4 at 40 %
+insertion: proc 4 at 50 %
+insertion: proc 4 at 60 %
+insertion: proc 4 at 70 %
+insertion: proc 4 at 80 %
+insertion: proc 1 at 40 %
+insertion: proc 5 at 40 %
+insertion: proc 5 at 40 %
+insertion: proc 1 at 50 %
+insertion: proc 4 at 90 %
+insertion: proc 5 at 50 %
+insertion: proc 1 at 60 %
+insertion: proc 4 at 100 %
+insertion: proc 5 at 60 %
+insertion: proc 1 at 70 %
+insertion: proc 5 at 70 %
+insertion: proc 1 at 80 %
+insertion: proc 5 at 80 %
+insertion: proc 1 at 90 %
+insertion: proc 5 at 90 %
+insertion: proc 1 at 100 %
+insertion: proc 5 at 100 %
+insertion: proc 2 at 40 %
+insertion: proc 2 at 50 %
+insertion: proc 2 at 60 %
+insertion: proc 2 at 70 %
+insertion: proc 2 at 80 %
+insertion: proc 2 at 90 %
+insertion: proc 2 at 100 %
+insertion: proc 3 at 40 %
+insertion: proc 3 at 50 %
+insertion: proc 3 at 60 %
+insertion: proc 3 at 70 %
+insertion: proc 3 at 80 %
+insertion: proc 3 at 90 %
+insertion: proc 3 at 100 %
+INFO: Particle insertion ins1: inserted 2874 particle templates (mass 8.004045e-05) at step 1
+ - a total of 2874 particle templates (mass 8.004045e-05) inserted so far.
+       1 
+Loop time of 8.43377 on 6 procs for 1 steps with 468462 atoms, finish time Mon Sep 11 13:12:25 2023
+
+
+Pair  time (%) = 2.05347 (24.3481)
+Neigh time (%) = 5.25381 (62.2949)
+Comm  time (%) = 0.0424951 (0.503868)
+Outpt time (%) = 0.66743 (7.91378)
+Other time (%) = 0.416568 (4.93929)
+
+Nlocal:    78077 ave 82656 max 75354 min
+Histogram: 3 1 0 0 0 0 0 0 0 2
+Nghost:    98633 ave 102838 max 94360 min
+Histogram: 1 1 1 0 0 0 0 1 1 1
+Neighs:    6.25197e+07 ave 7.08345e+07 max 5.67248e+07 min
+Histogram: 1 1 1 1 0 0 1 0 0 1
+
+Total # of neighbors = 375118244
+Ave neighs/atom = 800.744
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+468462 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 5.35e-06 reset 1000 threshold 1.00e-06 start_dt 2.616e-11 end_dt 1.570e-08
+run               100000
+Setting up run at Mon Sep 11 13:12:25 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 2416.86 Mbytes
+    Step 
+       1 
+fix_ms forced to insert 1 body types
+fix_ms forced to insert 1 body types
+fix_ms forced to insert 1 body types
+fix_ms forced to insert 1 body types
+fix_ms forced to insert 1 body types
+pre-run, step: 1000, ke/mass=8.053e+08, natoms=468888, overlap=5.268e-04, cor=1.047e-01, dt=6.238e-11 nbody: 2874 
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+Restart file was not written yet.

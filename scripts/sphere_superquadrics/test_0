@@ -1,0 +1,269 @@
+LIGGGHTS (Version LIGGGHTS-PUBLIC 3.8.0, compiled 2023-09-14-12:09:13 by liz.suehr, git commit 357ff034cff53320eeedb4a37627805705ae7ff9)
+communicate       single vel yes
+units             si
+log               log.shear.cyl6_0.liggghts
+atom_modify       map array
+
+processors        3 3 2
+
+# Set domain
+region            domain block 0.0 6.49340e-04 0.0 6.49340e-04 0.0 3.24670e-04 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00064934 0.00064934 0.00032467)
+  3 by 3 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          6.633e-05 bin
+neigh_modify      every 1 delay 0 check no
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history surface superquadric
+WARNING: 
+	The contact model you specified is not located in any whitelist.
+	Because of this the model will be run in an unoptimized version (increasing runtime by up to 20%).
+	In order to optimize this model you have the following options:
+		(i)  Run the genAutoExamplesWhitelist.sh script in your LIGGGHTS(R) source folder to automatically parse the input script
+		(ii) Add the model combination by hand to your style_contact_model_user.whitelist that can be found in your LIGGGHTS(R) source folder
+		(iii) Use the ENABLE_MODEL_* flag when building with cmake.
+	If you perform one of the steps above LIGGGHTS(R) needs to be recompiled to generate the optimized code.
+
+ (../contact_models.h:365)
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/superquadric 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 shape constant 0.000010 0.000010 0.000060 blockiness constant 10.000000 2.000000
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+Fix particledistribution/discrete (id pdd1): distribution based on mass%:
+    pts1: d=1.216674e-04 (max. bounding sphere) mass%=100.000000%
+Fix particledistribution/discrete (id pdd1): distribution based on number%:
+    pts1: d=1.216674e-04 (max. bounding sphere) number%=100.000000%
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 48 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.025
+# Apply integration fix
+fix               ms nve_group1 nve/superquadric
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Thu Sep 14 12:25:17 2023
+
+INFO: Resetting random generator for region domain
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 19.1299 Mbytes
+    Step 
+       0 
+INFO: Particle insertion ins1: inserted 94 particle templates (mass 8.622672e-09) at step 1
+ - a total of 94 particle templates (mass 8.622672e-09) inserted so far.
+       1 
+Loop time of 0.00128393 on 18 procs for 1 steps with 94 atoms, finish time Thu Sep 14 12:25:20 2023
+
+
+Pair  time (%) = 8.82781e-05 (6.87562)
+Neigh time (%) = 2.45082e-05 (1.90884)
+Comm  time (%) = 0.000230023 (17.9156)
+Outpt time (%) = 1.08125e-05 (0.842141)
+Other time (%) = 0.000930308 (72.4578)
+
+Nlocal:    5.22222 ave 8 max 4 min
+Histogram: 8 0 2 0 0 5 0 2 0 1
+Nghost:    135.778 ave 138 max 132 min
+Histogram: 1 1 0 2 0 2 7 0 1 4
+Neighs:    83.5 ave 146 max 42 min
+Histogram: 7 1 0 1 2 2 1 0 1 3
+
+Total # of neighbors = 1503
+Ave neighs/atom = 15.9894
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+94 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 1.10e-06 reset 1000 threshold 1.00e-06 start_dt 1.291e-09 end_dt 1.291e-08
+run               100000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Thu Sep 14 12:25:20 2023
+
+Memory usage per processor = 23.438 Mbytes
+    Step 
+       1 
+pre-run, step: 1000, ke/mass=0.000e+00, natoms=94, overlap=1.000e+00, cor=9.776e-01, dt=2.044e-09
+Loop time of 0.0679445 on 18 procs for 100000 steps with 94 atoms, finish time Thu Sep 14 12:25:20 2023
+
+
+Pair  time (%) = 0.00294879 (4.33999)
+Neigh time (%) = 0.00307532 (4.52623)
+Comm  time (%) = 0.0391358 (57.5997)
+Outpt time (%) = 0 (0)
+Other time (%) = 0.0227846 (33.5341)
+
+Nlocal:    5.22222 ave 8 max 4 min
+Histogram: 8 0 2 0 0 5 0 2 0 1
+Nghost:    135.778 ave 138 max 132 min
+Histogram: 1 1 0 2 0 2 7 0 1 4
+Neighs:    83.5 ave 146 max 42 min
+Histogram: 7 1 0 1 2 2 1 0 1 3
+
+Total # of neighbors = 1503
+Ave neighs/atom = 15.9894
+Neighbor list builds = 999
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          1.2909e-08
+
+fix               leboundary all lebc 100.0 true gtemp 0.1
+
+# Run desired simulation
+run               15000000
+Setting up run at Thu Sep 14 12:25:20 2023
+
+Memory usage per processor = 23.438 Mbytes
+    Step 
+    1000 
+3500 2500 atom_count: 94 1.711e-03 5.483e-03 1.335e-03 0.000e+00 0.000e+00 0.000e+00
+6000 5000 atom_count: 94 1.707e-03 5.483e-03 1.326e-03 0.000e+00 0.000e+00 0.000e+00
+8500 7500 atom_count: 94 1.703e-03 5.483e-03 1.317e-03 0.000e+00 0.000e+00 0.000e+00
+11000 10000 atom_count: 94 1.698e-03 5.483e-03 1.308e-03 0.000e+00 0.000e+00 0.000e+00
+13500 12500 atom_count: 94 1.694e-03 5.483e-03 1.299e-03 0.000e+00 0.000e+00 0.000e+00
+16000 15000 atom_count: 94 1.700e-03 5.473e-03 1.283e-03 3.312e-08 1.202e-07 -6.309e-08
+18500 17500 atom_count: 94 1.710e-03 5.454e-03 1.250e-03 6.421e-08 2.642e-07 1.734e-08
+21000 20000 atom_count: 94 1.712e-03 5.437e-03 1.219e-03 5.618e-08 2.311e-07 1.518e-08
+23500 22500 atom_count: 94 1.713e-03 5.423e-03 1.194e-03 4.994e-08 2.055e-07 1.349e-08
+26000 25000 atom_count: 94 1.713e-03 5.413e-03 1.171e-03 4.495e-08 1.849e-07 1.214e-08
+28500 27500 atom_count: 94 1.713e-03 5.403e-03 1.151e-03 1.058e-07 2.119e-07 6.437e-08
+31000 30000 atom_count: 94 1.730e-03 5.365e-03 1.124e-03 2.079e-07 2.666e-07 1.409e-07
+33500 32500 atom_count: 94 1.743e-03 5.325e-03 1.099e-03 2.176e-07 2.691e-07 1.057e-07
+36000 35000 atom_count: 94 1.753e-03 5.295e-03 1.075e-03 2.021e-07 2.499e-07 9.814e-08
+38500 37500 atom_count: 94 1.760e-03 5.269e-03 1.053e-03 1.886e-07 2.332e-07 9.160e-08
+41000 40000 atom_count: 94 1.767e-03 5.246e-03 1.032e-03 1.768e-07 2.186e-07 8.587e-08
+43500 42500 atom_count: 94 1.773e-03 5.226e-03 1.013e-03 1.664e-07 2.058e-07 8.082e-08
+46000 45000 atom_count: 94 1.777e-03 5.208e-03 9.958e-04 1.572e-07 1.943e-07 7.633e-08
+48500 47500 atom_count: 94 1.781e-03 5.192e-03 9.792e-04 1.489e-07 1.841e-07 7.232e-08
+51000 50000 atom_count: 94 1.786e-03 5.176e-03 9.629e-04 1.694e-07 1.946e-07 9.213e-08
+51000 1.786e-03 5.176e-03 9.629e-04 1.694e-07 1.946e-07 9.213e-08
+53500 2500 atom_count: 94 1.911e-03 4.807e-03 6.182e-04 0.000e+00 0.000e+00 0.000e+00
+56000 5000 atom_count: 94 1.888e-03 4.811e-03 6.174e-04 1.026e-07 7.882e-08 -8.994e-08
+58500 7500 atom_count: 94 1.904e-03 4.734e-03 6.289e-04 4.263e-07 7.253e-07 2.510e-07
+61000 10000 atom_count: 94 1.933e-03 4.678e-03 6.264e-04 3.611e-07 6.131e-07 1.347e-07
+63500 12500 atom_count: 94 1.954e-03 4.642e-03 6.205e-04 2.889e-07 4.905e-07 1.078e-07
+66000 15000 atom_count: 94 1.967e-03 4.618e-03 6.142e-04 2.407e-07 4.087e-07 8.983e-08
+68500 17500 atom_count: 94 1.976e-03 4.600e-03 6.078e-04 2.064e-07 5.314e-07 8.072e-08
+71000 20000 atom_count: 94 1.976e-03 4.584e-03 6.110e-04 1.872e-07 4.825e-07 5.992e-08
+73500 22500 atom_count: 94 1.973e-03 4.574e-03 6.137e-04 1.664e-07 4.289e-07 5.326e-08
+76000 25000 atom_count: 94 1.973e-03 4.561e-03 6.156e-04 1.637e-07 3.964e-07 3.586e-08
+78500 27500 atom_count: 94 1.973e-03 4.550e-03 6.162e-04 1.558e-07 3.645e-07 2.729e-08
+81000 30000 atom_count: 94 1.980e-03 4.535e-03 6.139e-04 1.450e-07 3.498e-07 1.908e-08
+83500 32500 atom_count: 94 1.986e-03 4.522e-03 6.106e-04 1.339e-07 3.229e-07 1.761e-08
+86000 35000 atom_count: 94 1.991e-03 4.511e-03 6.067e-04 1.243e-07 2.998e-07 1.635e-08
+88500 37500 atom_count: 94 1.995e-03 4.501e-03 6.024e-04 1.160e-07 2.798e-07 1.526e-08
+91000 40000 atom_count: 94 1.998e-03 4.493e-03 5.978e-04 1.088e-07 2.623e-07 1.431e-08
+93500 42500 atom_count: 94 2.000e-03 4.486e-03 5.929e-04 1.024e-07 2.469e-07 1.347e-08
+96000 45000 atom_count: 94 2.003e-03 4.479e-03 5.877e-04 9.668e-08 2.332e-07 1.272e-08
+98500 47500 atom_count: 94 2.004e-03 4.473e-03 5.823e-04 9.159e-08 2.209e-07 1.205e-08
+101000 50000 atom_count: 94 2.006e-03 4.468e-03 5.768e-04 8.701e-08 2.099e-07 1.145e-08
+101000 2.006e-03 4.468e-03 5.768e-04 8.701e-08 2.099e-07 1.145e-08
+103500 2500 atom_count: 94 2.030e-03 4.367e-03 4.577e-04 0.000e+00 0.000e+00 0.000e+00
+106000 5000 atom_count: 94 2.029e-03 4.367e-03 4.507e-04 0.000e+00 0.000e+00 0.000e+00
+108500 7500 atom_count: 94 2.028e-03 4.367e-03 4.432e-04 1.401e-09 1.472e-09 -1.436e-09
+111000 10000 atom_count: 94 2.028e-03 4.368e-03 4.352e-04 1.051e-09 1.104e-09 -1.077e-09
+113500 12500 atom_count: 94 2.027e-03 4.368e-03 4.275e-04 8.408e-10 8.834e-10 -8.618e-10
+116000 15000 atom_count: 94 2.030e-03 4.368e-03 4.199e-04 9.786e-09 2.812e-09 -5.061e-09
+118500 17500 atom_count: 94 2.035e-03 4.367e-03 4.123e-04 8.388e-09 2.411e-09 -4.338e-09
+121000 20000 atom_count: 94 2.038e-03 4.366e-03 4.049e-04 7.340e-09 2.109e-09 -3.796e-09
+123500 22500 atom_count: 94 2.040e-03 4.366e-03 3.975e-04 6.524e-09 1.875e-09 -3.374e-09
+126000 25000 atom_count: 94 2.042e-03 4.365e-03 3.902e-04 5.872e-09 1.687e-09 -3.037e-09
+128500 27500 atom_count: 94 2.043e-03 4.365e-03 3.830e-04 5.338e-09 1.534e-09 -2.761e-09
+131000 30000 atom_count: 94 2.042e-03 4.365e-03 3.764e-04 9.333e-09 6.306e-09 -7.195e-09
+133500 32500 atom_count: 94 2.041e-03 4.365e-03 3.697e-04 8.615e-09 5.821e-09 -6.642e-09
+136000 35000 atom_count: 94 2.043e-03 4.363e-03 3.616e-04 1.010e-08 1.858e-08 -1.119e-08
+138500 37500 atom_count: 94 2.045e-03 4.362e-03 3.537e-04 9.427e-09 1.734e-08 -1.045e-08
+141000 40000 atom_count: 94 2.046e-03 4.361e-03 3.460e-04 8.838e-09 1.626e-08 -9.794e-09
+143500 42500 atom_count: 94 2.046e-03 4.359e-03 3.376e-04 1.270e-08 1.660e-08 -6.836e-09
+146000 45000 atom_count: 94 2.046e-03 4.357e-03 3.290e-04 1.199e-08 1.567e-08 -6.456e-09
+148500 47500 atom_count: 94 2.046e-03 4.356e-03 3.205e-04 1.136e-08 1.485e-08 -6.117e-09
+151000 50000 atom_count: 94 2.046e-03 4.354e-03 3.122e-04 1.079e-08 1.411e-08 -5.811e-09
+151000 2.046e-03 4.354e-03 3.122e-04 1.079e-08 1.411e-08 -5.811e-09
+153500 2500 atom_count: 94 2.044e-03 4.324e-03 1.401e-04 5.831e-08 7.019e-08 6.397e-08
+156000 5000 atom_count: 94 2.088e-03 4.257e-03 1.546e-04 9.285e-08 3.365e-07 1.706e-07
+158500 7500 atom_count: 94 2.112e-03 4.220e-03 1.617e-04 6.190e-08 2.244e-07 1.137e-07
+161000 10000 atom_count: 94 2.121e-03 4.199e-03 1.644e-04 1.132e-07 2.132e-07 3.052e-08
+163500 12500 atom_count: 94 2.119e-03 4.187e-03 1.640e-04 1.269e-07 1.746e-07 3.658e-08
+166000 15000 atom_count: 94 2.115e-03 4.179e-03 1.616e-04 1.077e-07 1.458e-07 2.982e-08
+168500 17500 atom_count: 94 2.111e-03 4.173e-03 1.584e-04 9.229e-08 1.249e-07 2.556e-08
+171000 20000 atom_count: 94 2.111e-03 4.164e-03 1.539e-04 8.734e-08 1.404e-07 2.671e-08
+173500 22500 atom_count: 94 2.121e-03 4.144e-03 1.451e-04 1.435e-07 2.591e-07 -4.956e-08
+176000 25000 atom_count: 94 2.131e-03 4.126e-03 1.361e-04 1.291e-07 2.332e-07 -4.460e-08
+178500 27500 atom_count: 94 2.139e-03 4.111e-03 1.275e-04 1.181e-07 2.122e-07 -4.090e-08
+181000 30000 atom_count: 94 2.146e-03 4.096e-03 1.177e-04 1.195e-07 2.338e-07 -2.065e-08
+183500 32500 atom_count: 94 2.148e-03 4.078e-03 1.040e-04 1.103e-07 2.158e-07 -1.906e-08
+186000 35000 atom_count: 94 2.150e-03 4.063e-03 9.129e-05 1.024e-07 2.004e-07 -1.770e-08
+188500 37500 atom_count: 94 2.152e-03 4.050e-03 7.946e-05 9.560e-08 1.870e-07 -1.652e-08
+191000 40000 atom_count: 94 2.154e-03 4.038e-03 6.833e-05 8.962e-08 1.753e-07 -1.548e-08
+193500 42500 atom_count: 94 2.155e-03 4.028e-03 5.778e-05 8.435e-08 1.650e-07 -1.457e-08
+196000 45000 atom_count: 94 2.157e-03 4.019e-03 4.770e-05 7.967e-08 1.558e-07 -1.376e-08
+198500 47500 atom_count: 94 2.158e-03 4.010e-03 3.804e-05 7.547e-08 1.476e-07 -1.304e-08
+201000 50000 atom_count: 94 2.159e-03 4.003e-03 2.871e-05 7.170e-08 1.403e-07 -1.239e-08
+201000 2.159e-03 4.003e-03 2.871e-05 7.170e-08 1.403e-07 -1.239e-08
+203500 2500 atom_count: 94 2.183e-03 3.863e-03 -1.609e-04 0.000e+00 0.000e+00 0.000e+00
+206000 5000 atom_count: 94 2.184e-03 3.874e-03 -1.516e-04 1.893e-07 2.672e-07 7.606e-08
+208500 7500 atom_count: 94 2.179e-03 3.881e-03 -1.394e-04 1.262e-07 1.781e-07 5.071e-08
+211000 10000 atom_count: 94 2.177e-03 3.885e-03 -1.364e-04 9.465e-08 1.336e-07 3.803e-08
+213500 12500 atom_count: 94 2.176e-03 3.887e-03 -1.371e-04 7.572e-08 1.069e-07 3.042e-08
+216000 15000 atom_count: 94 2.175e-03 3.888e-03 -1.397e-04 6.310e-08 8.907e-08 2.535e-08
+218500 17500 atom_count: 94 2.175e-03 3.889e-03 -1.434e-04 5.408e-08 7.634e-08 2.173e-08
+221000 20000 atom_count: 94 2.175e-03 3.890e-03 -1.477e-04 4.732e-08 6.680e-08 1.901e-08
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.
+
+SIGINT/SIGTERM caught - Writing restart on next occasion and quitting after that.

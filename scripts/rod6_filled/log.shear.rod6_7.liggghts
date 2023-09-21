@@ -1,0 +1,255 @@
+atom_modify       map array
+
+processors        3 3 2
+
+# Set domain
+region            domain block 0.0 5.72238e-04 0.0 5.72238e-04 0.0 2.86119e-04 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.000572238 0.000572238 0.000286119)
+  3 by 3 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          2.010e-05 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 11 ntry 10000000 spheres file particle_data.txt scale 1.0 type 1
+Finished calculating properties of template
+   mass = 8.246604e-11, radius of bounding sphere = 6.000000e-05, radius of equivalent sphere = 1.989522e-05
+   center of mass = 0.000000e+00, 0.000000e+00, 0.000000e+00
+   center of bounding sphere in body coords = -1.052623e-08, 9.763669e-10, -1.228115e-09
+   Principal moments of inertia_: 3.739845e-21, 9.227589e-20, 9.227548e-20
+     Eigenvector: 1.000000e+00, -8.468843e-06, 4.808934e-05
+     Eigenvector: -1.832160e-05, 8.478124e-01, 5.302962e-01
+     Eigenvector: -4.526173e-05, -5.302962e-01, 8.478124e-01
+     Inertia tensor: 3.739845e-21, 7.497881e-25, -4.257624e-24
+     Inertia tensor: 7.497881e-25, 9.227578e-20, 1.836000e-25
+     Inertia tensor: -4.257624e-24, 1.836000e-25, 9.227560e-20
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 10000 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.5
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Fri Sep 15 06:42:48 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.49154 Mbytes
+    Step 
+       0 
+INFO: Particle insertion ins1: inserted 1421 particle templates (mass 1.171842e-07) at step 1
+ - a total of 1421 particle templates (mass 1.171842e-07) inserted so far.
+       1 
+Loop time of 0.143727 on 18 procs for 1 steps with 15631 atoms, finish time Fri Sep 15 06:42:53 2023
+
+
+Pair  time (%) = 0.00200467 (1.39477)
+Neigh time (%) = 0.00583146 (4.05731)
+Comm  time (%) = 0.00550094 (3.82735)
+Outpt time (%) = 0.00509893 (3.54764)
+Other time (%) = 0.125291 (87.1729)
+
+Nlocal:    868.389 ave 1392 max 642 min
+Histogram: 8 0 0 4 4 0 0 0 0 2
+Nghost:    7007.83 ave 10934 max 5246 min
+Histogram: 8 0 0 2 6 0 0 0 0 2
+Neighs:    57498.5 ave 104372 max 33179 min
+Histogram: 6 2 0 2 4 2 0 0 0 2
+
+Total # of neighbors = 1034973
+Ave neighs/atom = 66.2128
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+15631 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+variable          vzero atom 0.0
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 1.00e-06 reset 1000 threshold 0.50e-06 start_dt 1.347e-09 end_dt 1.174e-08
+run               200000
+Setting up run at Fri Sep 15 06:42:53 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 12.6107 Mbytes
+    Step 
+       1 
+Loop time of 51.7037 on 18 procs for 200000 steps with 15631 atoms, finish time Fri Sep 15 06:43:44 2023
+
+
+Pair  time (%) = 4.03483 (7.80376)
+Neigh time (%) = 19.1569 (37.0513)
+Comm  time (%) = 6.44887 (12.4727)
+Outpt time (%) = 0 (0)
+Other time (%) = 22.0631 (42.6722)
+
+Nlocal:    868.389 ave 957 max 780 min
+Histogram: 2 1 0 2 3 5 1 2 0 2
+Nghost:    6559.5 ave 6952 max 6254 min
+Histogram: 3 1 3 3 1 1 2 2 0 2
+Neighs:    25326.6 ave 30738 max 20824 min
+Histogram: 2 1 3 0 6 1 3 0 0 2
+
+Total # of neighbors = 455878
+Ave neighs/atom = 29.165
+Neighbor list builds = 5999
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+unfix             limcheck
+# Set the top/bottom boundaries as LE
+timestep          8.1736e-09
+
+fix               leboundary all lebc 100.0 true gtemp 1.00e-06
+
+# Run desired simulation
+run               30000000
+Setting up run at Fri Sep 15 06:43:44 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+Memory usage per processor = 12.6257 Mbytes
+    Step 
+    6000 
+stress: 0.001773 0.001531 -0.000290 0.470115 0.451521 -0.094592
+stress: 0.002911 0.002893 -0.000518 0.292643 0.285832 -0.070550
+stress: 0.004028 0.003913 -0.000677 0.289969 0.299942 -0.083110
+stress: 0.005395 0.004766 -0.000771 0.323494 0.337637 -0.093014
+stress: 0.006813 0.005347 -0.000901 0.354908 0.357710 -0.100685
+stress: 0.007806 0.005903 -0.000636 0.335042 0.352070 -0.075217
+stress: 0.008697 0.006312 -0.000675 0.368250 0.401385 -0.101833
+stress: 0.009119 0.006508 -0.000597 0.370963 0.392457 -0.086549
+stress: 0.009641 0.006783 -0.000630 0.399037 0.429655 -0.103751
+stress: 0.010047 0.007308 -0.000714 0.397182 0.425721 -0.091600
+stress: 0.010729 0.007605 -0.000750 0.418375 0.443050 -0.115214
+stress: 0.011499 0.007932 -0.000801 0.407227 0.442567 -0.101826
+stress: 0.011810 0.008040 -0.000811 0.423099 0.448077 -0.088979
+stress: 0.012251 0.008068 -0.000781 0.446183 0.461634 -0.112145
+stress: 0.012716 0.008545 -0.000427 0.453631 0.482608 -0.122172
+stress: 0.012717 0.009007 -0.000464 0.450522 0.497501 -0.103412
+stress: 0.012941 0.008744 -0.000591 0.457002 0.493832 -0.116968
+stress: 0.013258 0.009393 -0.000342 0.416412 0.472972 -0.105755
+stress: 0.013759 0.009077 -0.000204 0.463050 0.483019 -0.114804
+stress: 0.013661 0.009441 -0.000385 0.442645 0.503592 -0.110537
+stress: 0.013164 0.009997 -0.000370 0.405347 0.461421 -0.114421
+stress: 0.013493 0.009811 -0.000590 0.419234 0.446762 -0.103075
+stress: 0.014067 0.009516 -0.000504 0.423372 0.462582 -0.103452
+stress: 0.014322 0.009805 -0.000321 0.416501 0.456218 -0.089877
+stress: 0.013640 0.010236 -0.000519 0.398344 0.463660 -0.098504
+stress: 0.014012 0.009693 0.000006 0.389475 0.449372 -0.094073
+stress: 0.013872 0.009264 0.000213 0.389660 0.434613 -0.089639
+stress: 0.013693 0.008819 0.000382 0.356283 0.429985 -0.088352
+stress: 0.013248 0.008983 0.000850 0.344937 0.433884 -0.092980
+stress: 0.013390 0.008900 0.001074 0.360327 0.419659 -0.081390
+stress: 0.013504 0.008732 0.001058 0.355177 0.418129 -0.089926
+stress: 0.013742 0.008609 0.000744 0.343263 0.403213 -0.081218
+stress: 0.013639 0.008465 0.000576 0.345965 0.404493 -0.083367
+stress: 0.013403 0.008890 0.000577 0.351522 0.416893 -0.098990
+stress: 0.012965 0.009078 0.000685 0.328592 0.386266 -0.072590
+stress: 0.013220 0.009187 0.000289 0.330935 0.393218 -0.079097
+stress: 0.012803 0.009106 0.000542 0.343279 0.381295 -0.071355
+stress: 0.012890 0.009219 0.000392 0.333347 0.402427 -0.097858
+stress: 0.013008 0.008765 0.000536 0.351109 0.398239 -0.088713
+stress: 0.013459 0.008704 0.000562 0.335343 0.413798 -0.075133
+stress: 0.013571 0.008943 0.000624 0.324994 0.375368 -0.073094
+stress: 0.013064 0.008991 0.000669 0.341981 0.386245 -0.085203
+stress: 0.013307 0.008909 0.000564 0.313958 0.385794 -0.075594
+stress: 0.013845 0.008387 0.000246 0.313130 0.379305 -0.098382
+stress: 0.014133 0.008454 0.000135 0.333736 0.397457 -0.093505
+stress: 0.014105 0.008122 0.000643 0.334780 0.398992 -0.076715
+stress: 0.013874 0.008333 0.000611 0.314505 0.384219 -0.085854
+stress: 0.013839 0.008646 0.000695 0.295097 0.376551 -0.072936
+stress: 0.013909 0.008707 0.000655 0.291735 0.350834 -0.075629
+stress: 0.014148 0.008386 0.000357 0.316042 0.376333 -0.081047
+stress: 0.014008 0.008308 0.000353 0.290800 0.357098 -0.083968
+stress: 0.013775 0.008455 0.000498 0.309086 0.375072 -0.086835
+stress: 0.013687 0.008101 0.000776 0.327702 0.400959 -0.079980
+stress: 0.013488 0.007397 0.000783 0.323958 0.383997 -0.092168
+stress: 0.013598 0.007238 0.000318 0.279645 0.377542 -0.065573
+stress: 0.013925 0.007523 0.000176 0.298491 0.402951 -0.095353
+stress: 0.014355 0.007797 -0.000347 0.305781 0.385572 -0.084249
+stress: 0.014474 0.007901 0.000057 0.312768 0.381717 -0.102843
+stress: 0.014740 0.008601 -0.000081 0.299069 0.382876 -0.092305
+stress: 0.014903 0.009050 0.000140 0.286576 0.377026 -0.066403
+stress: 0.014952 0.009485 0.000388 0.294192 0.359850 -0.063052
+stress: 0.015057 0.009648 0.000705 0.246355 0.328590 -0.075122
+stress: 0.014923 0.009401 0.000445 0.255568 0.325351 -0.052255
+stress: 0.014403 0.009428 0.000194 0.263799 0.324027 -0.070633
+stress: 0.014715 0.009319 -0.000050 0.243886 0.336167 -0.058479
+stress: 0.014871 0.009488 0.000007 0.245208 0.310672 -0.070661
+stress: 0.014812 0.008696 0.000328 0.239837 0.314834 -0.058185
+stress: 0.015203 0.008378 0.000159 0.227423 0.311732 -0.060754
+stress: 0.014933 0.008267 0.000399 0.241401 0.311387 -0.052571
+stress: 0.014648 0.008564 0.000808 0.216943 0.300907 -0.068750
+stress: 0.014812 0.008036 0.000622 0.222873 0.306704 -0.053038
+stress: 0.014951 0.007921 0.000488 0.246231 0.308606 -0.057515
+stress: 0.014805 0.007924 0.000541 0.241496 0.299027 -0.066585
+stress: 0.014585 0.007737 0.000890 0.210443 0.295395 -0.049465
+stress: 0.014227 0.007448 0.001180 0.209687 0.293263 -0.053351
+stress: 0.013984 0.007251 0.000776 0.201252 0.276530 -0.043900
+stress: 0.014403 0.006735 0.000920 0.194746 0.273455 -0.047998
+stress: 0.013928 0.006498 0.001080 0.207545 0.272606 -0.044318
+stress: 0.013925 0.006254 0.000965 0.181548 0.259829 -0.041381
+stress: 0.014179 0.006146 0.000999 0.172434 0.256849 -0.054275
+stress: 0.013966 0.005915 0.000995 0.183743 0.252514 -0.053922
+stress: 0.014010 0.005820 0.000878 0.166244 0.238212 -0.035802
+stress: 0.013787 0.005495 0.000637 0.175350 0.230106 -0.049812
+stress: 0.013420 0.005603 0.000652 0.153143 0.228058 -0.035499
+stress: 0.013297 0.005506 0.000394 0.179619 0.246449 -0.042757
+stress: 0.012912 0.005602 0.000350 0.165663 0.236598 -0.042931
+stress: 0.012856 0.005382 0.000327 0.168181 0.246431 -0.044315
+stress: 0.013117 0.005418 0.000281 0.182073 0.235422 -0.043896
+stress: 0.013173 0.005545 0.000191 0.157485 0.235760 -0.048728
+stress: 0.013011 0.005673 0.000045 0.157534 0.249077 -0.040261
+stress: 0.012842 0.005715 -0.000138 0.170375 0.231583 -0.048635
+stress: 0.012614 0.005461 0.000022 0.172455 0.221343 -0.019865
+stress: 0.012287 0.005500 -0.000160 0.151927 0.212819 -0.040115
+stress: 0.012292 0.005439 -0.000187 0.145944 0.212182 -0.039875
+stress: 0.012222 0.005586 -0.000260 0.160425 0.215543 -0.041192
+stress: 0.012445 0.005591 -0.000497 0.152048 0.213276 -0.031497
+stress: 0.012279 0.005526 -0.000388 0.151404 0.196600 -0.049492
+stress: 0.012026 0.005429 -0.000211 0.137927 0.197971 -0.023019
+stress: 0.012025 0.005386 -0.000227 0.134494 0.185787 -0.031303
+stress: 0.011860 0.005249 0.000031 0.124033 0.187761 -0.029115
+stress: 0.011763 0.005137 0.000028 0.124258 0.187877 -0.034589
+stress: 0.011793 0.005142 0.000106 0.119176 0.185574 -0.036394
+stress: 0.011667 0.004971 0.000212 0.138126 0.189910 -0.032910
+stress: 0.011628 0.004863 0.000191 0.132618 0.193896 -0.042197
+stress: 0.011530 0.004896 0.000169 0.125901 0.190487 -0.027847
+stress: 0.011767 0.004793 -0.000084 0.125857 0.192146 -0.038874
+stress: 0.012047 0.004790 0.000021 0.118006 0.186694 -0.029731
+stress: 0.012220 0.004831 -0.000052 0.135238 0.186333 -0.034192
+stress: 0.012502 0.004925 -0.000330 0.129094 0.181421 -0.035429
+stress: 0.012314 0.004970 -0.000320 0.132293 0.176253 -0.028377
+stress: 0.012028 0.005139 -0.000527 0.136130 0.177181 -0.017557
+stress: 0.011811 0.005159 -0.000665 0.124400 0.170465 -0.042912
+stress: 0.011788 0.005164 -0.000605 0.122890 0.167573 -0.021362
+stress: 0.011796 0.005112 -0.000612 0.124003 0.172321 -0.027513
+stress: 0.011765 0.005407 -0.000639 0.116664 0.177058 -0.026206
+stress: 0.011849 0.005141 -0.000725 0.125715 0.172724 -0.035675
+stress: 0.011888 0.004987 -0.000545 0.125397 0.170495 -0.032859
+stress: 0.011973 0.004807 -0.000393 0.118806 0.169295 -0.020197

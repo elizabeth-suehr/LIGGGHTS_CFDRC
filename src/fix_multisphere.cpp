@@ -455,6 +455,11 @@ void FixMultisphere::init()
 
     // timestep info
 
+    update_dt();
+}
+
+void FixMultisphere::update_dt()
+{
     dtv = update->dt;
     dtf = 0.5 * update->dt * force->ftm2v;
     dtq = 0.5 * update->dt;

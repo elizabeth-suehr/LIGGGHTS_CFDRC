@@ -1,0 +1,84 @@
+atom_modify       map array
+
+processors        3 2 1
+
+# Set domain
+region            domain block 0.0 5.04000e-03 0.0 5.04000e-03 0.0 2.52000e-03 units box volume_limit 1e-16
+create_box        2 domain
+Created orthogonal box = (0 0 0) to (0.00504 0.00504 0.00252)
+  3 by 2 by 1 MPI processor grid
+
+# Set neighbor and list options
+neighbor          1.721e-04 bin
+neigh_modify      every 1 delay 0 check no contact_distance_factor 1.1e+00
+
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.95 0.975 0.975 1.0
+fix               m4 all property/global coefficientFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 2 0.0 0.0 0.0 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/multisphere 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 nspheres 93 ntry 10000000 spheres file multisphere93.txt scale 1.0 type 1
+Finished calculating properties of template
+   mass = 2.760772e-08, radius of bounding sphere = 1.391000e-04, radius of equivalent sphere = 1.381446e-04
+   center of mass = 0.000000e+00, 0.000000e+00, 0.000000e+00
+   center of bounding sphere in body coords = -1.767384e-08, -6.601520e-09, 2.552590e-08
+   Principal moments of inertia_: 2.104960e-16, 2.106500e-16, 2.106852e-16
+     Eigenvector: 9.218533e-01, 3.633681e-02, -3.858317e-01
+     Eigenvector: -2.065396e-01, 8.884841e-01, -4.098017e-01
+     Eigenvector: 3.279145e-01, 4.574666e-01, 8.265570e-01
+     Inertia tensor: 2.105229e-16, 1.304116e-22, 6.431148e-20
+     Inertia tensor: 1.304116e-22, 2.106571e-16, 1.548612e-20
+     Inertia tensor: 6.431148e-20, 1.548612e-20, 2.106511e-16
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 3 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 100000000 volumefraction_region 0.5
+# Apply integration fix
+fix               ms nve_group1 multisphere
+
+# Make ymin and ymax temporary walls
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 2 0.1 0.1 0.1 0.1
+# Run one step to get particles inserted
+thermo_style      custom step
+run               1
+Setting up run at Mon Sep 11 13:11:56 2023
+
+WARNING: Energy calculated for multisphere particles is currently not correct (../fix_multisphere.cpp:1524)
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 8.46764 Mbytes
+    Step 
+       0 
+INFO: Particle insertion ins1: inserted 2899 particle templates (mass 8.003477e-05) at step 1
+ - a total of 2899 particle templates (mass 8.003477e-05) inserted so far.
+       1 
+Loop time of 2.83753 on 6 procs for 1 steps with 269607 atoms, finish time Mon Sep 11 13:12:04 2023
+
+
+Pair  time (%) = 0.674918 (23.7854)
+Neigh time (%) = 1.78858 (63.033)
+Comm  time (%) = 0.0218783 (0.771034)
+Outpt time (%) = 0.193925 (6.8343)
+Other time (%) = 0.158228 (5.57627)
+
+Nlocal:    44934.5 ave 47536 max 43392 min
+Histogram: 2 2 0 0 0 0 0 0 0 2
+Nghost:    56448.3 ave 58948 max 53328 min
+Histogram: 1 0 2 0 0 0 0 0 1 2
+Neighs:    2.05638e+07 ave 2.2879e+07 max 1.87175e+07 min
+Histogram: 1 1 0 2 0 0 0 0 1 1
+
+Total # of neighbors = 123382702
+Ave neighs/atom = 457.639
+Neighbor list builds = 1
+Dangerous builds = 0

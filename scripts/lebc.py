@@ -69,13 +69,14 @@ import numpy as np
 #import h5py
 import math
 from os.path import exists
+import superquadrics
 
 #####################################################################################################
 # set input parameters, defaults get overwritten by user
 #####################################################################################################
 nspecies        = 1					# Number of species to use
 proc	 	= np.array([1,1,1])		 	# Coefficients of restitution
-ptype	 	= np.array([""])                	# Particle type, blank is sphere, file names means multisphere. radius specified in file. 
+ptype	 	= np.array([""])                	# Particle type, blank is sphere, 'superquadric' for superquadric, file name means multisphere. radius specified in file. 
 nsph            = np.array([1])                         # number of spheres for body, 1 for pure sphere (not body)
 # ptype	 	= np.array(["","","particle"])      	# Particle type, blank is sphere, file names means multisphere
 diam	 	= np.array([0.0001])      		# Particle diameters, equivalent diameter for irregular shape
@@ -135,6 +136,11 @@ def set_input(nsph_i,proc_i,ptype_i,nspecies_i,diam_i,dens_i,cres_i,amin_i,amax_
   global shearStr
   global dtrelax
   global isDimensional
+  global is_superquad
+  global superquad_values
+  is_superquad = []
+  superquad_values = []
+
   nsph=nsph_i
   proc=proc_i
   ptype=ptype_i
@@ -157,6 +163,14 @@ def set_input(nsph_i,proc_i,ptype_i,nspecies_i,diam_i,dens_i,cres_i,amin_i,amax_
   filestr=filestr_i
   E=E_i
   nu=nu_i
+  global is_time_test
+  is_time_test = False
+  if (isinstance(steps_i, str)):
+    is_time_test = True
+    del steps_i
+    steps_i = 100000
+
+
   steps=steps_i
   shearStr=ss_i
   gtemp=gt_i
@@ -332,10 +346,38 @@ def pv_from_spheres(xl,yl,zl,rad,latt):
 
 def particle_volume(bid):
   global minrad,maxrad
+  global is_superquad
+  global pmode
+  global superquad_values
+  global global_max_xcm_dis
+
+  if pmode[bid] == 2:
+    print("found superquadric")
+    is_superquad.append(True)
+    strvals = str(ptype[bid]).split()
+    this_superquad = [float(strvals[1]),float(strvals[2]),float(strvals[3]),float(strvals[4]),float(strvals[5])]
+    superquad_values.append(this_superquad)
+    minrad=np.min(np.array([float(strvals[1]),float(strvals[2]),float(strvals[3])]))
+    maxrad=np.max(np.array([float(strvals[1]),float(strvals[2]),float(strvals[3])]))
+    minrad = minrad * 1.1
+    maxrad = maxrad * 1.1
+
+    vol1 = superquadrics.volume([this_superquad[0],this_superquad[1],this_superquad[2],2.0/this_superquad[3],2.0/this_superquad[4]])
+    print(vol1)
+    global_max_xcm_dis = maxrad
+
+    return vol1
+
+  else:
+    is_superquad.append(False)
+    superquad_values.append([])
   if (nsph[bid]<=1):
     return 4.0/3.0 * np.pi * (diam[bid]/2.0) ** 3
   ncols=4
-    
+  
+
+ 
+
   fin = open(ptype[bid], 'r')
   # check if file exists
   file_ex = exists(ptype[bid])
@@ -398,7 +440,7 @@ def particle_volume(bid):
           max_dis = max(distance,max_dis)
 
 
-  global global_max_xcm_dis
+  
 
   global_max_xcm_dis = max(global_max_xcm_dis, max_xcm_dis)
 
@@ -788,7 +830,9 @@ def calculate_params():
     sphericity[i] = 1.0
     psphericity[i] = 1.0
     pmode[i] = 0;
-    if ptype[i] != "":
+    if ptype[i].split()[0] == "superquadric":
+      pmode[i] = 2;
+    elif ptype[i] != "":
       # check if file exists
       file_ex = exists(ptype[i])
       if (not file_ex):
@@ -805,6 +849,8 @@ def calculate_params():
   global minrad,maxrad
   for i in range(0,nspecies):        
     diam[i]=2.0*np.cbrt(3.0/4.0*particle_volume(i)/np.pi)
+    print(min_radius)
+    print(minrad)
     min_radius = min(min_radius,minrad) #minrad is modified inside particle_volume calculations
     max_radius = max(max_radius,maxrad) #minrad is modified inside particle_volume calculations
     nd_diam+=diam[i]
@@ -812,30 +858,32 @@ def calculate_params():
   nd_diam=nd_diam/float(nspecies)
   nd_dens=nd_dens/float(nspecies)
   global binsize,nbins_x
-  # binsize =2.1*max_radius #3.0*np.max(diam)
-  # binsize =2.0*np.max(diam)
-  binsize=15.0*lens/nbins_x # obviously, this cannot be smaller than 2*largest_rad. For multisphere, the same applies.
-  if (binsize<2.0*max_radius):
-    nbins_x_old = nbins_x
-    nbins_x = math.floor(15.0*lens/(2.0*max_radius))
-    if (nbins_x % 2 == 0):
-      print("Nbins changed from {0} to {1}".format(nbins_x_old,nbins_x))
-    else:
-      nbins_x+=1
-      print("Nbins changed from {0} to {1}".format(nbins_x_old,nbins_x))
-  binsize=15.0*lens/nbins_x
+  # # binsize =2.1*max_radius #3.0*np.max(diam)
+  # # binsize =2.0*np.max(diam)
+  # binsize=15.0*lens/nbins_x # obviously, this cannot be smaller than 2*largest_rad. For multisphere, the same applies.
+  # if (binsize<2.0*max_radius):
+  #   nbins_x_old = nbins_x
+  #   nbins_x = math.floor(15.0*lens/(2.0*max_radius))
+  #   if (nbins_x % 2 == 0):
+  #     print("Nbins changed from {0} to {1}".format(nbins_x_old,nbins_x))
+  #   else:
+  #     nbins_x+=1
+  #     print("Nbins changed from {0} to {1}".format(nbins_x_old,nbins_x))
+  # binsize=15.0*lens/nbins_x
   
 
 
   global global_max_xcm_dis
 
   binsize = max_radius * 2.01
+
   #different bin size calucations, rewrites old stuff
   #binsize = max(max_radius * 2 * 1.1, global_max_xcm_dis * 1.1)
 
 
 
   minrad = min_radius
+  print(minrad)
   maxrad = max_radius
   # Particle volume
   vol = np.zeros(nspecies)
@@ -896,9 +944,9 @@ def calculate_params():
 
 
   global dtrelax
-  if dtrelax > 0.4:
-    print("Changed dtrelax to 0.4, it was larger")
-    dtrelax = 0.4
+  if dtrelax > 0.2:
+    print("Changed dtrelax to 0.2, it was larger")
+    dtrelax = 0.2
 
   # Determine time step for each case, use normal elastic constant
   # Scaling by volume fraction improves performance
@@ -953,14 +1001,12 @@ def calculate_params():
     # print("timestep={0:.3e}, {1:.3e}, {2:.3e}".format(dt[i], dts[i], dts0))
     dt_fix_init[i]  = min(dt_temp,min(dts_temp,dts0_temp)) # quater of stable dt
 
-
-
-
-
     dt_rayleigh = dts0
     
     dxx = lens*15.0
     max_vel = shearStr / 2.0 * dxx
+    
+
     max_flow_through = max_vel*dt[i]*steps/(dxx)
     dt_hertz = 2.87*(pmass**2.0 / (0.5*np.max(diam)*E**2*max_vel))**0.2
     
@@ -1072,7 +1118,10 @@ def shear_sim_files_specific(j):
   fout.write('# LIGGGHTS shear simulation input file\n\n')
 
   fout.write('# General simulation options\n')
-  fout.write('atom_style        granular\n')
+  if pmode[0] == 2:
+    fout.write('atom_style        superquadric\n')
+  else: 
+    fout.write('atom_style        granular\n')
   fout.write('boundary          p p p\n')  
   fout.write('newton            off\n')
   fout.write('echo              both\n')
@@ -1086,6 +1135,8 @@ def shear_sim_files_specific(j):
   size = lens
   if distribution == "curtis_literature":
     size = diam[0] * 1.05  #the ~15 number is actually around 15.7 * equiv volume diameter
+    # if pmode[0] == 2:
+    #   size = size * 1.5
   fout.write('region            domain block 0.0 {0:.5e} 0.0 {1:.5e} 0.0 {2:.5e} units box volume_limit 1e-16\n'.format(15.0*size,15.0*size,7.5*size))
 
   if (lebc_latt):
@@ -1093,12 +1144,18 @@ def shear_sim_files_specific(j):
   else:
     fout.write('create_box        {0} domain\n\n'.format(nspecies+1))
   fout.write('# Set neighbor and list options\n')
+
+  if pmode[0] != 2:
+    fout.write('neighbor          {0:.3e} bin\n'.format(binsize))
   # fout.write('neighbor          {0:.3e} bin\n'.format(binsize))
-  fout.write('neighbor          {0:.3e} bin\n'.format(binsize))
+  
   # fout.write('neighbor          {0:.3e} multi\n'.format(binsize))
   
   # fout.write('neigh_modify      every 1 delay 0 check no one {0} page {1}\n\n'.format(npar_max,51*npar_max))
-  fout.write('neigh_modify      every 1 delay 0 check no contact_distance_factor {0:.1e}\n\n'.format(npar_max))
+    fout.write('neigh_modify      every 1 delay 0 check no contact_distance_factor {0:.1e}\n\n'.format(npar_max))
+  else:
+    fout.write('neighbor          {0:.3e} bin\n'.format(binsize / 2.0))
+    fout.write('neigh_modify      every 1 delay 0 check no\n')
 
   fout.write('# Set particle properties\n')
   fout.write('hard_particles    yes\n')
@@ -1118,16 +1175,28 @@ def shear_sim_files_specific(j):
     
 
   fout.write('# Set collision models and time step\n')
-  fout.write('pair_style        gran model hertz tangential history\n')
+  
+  if pmode[0] == 2:
+    fout.write('pair_style        gran model hertz tangential history surface superquadric\n')
+  else:
+    fout.write('pair_style        gran model hertz tangential history\n')
   fout.write('pair_coeff        * *\n')
   # dtj = dt[j]/10.0
   fout.write('timestep          {0:.4e}\n\n'.format(1e-16))
 
   fout.write('# Set up particle templates, distributions, and groups\n')
   ims=1
+
+
+  global superquad_values
   for i in range(0,nspecies):
     fout.write('group             nve_group{0} region domain\n'.format(i+1))
-    if (int(pmode[i])):
+    if (int(pmode[i]) == 2):
+      
+      print(" test ")
+      print(superquad_values)
+      fout.write('fix               pts{0} nve_group{0} particletemplate/superquadric 123457 atom_type {0} volume_limit 1e-18 density constant {1:.3f} shape constant {2:.6f} {3:.6f} {4:.6f} blockiness constant {5:.6f} {6:.6f}\n'.format(i+1,dens[i],superquad_values[i][0],superquad_values[i][1],superquad_values[i][2],superquad_values[i][3],superquad_values[i][4]))
+    elif (int(pmode[i]) == 1):
       # print(i,pmode[i],dens[i],nsph[i],ptype[i])
       fout.write('fix               pts{0} nve_group{0} particletemplate/multisphere 123457 atom_type {0} volume_limit 1e-18 density constant {1:.3f} nspheres {2} ntry 10000000 spheres file {3} scale 1.0 type {4}\n'.format(i+1,dens[i],nsph[i],ptype[i],ims))
       ims=ims+1
@@ -1142,13 +1211,14 @@ def shear_sim_files_specific(j):
 
   fout.write('# Apply integration fix\n')
   for i in range(0,nspecies):
-    if (pmode[i]):
+    if (pmode[i] == 1):
       fout.write('fix               ms nve_group{0} multisphere\n'.format(i+1))
+    if (pmode[i] == 2):
+      fout.write('fix               ms nve_group{0} nve/superquadric\n'.format(i+1))
     else:
       fout.write('fix               integr{0} nve_group{0} nve/sphere\n'.format(i+1))
 
   if (not lebc_latt):
-    fout.write('\n# Make ymin and ymax temporary walls\n')
     # fout.write('fix               topwall all wall/gran model hertz tangential history primitive type {0} yplane {1:.5e}\n'.format(nspecies+1,15.0*lens))
     # fout.write('fix               botwall all wall/gran model hertz tangential history primitive type {0} yplane 0.0\n\n'.format(nspecies+1))
     fout.write('# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps\n')
@@ -1170,7 +1240,7 @@ def shear_sim_files_specific(j):
     fout.write('fix               m3 all property/global coefficientRestitution peratomtypepair {0} {1}\n'.format(nspecies+1,shearCorM2))
     fout.write('variable          vzero atom 0.0\n')
     fout.write('# Run briefly to eliminate potential overlaps\n')
-    fout.write('fix               limcheck all slowinit xmax {0:.2e} reset {1} threshold {2:.2e} start_dt {3:.3e} end_dt {4:.3e}\n'.format(rinit_xmax,int(rinit_reset),rinit_th, (dt[j] * 0.2), dt[j])) # should make this available for user to set
+    fout.write('fix               limcheck all slowinit xmax {0:.2e} reset {1} threshold {2:.2e} start_dt {3:.3e} end_dt {4:.3e}\n'.format(rinit_xmax,int(rinit_reset),rinit_th, 1e-16, dt_fix_init[j])) # should make this available for user to set
     fout.write('run               {0}\n\n'.format(int(rinit_ns)))
 
     fout.write('# Set restitution and velocity for granular temperature\n')
@@ -1188,7 +1258,18 @@ def shear_sim_files_specific(j):
   else:
     fout.write('fix               leboundary all lebc {0} {1} gtemp {2}\n'.format(shearStr, isDimensional, 0.1))
   fout.write('\n# Run desired simulation\n')
-  fout.write('run               {0}\n'.format(steps))
+  if is_time_test:
+    fout.write('info time\n')
+    for asdf in range(50):
+      fout.write('run 10000\n')
+      fout.write('info time\n')
+   
+    # for asdf in range(15):
+    #   fout.write('run 100000\n')
+    #   fout.write('info time\n')
+
+  else:
+    fout.write('run               {0}\n'.format(steps))
 
   fout.close
 
@@ -1220,10 +1301,9 @@ def cooling_sim_files():
       fout.write('create_box        {0} domain\n\n'.format(nspecies))
 
       fout.write('# Set neighbor and list options\n')
-      # fout.write('neighbor          {0:.3e} bin\n'.format(binsize))
-      fout.write('neighbor          {0:.3e} multi\n'.format(binsize))
-      # fout.write('neigh_modify      every 1 delay 0 check no one {0} page {1}\n\n'.format(npar_max,51*npar_max))
-      fout.write('neigh_modify      every 1000 delay 0 check no contact_distance_factor {0:.1e}\n\n'.format(npar_max))
+      
+      fout.write('neighbor          {0:.3e} bin\n'.format(binsize))
+      fout.write('neigh_modify      every 1 delay 0 check no contact_distance_factor {0:.1e}\n\n'.format(npar_max))
 
       fout.write('# Set particle properties\n')
       fout.write('hard_particles    yes\n')
@@ -1278,21 +1358,20 @@ def cooling_sim_files():
 
       #####
       if (not lebc_latt):
-        dtj = dt[j]/10.0
-        fout.write('timestep          {0:.4e}\n\n'.format(dtj))
-
         fout.write('# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps\n')
-        fout.write('fix               m3 all property/global coefficientRestitution peratomtypepair {0} {1}\n'.format(nspecies,shearCor2))
-
+        fout.write('fix               m3 all property/global coefficientRestitution peratomtypepair {0} {1}\n'.format(nspecies+1,shearCorM2))
         fout.write('variable          vzero atom 0.0\n')
-        fout.write('fix               limcheck all slowinit xmax {0:.2e} reset {1} threshold {2:.2e}\n'.format(rinit_xmax,int(rinit_reset),rinit_th)) # should make this available for user to set
+        fout.write('# Run briefly to eliminate potential overlaps\n')
+        fout.write('fix               limcheck all slowinit xmax {0:.2e} reset {1} threshold {2:.2e} start_dt {3:.3e} end_dt {4:.3e}\n'.format(rinit_xmax,int(rinit_reset),rinit_th, 1e-16, dt_fix_init[j])) # should make this available for user to set
         fout.write('run               {0}\n\n'.format(int(rinit_ns)))
 
         fout.write('# Set restitution and velocity for granular temperature\n')
-        fout.write('fix               m3 all property/global coefficientRestitution peratomtypepair {0} {1}\n'.format(nspecies,shearCor))
-        fout.write('unfix             limcheck\n\n')
+        fout.write('fix               m3 all property/global coefficientRestitution peratomtypepair {0} {1}\n'.format(nspecies+1,shearCorM))
+        # fout.write('unfix             topwall\n')
+        # fout.write('unfix             botwall\n')
+        fout.write('unfix             limcheck\n')
 
-      fout.write('neigh_modify      every 1 delay 0 check no contact_distance_factor {0:.1e}\n\n'.format(npar_max))
+    
       fout.write('# Set the top/bottom boundaries as LE\n')
       fout.write('timestep          {0:.4e}\n\n'.format(dt[j]))
       fout.write('fix               output all cool gtemp {0} multisphere_types {1} lattice {2}\n'.format(gtemp,mstt,lebc_latt))
@@ -1405,9 +1484,10 @@ def load_shear_data_specific(j):
 
   normalized_pyy = k_normalized_pyy + c_normalized_pyy
   normalized_pxy = k_normalized_pxy + c_normalized_pxy
+  
 
-  average_yy[j] = np.average(normalized_pyy[-25:])
-  average_xy[j] = np.average(normalized_pxy[-25:])
+  average_yy[j] = np.average(normalized_pyy[-50:])
+  average_xy[j] = np.average(normalized_pxy[-50:])
 
   print(' Done\n')
 
@@ -1602,7 +1682,7 @@ def plot_shear_data():
   global average_xy
   # reference data from updated kinetic theory ... 
 
-  vfLunmono = np.linspace(1e-3,asmax-1e-3,100)
+  vfLunmono = np.linspace(1e-3,0.6,100)
   # pressure = []
   # shear_visc = []
   # coldissipation = []
@@ -1612,6 +1692,25 @@ def plot_shear_data():
   vfrac = np.zeros(tsize)
   for i in range(0,tsize):
     vfrac[i]=np.sum(alpha[i,:])
+
+
+
+  curl_vf = [0.025,0.05,0.1,0.2,0.3,0.4,0.45]
+  #stresses xy
+  curl_0_xy = [0.18431267635898857, 0.10533966487104529, 0.09104493601081359, 0.1915798671443623, 0.32080276305435673, 0.6490373002283759, 1.0214936003757875]
+  curl_1_xy = [0.18367692476011882, 0.09760702116503658, 0.08463205830986278, 0.1611901079542458, 0.41921213773960553, 1.2879637136782673, 3.146242914956905]
+  curl_2_xy = [0.18311016735456978, 0.1066595457969883, 0.08208424718225502, 0.15766605794049596, 0.43870675890136124, 1.5780930315790995, 4.327870848966893]
+  curl_3_xy = [0.18874054107830066, 0.11974615765895519, 0.08157479841902532, 0.14821534884967988, 0.442685000126121, 1.6505722502853597, 4.687382633867693]
+  curl_4_xy = [0.2637930002340734, 0.12547916766519773, 0.08448164151450277, 0.15040874168152926, 0.39937850736643393, 1.4991871185171846, 4.281167837710025]
+  curl_5_xy = [0.32328908868525696, 0.18259869014127486, 0.11727442091695756, 0.15494254128609156, 0.3961673212314838, 1.1544599047372266, 2.342318464760482]
+  #stresses yy
+  curl_0_yy = [0.5656900319112476, 0.36929181249218357, 0.37930530302455695, 0.7585219698293981, 1.428640715619119, 3.136822877318178, 5.0898130552298655]
+  curl_1_yy = [0.5563586304922369, 0.35401643400143334, 0.34337368122020173, 0.6938718501732444, 1.648562469649389, 5.2481342812454965, 13.138746662865987]
+  curl_2_yy = [0.5717188732159838, 0.3606425615712801, 0.3446365428676307, 0.7018431256406372, 1.8289130557414053, 6.374434848472287, 17.896000134764208]
+  curl_3_yy = [0.569509910549374, 0.3677985373849852, 0.33521967994911417, 0.7069983845934169, 1.877948004122656, 6.567859501608791, 18.995213808533574]
+  curl_4_yy = [0.7468499557518299, 0.4116384082230158, 0.35798385934003285, 0.696624311780879, 1.7939588565221556, 6.208763335527074, 17.00182810119522]
+  curl_5_yy = [1.0101664681952056, 0.6001889445369429, 0.4451240765608879, 0.6469703725119114, 1.4315900744395864, 4.059044620535561, 8.331972972720303]
+
 
 
   rod2_vf = [0.02533,
@@ -1676,7 +1775,42 @@ def plot_shear_data():
     3.8864,
     14.428,
     35.295]
- 
+  
+
+  rod2_vis = [
+    0.6436,
+    0.30878,
+    0.20375,
+    0.25643,
+    0.48546,
+    1.1089,
+    3.6883
+    ]
+
+
+  rod4_vis = [
+    0.24964,
+    0.15551,
+    0.14578,
+    0.25643,
+    0.48945,
+    1.022,
+    3.5974,
+    8.01
+    ]
+
+  rod6_vis = [
+    0.14683,
+    0.11591,
+    0.1411,
+    0.2344,
+    0.30731,
+    0.6794,
+    0.7936,
+    1.1558,
+    1.361,
+    4.1325
+    ]
  
   ## pressure
   plt.figure(0)
@@ -1688,6 +1822,12 @@ def plot_shear_data():
     plt.semilogy(rod4_vf,rod4_normal,'*',color='blue',label='Guo: rod4')
   if filestr == "rod6":
     plt.semilogy(rod6_vf,rod6_normal,'*',color='blue',label='Guo: rod6')
+  if filestr == "curl_3":
+    plt.semilogy(curl_vf,curl_3_yy,'*',color='blue',label='Suehr: curl_3')
+  if filestr == "curl_5":
+    plt.semilogy(curl_vf,curl_5_yy,'*',color='blue',label='Suehr: curl_5')
+  if filestr == "curl_0" or filestr == "rod5":
+    plt.semilogy(curl_vf,curl_0_yy,'*',color='blue',label='Suehr: curl_0 or rod5')
   plt.xlabel(r'$\alpha_{solid}$')
   plt.ylabel(r'$p_{yy}/\left(\rho d^2 \gamma^2\right)$')
   plt.legend()
@@ -1696,8 +1836,20 @@ def plot_shear_data():
   
   ## viscosity
   plt.figure(1)
-  plt.semilogy(vfLunmono,snLunmono,'k-', linewidth=8,label='Lun et al. spheres')
+  plt.semilogy(vfLunmono,snLunmono,'k-', linewidth=8,label='Kinetic Theory')
   plt.semilogy(vfrac,average_xy,'rs', linewidth=2,label='LIGGGHTS '+filestr,markersize=10)
+  if filestr == "rod2":
+    plt.semilogy(rod2_vf,rod2_vis,'*',color='blue',label='Guo: rod2')
+  if filestr == "rod4":
+    plt.semilogy(rod4_vf,rod4_vis,'*',color='blue',label='Guo: rod4')
+  if filestr == "rod6":
+    plt.semilogy(rod6_vf,rod6_vis,'*',color='blue',label='Guo: rod6')
+  if filestr == "curl_3":
+    plt.semilogy(curl_vf,curl_3_xy,'*',color='blue',label='Suehr: curl_3')
+  if filestr == "curl_5":
+    plt.semilogy(curl_vf,curl_3_xy,'*',color='blue',label='Suehr: curl_5')
+  if filestr == "curl_0" or filestr == "rod5":
+    plt.semilogy(curl_vf,curl_0_xy,'*',color='blue',label='Suehr: curl_0 or rod5')
   plt.xlabel(r'$\alpha_{solid}$')
   plt.ylabel(r'$|p_{xy}|/\left(\rho d^2 \gamma^2\right)$')
   plt.legend()
@@ -1705,6 +1857,8 @@ def plot_shear_data():
   plt.gcf().clear()
 
   print(' Done\n')
+
+
 
 def plot_shear_case_data(caseid):
   print('Plotting shear {0} simulation data ...'.format(caseid), end =" ")

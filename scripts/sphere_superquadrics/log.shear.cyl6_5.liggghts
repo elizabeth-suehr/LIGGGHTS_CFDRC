@@ -1,0 +1,148 @@
+atom_modify       map array
+
+processors        3 3 2
+
+# Set domain
+region            domain block 0.0 6.49340e-04 0.0 6.49340e-04 0.0 3.24670e-04 units box volume_limit 1e-16
+create_box        1 domain
+Created orthogonal box = (0 0 0) to (0.00064934 0.00064934 0.00032467)
+  3 by 3 by 2 MPI processor grid
+
+# Set neighbor and list options
+neighbor          6.633e-05 bin
+neigh_modify      every 1 delay 0 check no
+# Set particle properties
+hard_particles    yes
+fix               m1 all property/global youngsModulus peratomtype 8.70000e+09
+fix               m2 all property/global poissonsRatio peratomtype 0.3
+fix               m3 all property/global coefficientRestitution peratomtypepair 1 0.95
+fix               m4 all property/global coefficientFriction peratomtypepair 1 0.0
+fix               m5 all property/global coefficientRollingFriction peratomtypepair 1 0.0
+
+# Set collision models and time step
+pair_style        gran model hertz tangential history surface superquadric
+WARNING: 
+	The contact model you specified is not located in any whitelist.
+	Because of this the model will be run in an unoptimized version (increasing runtime by up to 20%).
+	In order to optimize this model you have the following options:
+		(i)  Run the genAutoExamplesWhitelist.sh script in your LIGGGHTS(R) source folder to automatically parse the input script
+		(ii) Add the model combination by hand to your style_contact_model_user.whitelist that can be found in your LIGGGHTS(R) source folder
+		(iii) Use the ENABLE_MODEL_* flag when building with cmake.
+	If you perform one of the steps above LIGGGHTS(R) needs to be recompiled to generate the optimized code.
+
+ (../contact_models.h:365)
+pair_coeff        * *
+timestep          1.0000e-16
+
+# Set up particle templates, distributions, and groups
+group             nve_group1 region domain
+0 atoms in group nve_group1
+fix               pts1 nve_group1 particletemplate/superquadric 123457 atom_type 1 volume_limit 1e-18 density constant 2500.000 shape constant 0.000010 0.000010 0.000060 blockiness constant 10.000000 2.000000
+fix               pdd1 nve_group1 particledistribution/discrete 15485867 1 pts1 1.0
+# Set up particle insertion
+fix               ins1 nve_group1 insert/pack seed 32452867 distributiontemplate pdd1 maxattempt 100000 vel constant 0. 0. 0.                   omega constant 0. 0. 0. insert_every once overlapcheck yes all_in yes region domain ntry_mc 1000000 volumefraction_region 0.4
+# Apply integration fix
+fix		          integr all nve/superquadric
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 1 0.1
+# Run one step to get particles inserted
+run               1
+Setting up run at Thu Sep 14 11:48:56 2023
+
+INFO: Particle insertion ins1: inserting every 0 steps
+Memory usage per processor = 19.1299 Mbytes
+    Step    Atoms         KinEng            CPU 
+       0        0              0              0 
+INFO: Particle insertion ins1: inserted 1493 particle templates (mass 1.369537e-07) at step 1
+ - a total of 1493 particle templates (mass 1.369537e-07) inserted so far.
+       1     1493              0      1.5902137 
+Loop time of 1.59726 on 18 procs for 1 steps with 1493 atoms, finish time Thu Sep 14 11:48:58 2023
+
+
+Pair  time (%) = 0.00325297 (0.20366)
+Neigh time (%) = 0.00159352 (0.0997663)
+Comm  time (%) = 0.00132788 (0.0831349)
+Outpt time (%) = 0.00121712 (0.0762008)
+Other time (%) = 1.58987 (99.5372)
+
+Nlocal:    82.9444 ave 126 max 64 min
+Histogram: 8 0 0 0 8 0 0 0 0 2
+Nghost:    2041.89 ave 2263 max 1910 min
+Histogram: 6 2 0 0 3 5 0 0 0 2
+Neighs:    25132.5 ave 51436 max 14592 min
+Histogram: 8 0 0 8 0 0 0 0 0 2
+
+Total # of neighbors = 452385
+Ave neighs/atom = 303.004
+Neighbor list builds = 1
+Dangerous builds = 0
+
+group             nve_group union nve_group1
+1493 atoms in group nve_group
+
+# Make collisions elastic, set velocity to zero, and repeat to eliminate overlaps
+fix               m3 all property/global coefficientRestitution peratomtypepair 1 0.1
+# Run briefly to eliminate potential overlaps
+fix               limcheck all slowinit xmax 1.10e-06 reset 1000 threshold 1.00e-06 start_dt 1.291e-09 end_dt 1.291e-08
+run               10000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Thu Sep 14 11:48:58 2023
+
+Memory usage per processor = 23.8369 Mbytes
+    Step    Atoms         KinEng            CPU 
+       1     1493              0              0 
+   10001     1493  1.2820541e-08      44.476043 
+Loop time of 44.4783 on 18 procs for 10000 steps with 1493 atoms, finish time Thu Sep 14 11:49:42 2023
+
+
+Pair  time (%) = 16.2657 (36.5699)
+Neigh time (%) = 9.20665 (20.6992)
+Comm  time (%) = 6.17154 (13.8754)
+Outpt time (%) = 0.000290854 (0.000653923)
+Other time (%) = 12.8341 (28.8548)
+
+Nlocal:    82.9444 ave 92 max 71 min
+Histogram: 1 0 1 1 4 4 2 1 0 4
+Nghost:    1963.72 ave 2008 max 1929 min
+Histogram: 3 1 2 1 5 1 2 1 0 2
+Neighs:    22229.1 ave 24864 max 19548 min
+Histogram: 1 2 0 5 3 2 0 1 2 2
+
+Total # of neighbors = 400124
+Ave neighs/atom = 268
+Neighbor list builds = 10000
+Dangerous builds = 0
+
+# Set restitution and velocity for granular temperature
+fix               m3 all property/global coefficientRestitution peratomtypepair 1 0.95
+unfix             limcheck
+# Run briefly to eliminate potential overlaps
+fix               limcheck1 all slowinit xmax 1.10e-06 reset 1000 threshold 1.00e-06 start_dt 8.291e-09 end_dt 1.291e-08
+run               10000
+WARNING: One or more atoms are time integrated more than once (../modify.cpp:304)
+Setting up run at Thu Sep 14 11:49:42 2023
+
+Memory usage per processor = 23.8374 Mbytes
+    Step    Atoms         KinEng            CPU 
+   10001     1493              0              0 
+   20001     1493  8.2595489e-14      40.831477 
+Loop time of 40.8335 on 18 procs for 10000 steps with 1493 atoms, finish time Thu Sep 14 11:50:23 2023
+
+
+Pair  time (%) = 14.6461 (35.868)
+Neigh time (%) = 9.25725 (22.6707)
+Comm  time (%) = 6.20429 (15.1941)
+Outpt time (%) = 0.000352469 (0.000863186)
+Other time (%) = 10.7255 (26.2663)
+
+Nlocal:    82.9444 ave 93 max 75 min
+Histogram: 2 1 2 6 1 2 1 0 0 3
+Nghost:    1972.67 ave 1993 max 1951 min
+Histogram: 2 2 0 3 1 2 2 2 3 1
+Neighs:    22205.3 ave 25468 max 19816 min
+Histogram: 2 0 5 4 2 1 1 0 0 3
+
+Total # of neighbors = 399696
+Ave neighs/atom = 267.713
+Neighbor list builds = 10000
+Dangerous builds = 0

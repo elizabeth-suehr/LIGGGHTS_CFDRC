@@ -76,7 +76,7 @@ namespace LAMMPS_NS {
         double **x_ins;
         bool atom_type_vector_flag;
         int *atom_type_vector;
-        double *ndensity_ins;
+
         // center of bounding sphere
         
         double x_bound_ins[3];

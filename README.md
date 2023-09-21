@@ -2,7 +2,7 @@
 >  This code is a work in progress. Assume it only runs what has been tested and validated.
 
 Results for the current dev branch should always be in [./scripts](./scripts/readme.md).
-As of right now a push into the dev branch should indicated that Single Spheres, Rod2, and multisphere13 have been tested and validated. This list will eventually grow to include mixtures of single and multispheres, superquadric spheres.
+As of right now a push into the dev branch should indicated that Single Spheres, Rod2, Rod4, Rod6, and multisphere13 have been tested and verified. This list will eventually grow to include mixtures of single and multispheres, superquadric spheres, and superqudric cylinders.
 
 
 # Current Progress
@@ -11,7 +11,7 @@ As of right now a push into the dev branch should indicated that Single Spheres,
 |   -        | -------------  | ------------- | -------  | ------------- |
 | **Starts** |     &#9745;    |     &#9745;   | &#9745;  |     &#9745;   |
 | **Convergence** |     &#9745;    |     &#9745;   | &#9745;  |     &#9745;   |
-| **Validated** |     &#9745;    |     [incomplete](#multi_sphere)   | [incomplete](#mixture)  |    &#9744;    |
+| **Verified** |     &#9745;    |     &#9745; [complete](#multi_sphere)   | &#9744; [incomplete](#mixture)  |    &#9744;    |
 
 ### MPI Setting
 > **Warning:**
@@ -19,17 +19,15 @@ As of right now a push into the dev branch should indicated that Single Spheres,
 
 i.e. the current code should not run and will give printouts if you are using the LEBC with only 1 processor core in the y direction.  This isn't a very complicated fix, but if you don't have at least 2 processors cores to run this code, you probably don't need it.
 
-Currently the single-sphere and multi-sphere runs are done on a MPI settings of 3x2x1 (x y z).  It is likely that any MPI x setting, z setting, and y setting greater than 1 should all work. That being said, if it hasn't been validated then that specific MPI setting might not work. 
-
-
+The runs are now being done on a variety of MPI settings, and they all seem to be working. (execpt y=1)
 
 <a name="multi_sphere"></a>
 # Multi-Sphere
-Rod2 and multisphere13 work is [here](./scripts/readme.md). For multispheres to be completed the following tests should compare well to literature.
+Rod2,4,6 and multisphere13 work is [here](./scripts/readme.md). For multispheres to be completed the following tests should compare well to literature.
 
 - rod2  &#9745;
-- rod4  &#9744;
-- rod6  &#9744;
+- rod4  &#9745;
+- rod6  &#9745;
 - multisphere13 (should give close to single-sphere results)  &#9745;
 
 
@@ -38,6 +36,9 @@ Rod2 and multisphere13 work is [here](./scripts/readme.md). For multispheres to 
 Curretly we have no validated results for mixtures because lebc.py isn't setup to generate mixtures input scripts correctly. 
 The LIGGGHTS code should not need edited to get these results.
 
+<a name="superquadrics"></a>
+# Superquadrics
+Curretly we have no verified results for superquadrics. Based on the few tests done with these shapes the collisonal stress tally is not working along with the fix_init's calcualtion of the overlap value.  The simulations seem to run and coverge to steady state values at least for translation stress.
 
 ## Notes
 The LEBC Code was taken from fork of LIGGGHTS on github, the code on github has lots of bugs fixed by CFDRC and will not run most simulations we have tested in this repo.
