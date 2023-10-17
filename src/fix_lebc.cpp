@@ -79,8 +79,8 @@ using namespace std;
 
 FixLEBC::FixLEBC(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
 {
-  if (narg < 7)
-    error->fix_error(FLERR, this, "Not enough arguments, include a float value for the shear strain rate, and then true or false for if the output is dimensional\n Example:fix     lebounary all lebc 100.0 true gtemp 0.01 \n");
+  if (narg < 9)
+    error->fix_error(FLERR, this, "Not enough arguments, include a float value for the shear strain rate, and then true or false for if the output is dimensional\n Example:fix     lebounary all lebc 100.0 true gtemp 0.01 ave_reset 50000 \n");
 
   ssr = force->numeric(FLERR, arg[3]);
   domain->ssr = ssr;
@@ -94,6 +94,11 @@ FixLEBC::FixLEBC(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   if (strcmp(arg[5], "gtemp") == 0)
   {
     gtemp_distribution = force->numeric(FLERR, arg[6]);
+  }
+
+  if (strcmp(arg[7], "ave_reset") == 0)
+  {
+    ave_count_reset = force->inumeric(FLERR, arg[8]);
   }
 
   if (domain->nonperiodic != 0 ||
@@ -117,12 +122,8 @@ FixLEBC::FixLEBC(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   fix_ms = static_cast<FixMultisphere *>(modify->find_fix_style("multisphere", 0));
   force->pair->pre_init_lebc();
 
-
-
   atom->add_callback(2);
   comm_border = 1;
-
-
 
   if (fix_ms)
   {
@@ -166,7 +167,7 @@ void FixLEBC::init()
   random_device rd;
 
   // Mersenne twister PRNG, initialized with seed from previous random device instance
-  //mt19937 gen(rd());
+  // mt19937 gen(rd());
   mt19937 gen(10);
 
   double ave_velocity[3] = {0.0};
@@ -188,8 +189,6 @@ void FixLEBC::init()
       v[i][1] = d_y(gen);
       v[i][2] = d_z(gen);
     }
-
-    
 
     for (int i = 0; i < atom->nlocal; i++)
     {
@@ -221,7 +220,7 @@ void FixLEBC::init()
     }
   }
   else if (fix_ms)
-  { 
+  {
 
     for (int i = 0; i < atom->nlocal; i++)
     {
@@ -239,9 +238,6 @@ void FixLEBC::init()
         v[i][2] = d_z(gen);
       }
     }
-
-    
-
 
     for (int ibody = 0; ibody < fix_ms->n_body(); ibody++)
     {
@@ -265,7 +261,6 @@ void FixLEBC::init()
     ave_velocity[1] = 0.0;
     ave_velocity[2] = 0.0;
     total_mass = 0.0;
-
 
     for (int i = 0; i < atom->nlocal; i++)
     {
@@ -319,7 +314,7 @@ void FixLEBC::init()
 
       fix_ms->data().vcm(vcm, i);
       vcm[0] -= global_ave_velocity[0];
-      vcm[1] -= global_ave_velocity[1];// + 0.2 * domain->yprd * ssr;
+      vcm[1] -= global_ave_velocity[1]; // + 0.2 * domain->yprd * ssr;
       vcm[2] -= global_ave_velocity[2];
       fix_ms->data().set_v_body(i, vcm);
     }
@@ -561,7 +556,6 @@ void FixLEBC::post_force(int vflag)
 
       total_mass += fix_ms->data().mass(i);
     }
-
   }
 
   double global_ave_velocity[3];
@@ -576,16 +570,15 @@ void FixLEBC::post_force(int vflag)
   {
     global_ave_velocity[i] = global_ave_velocity[i] / global_total_mass;
     // global_ave_velocity[i] = 0.0;
-
   }
 
   double local_kst[6] = {0};
 
   // TODO? Right now, we are subtracting ave_velocity, even though we shouldn't need to because
-  // we subtract it at the begining, maybe removing in future? Side note, The atoms are still drifting up and down, which they shouldn't 
+  // we subtract it at the begining, maybe removing in future? Side note, The atoms are still drifting up and down, which they shouldn't
   // so maybe we need to keep it
   for (int i = 0; i < atom->nlocal; i++)
-  { 
+  {
     if (!fix_ms)
     {
       double local_velocity = (x[i][1] - 0.5 * domain->yprd) * ssr;
@@ -595,7 +588,7 @@ void FixLEBC::post_force(int vflag)
       local_kst[3] += atom->rmass[i] * (v[i][0] - global_ave_velocity[0] - local_velocity) * (v[i][1] - global_ave_velocity[1]);                  // xy
       local_kst[4] += atom->rmass[i] * (v[i][0] - global_ave_velocity[0] - local_velocity) * (v[i][2] - global_ave_velocity[2]);                  // xz
       local_kst[5] += atom->rmass[i] * (v[i][1] - global_ave_velocity[1]) * (v[i][2] - global_ave_velocity[2]);                                   // yz
-    } 
+    }
     else if (fix_ms->belongs_to(i) == -1)
     {
       double local_velocity = (x[i][1] - 0.5 * domain->yprd) * ssr;
@@ -654,7 +647,6 @@ void FixLEBC::post_force(int vflag)
       for (int j = 0; j < 6; j++)
       {
         local_cst[j] += force_length_atom[i][j];
-
       }
     }
   }
@@ -703,7 +695,8 @@ void FixLEBC::post_force(int vflag)
     double scale = 1.0;
     if (!isDimensional)
     {
-      scale = 1.0 / (2500.0 * 100.0 * 100.0 * (equiv_vol_diameter) * (equiv_vol_diameter));;
+      scale = 1.0 / (2500.0 * 100.0 * 100.0 * (equiv_vol_diameter) * (equiv_vol_diameter));
+      ;
     }
 
     if (comm->me == 0)
@@ -712,11 +705,10 @@ void FixLEBC::post_force(int vflag)
         cout << update->ntimestep << " " << ave_count << " body_count: " << fix_ms->n_body_all() << " atom_count: " << atom->natoms << " " << kinetic_stress_tensor[0] * scale << " " << kinetic_stress_tensor[1] * scale << " " << kinetic_stress_tensor[3] * scale << " " << collision_stress_tensor[0] * scale << " " << collision_stress_tensor[1] * scale << " " << collision_stress_tensor[3] * scale << "\n";
       else
         cout << update->ntimestep << " " << ave_count << " atom_count: " << atom->natoms << " " << kinetic_stress_tensor[0] * scale << " " << kinetic_stress_tensor[1] * scale << " " << kinetic_stress_tensor[3] * scale << " " << collision_stress_tensor[0] * scale << " " << collision_stress_tensor[1] * scale << " " << collision_stress_tensor[3] * scale << "\n";
-
     }
   }
 
-  if (ave_count == 50000)
+  if (ave_count == ave_count_reset)
   {
 
     if (comm->me == 0)
@@ -737,9 +729,10 @@ void FixLEBC::post_force(int vflag)
       double scale = 1.0;
       if (!isDimensional)
       {
-        scale = 1.0 / (2500.0 * 100.0 * 100.0 * (equiv_vol_diameter) * (equiv_vol_diameter));;
+        scale = 1.0 / (2500.0 * 100.0 * 100.0 * (equiv_vol_diameter) * (equiv_vol_diameter));
+        ;
       }
-      cout << update->ntimestep << " " <<  kinetic_stress_tensor[0] * scale << " " << kinetic_stress_tensor[1] * scale << " " << kinetic_stress_tensor[3] * scale << " " << collision_stress_tensor[0] * scale << " " << collision_stress_tensor[1] * scale << " " << collision_stress_tensor[3] * scale << "\n";
+      cout << update->ntimestep << " " << kinetic_stress_tensor[0] * scale << " " << kinetic_stress_tensor[1] * scale << " " << kinetic_stress_tensor[3] * scale << " " << collision_stress_tensor[0] * scale << " " << collision_stress_tensor[1] * scale << " " << collision_stress_tensor[3] * scale << "\n";
       fprintf(logfile, "stress: %f %f %f %f %f %f\n", kinetic_stress_tensor[0] * scale, kinetic_stress_tensor[1] * scale, kinetic_stress_tensor[3] * scale, collision_stress_tensor[0] * scale, collision_stress_tensor[1] * scale, collision_stress_tensor[3] * scale);
       fflush(logfile);
     }

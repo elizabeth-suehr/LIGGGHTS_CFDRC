@@ -95,6 +95,7 @@ namespace LAMMPS_NS
         double kinetic_stress_tensor[6] = {0.0};
         double collision_stress_tensor[6] = {0.0};
         int ave_count = 0;
+        int ave_count_reset = 50000;
         bool isDimensional = true;
 
         FixMultisphere *fix_ms;
