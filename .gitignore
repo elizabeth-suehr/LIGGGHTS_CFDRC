@@ -3,3 +3,5 @@ in.shear.*
 *.pyc
 core.*
 __pycache__/
+lib
+
