@@ -826,23 +826,25 @@ void FixLEBC::print_body_data()
 
   if (comm->me == 0)
   {
-    ofstream myfile;
-    string filename = body_data_name + "/" + std::to_string(update->ntimestep) + ".txt";
+    std::ofstream ofs;
 
-    myfile.open(filename);
+    std::string filename = "cpi_";
+    filename += std::to_string(update->ntimestep);
+    filename += ".txt";
+    ofs.open(filename.c_str(), std::ofstream::out | std::ofstream::trunc);
 
     for (int ibody = 0; ibody < fix_ms->n_body_all(); ibody++)
     {
-      myfile << ibody << " " << body_tag_total[ibody] << " "
-             << body_rotations_total[ibody * 4 + 0] << " "
-             << body_rotations_total[ibody * 4 + 1] << " "
-             << body_rotations_total[ibody * 4 + 2] << " "
-             << body_rotations_total[ibody * 4 + 3]
-             << " " << body_positions_local[ibody * 3 + 0]
-             << " " << body_positions_local[ibody * 3 + 1]
-             << " " << body_positions_local[ibody * 3 + 2] << "\n";
+      ofs << ibody << " " << body_tag_total[ibody] << " "
+          << body_rotations_total[ibody * 4 + 0] << " "
+          << body_rotations_total[ibody * 4 + 1] << " "
+          << body_rotations_total[ibody * 4 + 2] << " "
+          << body_rotations_total[ibody * 4 + 3]
+          << " " << body_positions_local[ibody * 3 + 0]
+          << " " << body_positions_local[ibody * 3 + 1]
+          << " " << body_positions_local[ibody * 3 + 2] << "\n";
     }
 
-    myfile.close();
+    ofs.close();
   }
 }
