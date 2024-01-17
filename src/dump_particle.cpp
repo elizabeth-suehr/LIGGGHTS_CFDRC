@@ -1026,7 +1026,7 @@ int DumpParticle::count()
 
     // grow choose and variable vbuf arrays if needed
 
-    int nlocal = atom->nlocal + atom->nghost;
+    int nlocal = atom->nlocal;
     if (nlocal > maxlocal)
     {
         maxlocal = atom->nmax;
@@ -1096,7 +1096,7 @@ int DumpParticle::count()
         double *ptr;
         double value;
         int nstride;
-        int nlocal = atom->nlocal + atom->nghost;
+        int nlocal = atom->nlocal;
 
         for (int ithresh = 0; ithresh < nthresh; ithresh++)
         {

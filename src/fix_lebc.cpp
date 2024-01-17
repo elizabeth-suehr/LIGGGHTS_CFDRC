@@ -68,7 +68,7 @@
 #include "pair.h"
 
 #include <random>
-
+#include <fstream>
 #include <iostream>
 
 using namespace LAMMPS_NS;
@@ -80,7 +80,7 @@ using namespace std;
 FixLEBC::FixLEBC(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
 {
   if (narg < 9)
-    error->fix_error(FLERR, this, "Not enough arguments, include a float value for the shear strain rate, and then true or false for if the output is dimensional\n Example:fix     lebounary all lebc 100.0 true gtemp 0.01 ave_reset 50000 \n");
+    error->fix_error(FLERR, this, "Not enough arguments, include a float value for the shear strain rate, and then true or false for if the output is dimensional\n Example:fix     lebounary all lebc 100.0 true gtemp 0.01 ave_reset 50000 body_data curl1\n");
 
   ssr = force->numeric(FLERR, arg[3]);
   domain->ssr = ssr;
@@ -99,6 +99,12 @@ FixLEBC::FixLEBC(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   if (strcmp(arg[7], "ave_reset") == 0)
   {
     ave_count_reset = force->inumeric(FLERR, arg[8]);
+  }
+
+  if (strcmp(arg[9], "body_data") == 0)
+  {
+    body_data_name = arg[10];
+    ave_count_reset = force->inumeric(FLERR, arg[11]);
   }
 
   if (domain->nonperiodic != 0 ||
@@ -730,7 +736,6 @@ void FixLEBC::post_force(int vflag)
       if (!isDimensional)
       {
         scale = 1.0 / (2500.0 * 100.0 * 100.0 * (equiv_vol_diameter) * (equiv_vol_diameter));
-        ;
       }
       cout << update->ntimestep << " " << kinetic_stress_tensor[0] * scale << " " << kinetic_stress_tensor[1] * scale << " " << kinetic_stress_tensor[3] * scale << " " << collision_stress_tensor[0] * scale << " " << collision_stress_tensor[1] * scale << " " << collision_stress_tensor[3] * scale << "\n";
       fprintf(logfile, "stress: %f %f %f %f %f %f\n", kinetic_stress_tensor[0] * scale, kinetic_stress_tensor[1] * scale, kinetic_stress_tensor[3] * scale, collision_stress_tensor[0] * scale, collision_stress_tensor[1] * scale, collision_stress_tensor[3] * scale);
@@ -775,4 +780,69 @@ void FixLEBC::post_force(int vflag)
   //     MPI_Abort(0,42);
   //   }
   // }
+  if (save_count == save_count_reset)
+  {
+    print_body_data();
+    save_count = 0;
+  }
+  save_count++;
+}
+
+void FixLEBC::print_body_data()
+{
+  std::vector<double> body_rotations_total(fix_ms->n_body_all() * 4);
+  std::vector<double> body_rotations_local(fix_ms->n_body() * 4);
+
+  std::vector<double> body_positions_total(fix_ms->n_body_all() * 3);
+  std::vector<double> body_positions_local(fix_ms->n_body() * 3);
+
+  std::vector<int> body_tag_total(fix_ms->n_body_all());
+  std::vector<int> body_tag_local(fix_ms->n_body());
+
+  for (int ibody = 0; ibody < fix_ms->n_body(); ibody++)
+  {
+
+    double quat[4];
+    double pos[3];
+
+    fix_ms->data().quat(quat, ibody);
+    fix_ms->data().xcm(pos, ibody);
+
+    body_rotations_local.push_back(quat[0]);
+    body_rotations_local.push_back(quat[1]);
+    body_rotations_local.push_back(quat[2]);
+    body_rotations_local.push_back(quat[3]);
+
+    body_positions_local.push_back(pos[0]);
+    body_positions_local.push_back(pos[1]);
+    body_positions_local.push_back(pos[2]);
+
+    body_tag_local.push_back(fix_ms->data().tag(ibody));
+  }
+
+  MPI_Allgather(&body_rotations_local, fix_ms->n_body() * 4, MPI_DOUBLE, &body_rotations_total, fix_ms->n_body_all() * 4, MPI_DOUBLE, world);
+  MPI_Allgather(&body_positions_local, fix_ms->n_body() * 3, MPI_DOUBLE, &body_positions_total, fix_ms->n_body_all() * 3, MPI_DOUBLE, world);
+  MPI_Allgather(&body_tag_local, fix_ms->n_body(), MPI_INT, &body_tag_total, fix_ms->n_body_all(), MPI_INT, world);
+
+  if (comm->me == 0)
+  {
+    ofstream myfile;
+    string filename = body_data_name + "/" + std::to_string(update->ntimestep) + ".txt";
+
+    myfile.open(filename);
+
+    for (int ibody = 0; ibody < fix_ms->n_body_all(); ibody++)
+    {
+      myfile << ibody << " " << body_tag_total[ibody] << " "
+             << body_rotations_total[ibody * 4 + 0] << " "
+             << body_rotations_total[ibody * 4 + 1] << " "
+             << body_rotations_total[ibody * 4 + 2] << " "
+             << body_rotations_total[ibody * 4 + 3]
+             << " " << body_positions_local[ibody * 3 + 0]
+             << " " << body_positions_local[ibody * 3 + 1]
+             << " " << body_positions_local[ibody * 3 + 2] << "\n";
+    }
+
+    myfile.close();
+  }
 }

@@ -75,6 +75,7 @@ namespace LAMMPS_NS
         void initial_integrate(int vflag);
         void post_integrate();
         void post_force(int);
+        void print_body_data();
 
         int pack_border(int n, int *list, double *buf, int *pbc);
         int unpack_border(int n, int first, double *buf);
@@ -102,6 +103,10 @@ namespace LAMMPS_NS
         int init_total_bodies = 0;
 
         double gtemp_distribution = 0.000001;
+
+        string body_data_name;
+        int save_count = 0;
+        int save_count_reset = 5000;
     };
 
 }
