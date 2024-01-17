@@ -105,7 +105,7 @@ namespace LAMMPS_NS
 
         double gtemp_distribution = 0.000001;
 
-        string body_data_name;
+        std::string body_data_name;
         int save_count = 0;
         int save_count_reset = 5000;
     };
