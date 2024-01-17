@@ -780,15 +780,6 @@ void FixLEBC::post_force(int vflag)
   //     MPI_Abort(0,42);
   //   }
   // }
-  save_count++;
-  if (save_count == save_count_reset)
-  {
-    if (fix_ms)
-    {
-      print_body_data();
-    }
-    save_count = 0;
-  }
 }
 
 void FixLEBC::print_body_data()
@@ -977,8 +968,8 @@ void FixLEBC::print_body_data()
     {
       std::ofstream ofs;
 
-      std::string filename = "xcm_quat";
-      filename += std::to_string(fix_ms->n_body_all());
+      std::string filename = body_data_name + "/cpi_";
+      filename += std::to_string(update->ntimestep);
       filename += ".txt";
       ofs.open(filename.c_str(), std::ofstream::out | std::ofstream::trunc);
 
