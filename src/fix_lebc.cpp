@@ -783,7 +783,10 @@ void FixLEBC::post_force(int vflag)
   save_count++;
   if (save_count == save_count_reset)
   {
-    print_body_data();
+    if (fix_ms)
+    {
+      print_body_data();
+    }
     save_count = 0;
   }
 }
@@ -844,7 +847,7 @@ void FixLEBC::print_body_data()
           << " " << body_positions_local[ibody * 3 + 1]
           << " " << body_positions_local[ibody * 3 + 2] << "\n";
     }
-
+    ofs.flush();
     ofs.close();
   }
 }
