@@ -60,6 +60,7 @@ FixStyle(lebc, FixLEBC)
 
 #include "fix.h"
 #include "fix_multisphere.h"
+#include <string.h>
 
 namespace LAMMPS_NS
 {
