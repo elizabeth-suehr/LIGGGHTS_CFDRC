@@ -793,61 +793,201 @@ void FixLEBC::post_force(int vflag)
 
 void FixLEBC::print_body_data()
 {
-  std::vector<double> body_rotations_total(fix_ms->n_body_all() * 4);
-  std::vector<double> body_rotations_local(fix_ms->n_body() * 4);
+  // std::vector<double> body_rotations_total(fix_ms->n_body_all() * 4);
+  // std::vector<double> body_rotations_local(fix_ms->n_body() * 4);
 
-  std::vector<double> body_positions_total(fix_ms->n_body_all() * 3);
-  std::vector<double> body_positions_local(fix_ms->n_body() * 3);
+  // std::vector<double> body_positions_total(fix_ms->n_body_all() * 3);
+  // std::vector<double> body_positions_local(fix_ms->n_body() * 3);
 
-  std::vector<int> body_tag_total(fix_ms->n_body_all());
-  std::vector<int> body_tag_local(fix_ms->n_body());
+  // std::vector<int> body_tag_total(fix_ms->n_body_all());
+  // std::vector<int> body_tag_local(fix_ms->n_body());
 
-  for (int ibody = 0; ibody < fix_ms->n_body(); ibody++)
+  // for (int ibody = 0; ibody < fix_ms->n_body(); ibody++)
+  // {
+
+  //   double quat[4];
+  //   double pos[3];
+
+  //   fix_ms->data().quat(quat, ibody);
+  //   fix_ms->data().xcm(pos, ibody);
+
+  //   body_rotations_local.push_back(quat[0]);
+  //   body_rotations_local.push_back(quat[1]);
+  //   body_rotations_local.push_back(quat[2]);
+  //   body_rotations_local.push_back(quat[3]);
+
+  //   body_positions_local.push_back(pos[0]);
+  //   body_positions_local.push_back(pos[1]);
+  //   body_positions_local.push_back(pos[2]);
+
+  //   body_tag_local.push_back(fix_ms->data().tag(ibody));
+  // }
+
+  // MPI_Gatherv(&body_rotations_local, fix_ms->n_body() * 4, MPI_DOUBLE, &body_rotations_total, fix_ms->n_body_all() * 4, 0, MPI_DOUBLE, 0, world);
+  // MPI_Gatherv(&body_positions_local, fix_ms->n_body() * 3, MPI_DOUBLE, &body_positions_total, fix_ms->n_body_all() * 3, 0, MPI_DOUBLE, 0, world);
+  // MPI_Gatherv(&body_tag_local, fix_ms->n_body(), MPI_INT, &body_tag_total, fix_ms->n_body_all(), 0, MPI_INT, 0, world);
+
+  // if (comm->me == 0)
+  // {
+  //   std::ofstream ofs;
+
+  //   std::string filename = "cpi_";
+  //   filename += std::to_string(update->ntimestep);
+  //   filename += ".txt";
+  //   ofs.open(filename.c_str(), std::ofstream::out | std::ofstream::trunc);
+
+  //   for (int ibody = 0; ibody < fix_ms->n_body_all(); ibody++)
+  //   {
+  //     ofs << ibody << " " << body_tag_total[ibody] << " "
+  //         << body_rotations_total[ibody * 4 + 0] << " "
+  //         << body_rotations_total[ibody * 4 + 1] << " "
+  //         << body_rotations_total[ibody * 4 + 2] << " "
+  //         << body_rotations_total[ibody * 4 + 3]
+  //         << " " << body_positions_local[ibody * 3 + 0]
+  //         << " " << body_positions_local[ibody * 3 + 1]
+  //         << " " << body_positions_local[ibody * 3 + 2] << "\n";
+  //   }
+  //   ofs.flush();
+  //   ofs.close();
+  // }
+
+  if (fix_ms)
   {
 
-    double quat[4];
-    double pos[3];
+    std::vector<double> xcm;
+    std::vector<double> quat;
+    std::vector<int> tag;
 
-    fix_ms->data().quat(quat, ibody);
-    fix_ms->data().xcm(pos, ibody);
+    double temp[3] = {0.0, 0.0, 0.0};
+    double temp_quat[4] = {0.0, 0.0, 0.0, 0.0};
 
-    body_rotations_local.push_back(quat[0]);
-    body_rotations_local.push_back(quat[1]);
-    body_rotations_local.push_back(quat[2]);
-    body_rotations_local.push_back(quat[3]);
-
-    body_positions_local.push_back(pos[0]);
-    body_positions_local.push_back(pos[1]);
-    body_positions_local.push_back(pos[2]);
-
-    body_tag_local.push_back(fix_ms->data().tag(ibody));
-  }
-
-  MPI_Allgather(&body_rotations_local, fix_ms->n_body() * 4, MPI_DOUBLE, &body_rotations_total, fix_ms->n_body_all() * 4, MPI_DOUBLE, world);
-  MPI_Allgather(&body_positions_local, fix_ms->n_body() * 3, MPI_DOUBLE, &body_positions_total, fix_ms->n_body_all() * 3, MPI_DOUBLE, world);
-  MPI_Allgather(&body_tag_local, fix_ms->n_body(), MPI_INT, &body_tag_total, fix_ms->n_body_all(), MPI_INT, world);
-
-  if (comm->me == 0)
-  {
-    std::ofstream ofs;
-
-    std::string filename = "cpi_";
-    filename += std::to_string(update->ntimestep);
-    filename += ".txt";
-    ofs.open(filename.c_str(), std::ofstream::out | std::ofstream::trunc);
-
-    for (int ibody = 0; ibody < fix_ms->n_body_all(); ibody++)
+    for (int i = 0; i < fix_ms->n_body(); i++)
     {
-      ofs << ibody << " " << body_tag_total[ibody] << " "
-          << body_rotations_total[ibody * 4 + 0] << " "
-          << body_rotations_total[ibody * 4 + 1] << " "
-          << body_rotations_total[ibody * 4 + 2] << " "
-          << body_rotations_total[ibody * 4 + 3]
-          << " " << body_positions_local[ibody * 3 + 0]
-          << " " << body_positions_local[ibody * 3 + 1]
-          << " " << body_positions_local[ibody * 3 + 2] << "\n";
+      fix_ms->data().xcm(temp, i);
+      fix_ms->data().quat(temp_quat, i);
+      xcm.push_back(temp[0]);
+      xcm.push_back(temp[1]);
+      xcm.push_back(temp[2]);
+      quat.push_back(temp_quat[0]);
+      quat.push_back(temp_quat[1]);
+      quat.push_back(temp_quat[2]);
+      quat.push_back(temp_quat[3]);
+
+      tag.push_back(fix_ms->data().tag(i));
     }
-    ofs.flush();
-    ofs.close();
+
+    std::cout << xcm[0] << quat[0];
+
+    std::vector<int> counts_recv_xcm(comm->nprocs);
+    std::vector<int> displacements_xcm(comm->nprocs);
+
+    std::vector<int> counts_recv_quat(comm->nprocs);
+    std::vector<int> displacements_quat(comm->nprocs);
+
+    std::vector<int> counts_recv_tag(comm->nprocs);
+    std::vector<int> displacements_tag(comm->nprocs);
+
+    int size_xcm = xcm.size();
+    int size_quat = quat.size();
+    int size_tag = tag.size();
+
+    MPI_Gather(&size_xcm,
+               1,
+               MPI_INT,
+               &counts_recv_xcm[0],
+               1,
+               MPI_INT,
+               0,
+               world);
+
+    MPI_Gather(&size_quat,
+               1,
+               MPI_INT,
+               &counts_recv_quat[0],
+               1,
+               MPI_INT,
+               0,
+               world);
+
+    MPI_Gather(&size_tag,
+               1,
+               MPI_INT,
+               &counts_recv_tag[0],
+               1,
+               MPI_INT,
+               0,
+               world);
+
+    int displs = 0;
+    for (int i = 0; i < comm->nprocs; ++i)
+    {
+      displacements_xcm[i] = displs;
+      displs += counts_recv_xcm[i];
+    }
+
+    std::vector<double> xcm_all(displs);
+
+    int displs_quat = 0;
+    for (int i = 0; i < comm->nprocs; ++i)
+    {
+      displacements_quat[i] = displs_quat;
+      displs_quat += counts_recv_quat[i];
+    }
+    std::vector<double> quat_all(displs_quat);
+
+    int displs_tag = 0;
+    for (int i = 0; i < comm->nprocs; ++i)
+    {
+      displacements_tag[i] = displs_tag;
+      displs_tag += counts_recv_tag[i];
+    }
+    std::vector<double> tag_all(displs_tag);
+
+    MPI_Gatherv(&xcm[0],
+                xcm.size(),
+                MPI_DOUBLE,
+                &xcm_all[0],
+                &counts_recv_xcm[0],
+                &displacements_xcm[0],
+                MPI_DOUBLE,
+                0,
+                world);
+
+    MPI_Gatherv(&quat[0],
+                quat.size(),
+                MPI_DOUBLE,
+                &quat_all[0],
+                &counts_recv_quat[0],
+                &displacements_quat[0],
+                MPI_DOUBLE,
+                0,
+                world);
+
+    MPI_Gatherv(&tag[0],
+                tag.size(),
+                MPI_INT,
+                &tag_all[0],
+                &counts_recv_tag[0],
+                &displacements_tag[0],
+                MPI_INT,
+                0,
+                world);
+
+    if (comm->me == 0)
+    {
+      std::ofstream ofs;
+
+      std::string filename = "xcm_quat";
+      filename += std::to_string(fix_ms->n_body_all());
+      filename += ".txt";
+      ofs.open(filename.c_str(), std::ofstream::out | std::ofstream::trunc);
+
+      for (int i = 0; i < fix_ms->n_body_all(); i++)
+      {
+        // std::cout << i + 1 << " " << xcm_all[i * 3] << " " << xcm_all[i * 3 + 1] << " " << xcm_all[i * 3 + 2] << " " << quat_all[i * 4] << " " << quat_all[i * 4 + 1] << " " << quat_all[i * 4 + 2] << " " << quat_all[i * 4 + 3] << "\n";
+        ofs << i + 1 << " " << tag_all[i] << " " << xcm_all[i * 3] << " " << xcm_all[i * 3 + 1] << " " << xcm_all[i * 3 + 2] << " " << quat_all[i * 4] << " " << quat_all[i * 4 + 1] << " " << quat_all[i * 4 + 2] << " " << quat_all[i * 4 + 3] << "\n";
+      }
+      ofs.close();
+    }
   }
 }
