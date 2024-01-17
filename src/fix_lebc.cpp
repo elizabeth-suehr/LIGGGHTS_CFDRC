@@ -780,12 +780,12 @@ void FixLEBC::post_force(int vflag)
   //     MPI_Abort(0,42);
   //   }
   // }
+  save_count++;
   if (save_count == save_count_reset)
   {
     print_body_data();
     save_count = 0;
   }
-  save_count++;
 }
 
 void FixLEBC::print_body_data()
