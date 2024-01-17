@@ -68,7 +68,6 @@
 #include "pair.h"
 
 #include <random>
-#include <fstream>
 #include <iostream>
 
 using namespace LAMMPS_NS;
