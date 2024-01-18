@@ -60,7 +60,7 @@ FixStyle(lebc, FixLEBC)
 
 #include "fix.h"
 #include "fix_multisphere.h"
-// #include <string.h>
+#include <string.h>
 
 namespace LAMMPS_NS
 {
@@ -104,10 +104,10 @@ namespace LAMMPS_NS
 
         double gtemp_distribution = 0.000001;
 
-        // void print_body_data();
-        // std::string body_data_name;
-        // int save_count = 0;
-        // int save_count_reset = 5000;
+        void print_body_data();
+        std::string body_data_name;
+        int save_count = 0;
+        int save_count_reset = 5000;
     };
 
 }
