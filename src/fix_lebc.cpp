@@ -939,7 +939,7 @@ void FixLEBC::print_body_data()
       displacements_tag[i] = displs_tag;
       displs_tag += counts_recv_tag[i];
     }
-    std::vector<double> tag_all(displs_tag);
+    std::vector<int> tag_all(displs_tag);
 
     MPI_Gatherv(&xcm[0],
                 xcm.size(),
