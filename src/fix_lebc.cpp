@@ -104,7 +104,7 @@ FixLEBC::FixLEBC(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
   if (strcmp(arg[9], "body_data") == 0)
   {
     body_data_name = arg[10];
-    ave_count_reset = force->inumeric(FLERR, arg[11]);
+    save_count_reset = force->inumeric(FLERR, arg[11]);
   }
 
   if (domain->nonperiodic != 0 ||
