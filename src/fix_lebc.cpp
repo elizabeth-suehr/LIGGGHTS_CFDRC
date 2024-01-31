@@ -80,7 +80,7 @@ using namespace std;
 FixLEBC::FixLEBC(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
 {
   if (narg < 9)
-    error->fix_error(FLERR, this, "Not enough arguments, include a float value for the shear strain rate, and then true or false for if the output is dimensional\n Example:fix     lebounary all lebc 100.0 true gtemp 0.01 ave_reset 50000 body_data curl1\n");
+    error->fix_error(FLERR, this, "Not enough arguments, include a float value for the shear strain rate, and then true or false for if the output is dimensional\n Example:fix     lebounary all lebc 100.0 true gtemp 0.01 ave_reset 50000 body_data curl1 lock_symmetry true\n");
 
   ssr = force->numeric(FLERR, arg[3]);
   domain->ssr = ssr;
@@ -106,6 +106,19 @@ FixLEBC::FixLEBC(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
     body_data_name = arg[10];
     save_count_reset = force->inumeric(FLERR, arg[11]);
   }
+
+  if (strcmp(arg[12], "lock_symmetry") == 0)
+  {
+    if (strcmp(arg[12], "true"))
+    {
+      is_symmetry_locked = true;
+    }
+
+  }
+
+
+
+  
 
   if (domain->nonperiodic != 0 ||
       domain->xperiodic != 1 ||
@@ -242,6 +255,12 @@ void FixLEBC::init()
         v[i][0] = d_x(gen);
         v[i][1] = d_y(gen);
         v[i][2] = d_z(gen);
+
+        if (is_symmetry_locked) {
+          v[i][0] = velocity;
+          v[i][1] = 0.0;
+          v[i][2] = 0.0;
+        }
       }
     }
 
@@ -259,6 +278,12 @@ void FixLEBC::init()
       std::normal_distribution<float> d_z(0.0, gtemp_distribution * domain->yprd * ssr);
 
       double velocity[3] = {d_x(gen), d_y(gen), d_z(gen)};
+
+      if (is_symmetry_locked) {
+        velocity[0] = vel;
+        velocity[1] = 0.0;
+        velocity[2] = 0.0;
+      }
 
       fix_ms->data().set_v_body(ibody, velocity);
     }
@@ -325,6 +350,7 @@ void FixLEBC::init()
       fix_ms->data().set_v_body(i, vcm);
     }
     fix_ms->set_xv();
+    fix_ms->out_rev_comm_x_v_omega();
   }
   // TODO might not have the averaging of mixed single sphere and multisphere done correctly
 }
@@ -625,7 +651,15 @@ void FixLEBC::post_force(int vflag)
       local_kst[3] += fix_ms->data().mass(i) * (vcm[0] - global_ave_velocity[0] - local_velocity) * (vcm[1] - global_ave_velocity[1]);                  // xy
       local_kst[4] += fix_ms->data().mass(i) * (vcm[0] - global_ave_velocity[0] - local_velocity) * (vcm[2] - global_ave_velocity[2]);                  // xz
       local_kst[5] += fix_ms->data().mass(i) * (vcm[1] - global_ave_velocity[1]) * (vcm[2] - global_ave_velocity[2]);                                   // yz
+      if (is_symmetry_locked){
+        vcm[1] -= global_ave_velocity[1];
+        fix_ms->data().set_v_body(i, vcm);
+      }
     }
+  }
+  if (is_symmetry_locked) {
+    fix_ms->set_xv();
+    fix_ms->out_rev_comm_x_v_omega();
   }
 
   double global_kst[6] = {0.0};

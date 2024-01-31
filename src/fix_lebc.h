@@ -108,6 +108,8 @@ namespace LAMMPS_NS
         std::string body_data_name;
         int save_count = 0;
         int save_count_reset = 5000;
+
+        bool is_symmetry_locked = false;
     };
 
 }
